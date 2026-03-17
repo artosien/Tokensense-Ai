@@ -1,2 +1,29 @@
-# Tokensense-Ai
-TokenSense is a lightning-fast token cost calculator for LLMs.  Paste your prompt, pick your model, see instant cost estimates across Claude, OpenAI,  Anthropic, and other providers. Free, open-source, and built for developers.
+# TokenSense
+
+A free, open-source LLM token cost calculator for developers.
+
+## Features
+- Support for Claude, GPT, Llama, and more
+- Real-time cost estimation
+- Open-source with premium features via LemonSqueezy
+
+## Getting Started
+```bash
+npm install
+npm run dev
+```
+
+## Tech Stack
+- Next.js, Tailwind CSS, [your other tech]
+
+## License
+Apache 2.0 (open core)
+
+## Contribute
+See [CONTRIBUTING.md](./CONTRIBUTING.md)
+```
+
+**LICENSE** file
+```
+Since you chose Apache 2.0, GitHub lets you select it during repo creation,
+or copy/paste the full text to a LICENSE file
