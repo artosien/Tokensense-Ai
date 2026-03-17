@@ -25,5 +25,3 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 **LICENSE** file
 ```
-Since you chose Apache 2.0, GitHub lets you select it during repo creation,
-or copy/paste the full text to a LICENSE file
