@@ -1,0 +1,92 @@
+import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import BackToTop from "@/components/BackToTop";
+import LoadingScreen from "@/components/LoadingScreen";
+import ThemeProvider from "@/components/ThemeProvider";
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Tokensense-Ai — Free LLM Token Cost Calculator",
+  description:
+    "Estimate LLM API costs before you send a request. Tokensense-Ai is a free, client-side token cost calculator for GPT-4o, Claude, Gemini, and more. No account needed.",
+  keywords: "LLM token cost calculator, token cost estimator, GPT-4o pricing, Claude API cost, AI token counter, OpenAI token calculator, prompt token count, LLM API pricing tool",
+  manifest: "/manifest.json",
+  openGraph: {
+    title: "Tokensense-Ai — Free LLM Token Cost Calculator",
+    description:
+      "Know your token cost before every API call. Supports GPT-4o, Claude, Gemini & more. Free, private, client-side.",
+    type: "website",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#09090b",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body className={`${inter.variable} font-sans antialiased`}>
+        <ThemeProvider>
+          <LoadingScreen />
+          {children}
+          <BackToTop />
+        </ThemeProvider>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "Tokensense-Ai",
+              "description": "A free, client-side pre-flight LLM token cost calculator. Estimate API costs for GPT-4o, Claude, Gemini, and more before sending any request.",
+              "applicationCategory": "DeveloperApplication",
+              "operatingSystem": "Any",
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+              },
+              "featureList": [
+                "Real-time token counting",
+                "LLM API cost estimation",
+                "Multi-model support",
+                "File context upload",
+                "Agentic loop cost simulator",
+                "100% client-side, private"
+              ]
+            })
+          }}
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').then(
+                    function(registration) {
+                      console.log('ServiceWorker registration successful');
+                    },
+                    function(err) {
+                      console.log('ServiceWorker registration failed: ', err);
+                    }
+                  );
+                });
+              }
+            `,
+          }}
+        />
+      </body>
+    </html>
+  );
+}
+
