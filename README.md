@@ -28,8 +28,8 @@ npm run dev
 ```
 
 ## Tech Stack
-- Next.js, Tailwind CSS, [your other tech]
-
+- Next.js, Tailwind CSS.
+  
 ## License
 Apache 2.0 (open core)
 
