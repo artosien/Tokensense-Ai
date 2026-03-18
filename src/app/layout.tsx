@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import BackToTop from "@/components/BackToTop";
+import Footer from "@/components/Footer";
 import LoadingScreen from "@/components/LoadingScreen";
 import ThemeProvider from "@/components/ThemeProvider";
 
@@ -59,6 +60,7 @@ export default function RootLayout({
         <ThemeProvider>
           <LoadingScreen />
           {children}
+          <Footer />
           <BackToTop />
         </ThemeProvider>
         <script
