@@ -1,8 +1,6 @@
 import WorkflowSimulator from "@/components/WorkflowSimulator";
 import SiteHeader from "@/components/SiteHeader";
 import Link from "next/link";
-import { Bot } from "lucide-react";
-import TrustMessage from "@/components/TrustMessage";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -163,45 +161,6 @@ export default function WorkflowPage() {
                 </section>
             </main>
 
-            {/* Footer */}
-            <footer className="border-t border-border/40 mt-auto bg-muted/20">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-                    <div className="flex flex-col items-center justify-center gap-4 text-center">
-                        <div className="flex items-center justify-center gap-2">
-                            <div className="flex items-center justify-center w-5 h-5 rounded bg-gradient-to-br from-indigo-500 to-purple-600 shadow-sm text-white">
-                                <Bot className="w-3.5 h-3.5 text-indigo-50" />
-                            </div>
-                            <p className="text-sm font-medium text-foreground">
-                                Token clarity, before every call.
-                            </p>
-                        </div>
-                        <TrustMessage />
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-xs text-muted-foreground/60">
-                            <p>Tokensense-Ai — Prices are estimates based on public API pricing.</p>
-                            <span className="hidden sm:inline">•</span>
-                            <p>Built with Next.js, Tailwind CSS, and tiktoken</p>
-                        </div>
-                        <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm font-medium text-muted-foreground/80">
-                            <Link href="/multimodal" className="hover:text-indigo-400 transition-colors">Image Estimator</Link>
-                            <Link href="/caching" className="hover:text-indigo-400 transition-colors">Context Caching</Link>
-                            <Link href="/comparison" className="hover:text-indigo-400 transition-colors">Comparison Table</Link>
-                            <Link href="/workflow" className="hover:text-indigo-400 transition-colors">Workflow Estimator</Link>
-                            <Link href="/faq" className="hover:text-indigo-400 transition-colors">FAQ</Link>
-                            <Link href="/about" className="hover:text-indigo-400 transition-colors">About</Link>
-                            <Link href="/contact" className="hover:text-indigo-400 transition-colors">Contact Us</Link>
-                        </div>
-                        <div className="mt-4 flex items-center justify-center gap-3 text-xs text-muted-foreground/60">
-                            <Link href="/terms" className="hover:text-indigo-400 underline underline-offset-2 transition-colors">
-                                Terms of Service
-                            </Link>
-                            <span>|</span>
-                            <Link href="/privacy" className="hover:text-indigo-400 underline underline-offset-2 transition-colors">
-                                Privacy Policy
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </footer>
         </div>
     );
 }

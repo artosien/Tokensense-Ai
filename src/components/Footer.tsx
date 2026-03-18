@@ -14,32 +14,32 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Product Links */}
+          {/* Main Links */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Product</h4>
+            <h4 className="text-white font-semibold mb-4">Links</h4>
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="#"
+                  href="/"
                   className="text-gray-400 hover:text-cyan-400 transition text-sm"
                 >
-                  Features
+                  Home
                 </Link>
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/about"
                   className="text-gray-400 hover:text-cyan-400 transition text-sm"
                 >
-                  Pricing
+                  About
                 </Link>
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/contact"
                   className="text-gray-400 hover:text-cyan-400 transition text-sm"
                 >
-                  Changelog
+                  Contact Us
                 </Link>
               </li>
             </ul>
@@ -65,14 +65,6 @@ export default function Footer() {
                   Terms of Service
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-gray-400 hover:text-cyan-400 transition text-sm"
-                >
-                  License
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -88,16 +80,6 @@ export default function Footer() {
                   className="text-gray-400 hover:text-cyan-400 transition text-sm"
                 >
                   GitHub
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://twitter.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-cyan-400 transition text-sm"
-                >
-                  Twitter
                 </a>
               </li>
             </ul>
