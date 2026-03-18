@@ -14,10 +14,31 @@ export default function BugReportForm() {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsSubmitting(true);
-        // Simulate network request
-        await new Promise((resolve) => setTimeout(resolve, 800));
+
+        try {
+            const form = e.currentTarget;
+            const formData = new FormData(form);
+
+            const response = await fetch(form.action, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    Accept: "application/json",
+                },
+            });
+
+            setIsSubmitting(false);
+            if (response.ok) {
+                setIsSubmitted(true);
+                form.reset();
+                return;
+            }
+        } catch {
+            // fall through to error state below
+        }
+
         setIsSubmitting(false);
-        setIsSubmitted(true);
+        alert("Submission failed. Please try again.");
     };
 
     if (isSubmitted) {
@@ -49,21 +70,27 @@ export default function BugReportForm() {
                 Tokensense-Ai is built to make developers' lives easier. If token counting seems off or the app isn't behaving properly, tell us so we can issue a fix.
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form
+                action="https://formspree.io/f/xbdzpnjy"
+                method="POST"
+                onSubmit={handleSubmit}
+                className="space-y-5"
+            >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="name" className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Name (Optional)</Label>
-                        <Input id="name" placeholder="John Doe" className="bg-background/50 border-border/50 focus:border-indigo-500/50" />
+                        <Input id="name" name="name" placeholder="John Doe" className="bg-background/50 border-border/50 focus:border-indigo-500/50" />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="email" className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Email (Optional)</Label>
-                        <Input id="email" type="email" placeholder="john@example.com" className="bg-background/50 border-border/50 focus:border-indigo-500/50" />
+                        <Input id="email" name="email" type="email" placeholder="john@example.com" className="bg-background/50 border-border/50 focus:border-indigo-500/50" />
                     </div>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="description" className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Description <span className="text-red-500">*</span></Label>
                     <Textarea
                         id="description"
+                        name="description"
                         required
                         placeholder="What went wrong? Any steps to reproduce?"
                         className="min-h-[140px] bg-background/50 border-border/50 focus:border-indigo-500/50 resize-y"
