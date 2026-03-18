@@ -1,5 +1,7 @@
 # TokenSense
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/32cea1ad-3078-4142-a496-4231229da97f/deploy-status)](https://app.netlify.com/projects/tokensense-ai/deploys)
+
 A free, open-source LLM token cost calculator for developers.
 
 ## Features
