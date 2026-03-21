@@ -32,10 +32,6 @@ A free, open-source LLM token cost calculator for developers.
 
 ![TokenSense Calculator](./screenshots/calculator-demo.png)
 
-## Features
-- Support for Claude, GPT, Llama, and more
-- Real-time cost estimation
-
 ## More Screenshots
 
 ![Cost Breakdown](./screenshots/cost-breakdown.png)
