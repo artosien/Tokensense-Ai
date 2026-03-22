@@ -35,7 +35,7 @@ export default function MetricsDashboard() {
 
     const [compareMode, setCompareMode] = useState(false);
     const [shareCopied, setShareCopied] = useState(false);
-    const { copyShareUrl, getShareUrl } = useShareableUrl();
+    const { buildUrl, copyShareUrl } = useShareableUrl();
 
     const model = getModelById(selectedModelId) ?? models[0];
     const totalInputTokens = inputTokenCount + fileTokenCount;
@@ -88,7 +88,7 @@ export default function MetricsDashboard() {
         // M12: Use Web Share API if available on mobile
         if (typeof navigator !== "undefined" && navigator.share && window.innerWidth < 768) {
           try {
-            const url = getShareUrl({
+            const url = buildUrl({
               modelId: selectedModelId,
               inputTokens: totalInputTokens,
               outputTokens: expectedOutputTokens,
