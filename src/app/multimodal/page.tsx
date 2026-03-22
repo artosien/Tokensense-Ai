@@ -1,21 +1,22 @@
-"use client";
+﻿"use client";
 
 import { useState, useCallback } from "react";
 import SiteHeader from "@/components/SiteHeader";
 import Link from "next/link";
+import Image from "next/image";
 import { useDropzone } from "react-dropzone";
-import { ImageIcon } from "lucide-react";
+import { ImageIcon, ArrowRight } from "lucide-react";
 import { models } from "@/lib/models";
 import { calculateImageTokens } from "@/lib/imageTokenMath";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";       
 
 export default function MultimodalPage() {
     const visionModels = models.filter((m) => m.visionPricing);
-    const [selectedModelId, setSelectedModelId] = useState(visionModels.length > 0 ? visionModels[0].id : "");
+    const [selectedModelId, setSelectedModelId] = useState(visionModels.length > 0 ? visionModels[0].id : "");  
 
     const [imageWidth, setImageWidth] = useState<number | null>(null);
     const [imageHeight, setImageHeight] = useState<number | null>(null);
@@ -36,7 +37,7 @@ export default function MultimodalPage() {
             setImagePreview(dataUrl);
 
             // Load into HTMLImageElement to extract true width/height
-            const img = new Image();
+            const img = new window.Image();
             img.onload = () => {
                 setImageWidth(img.width);
                 setImageHeight(img.height);
@@ -66,7 +67,7 @@ export default function MultimodalPage() {
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
-      <SiteHeader />
+            <SiteHeader />
 
             {/* Main Content */}
             <main className="flex-1 mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-10 md:py-16">
@@ -74,7 +75,7 @@ export default function MultimodalPage() {
                     <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
                         Multimodal Image Estimator
                     </h1>
-                    <p className="text-lg text-muted-foreground max-w-3xl border-l-4 border-indigo-500 pl-4">
+                    <p className="text-lg text-muted-foreground max-w-3xl border-l-4 border-indigo-500 pl-4">   
                         Image token costs are calculated based on pixel scaling Math, not file size.
                         Every model scales, resizes, and tiles images differently. Upload an image to
                         calculate the exact token payload before sending it to an API.
@@ -84,22 +85,24 @@ export default function MultimodalPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Controls Panel */}
                     <div className="space-y-6">
-                        <Card className="shadow-sm">
+                        <Card className="shadow-sm border-border/40 bg-card/50 backdrop-blur-sm">
                             <CardHeader>
-                                <CardTitle>Upload Image</CardTitle>
-                                <CardDescription>Processed locally. Never sent to a server.</CardDescription>
+                                <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Upload Image</CardTitle>
+                                <CardDescription>Processed locally. Never sent to a server.</CardDescription>   
                             </CardHeader>
                             <CardContent>
                                 <div
                                     {...getRootProps()}
-                                    className={`relative flex flex-col items-center justify-center w-full h-80 border-2 border-dashed rounded-xl transition-all duration-300 cursor-pointer group
-                                        ${isDragActive 
-                                            ? "border-indigo-500 bg-indigo-500/15 scale-105" 
-                                            : "border-border/50 bg-muted/30 hover:bg-indigo-500/10 hover:border-indigo-400 hover:scale-[1.02]"}`}
+                                    className={`relative flex flex-col items-center justify-center w-full h-80 border-2 border-dashed rounded-2xl transition-all duration-300 cursor-pointer group
+                                        ${isDragActive
+                                            ? "border-indigo-500 bg-indigo-500/15 scale-[1.02]"
+                                            : "border-border/50 bg-muted/20 hover:bg-indigo-500/10 hover:border-indigo-400"}`}
                                 >
                                     <input {...getInputProps()} />
-                                    <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
-                                        <ImageIcon className={`w-16 h-16 mb-4 transition-all duration-300 ${isDragActive ? "text-indigo-500 scale-110" : "text-muted-foreground/60 group-hover:text-indigo-400 group-hover:scale-110"}`} />
+                                    <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
+                                        <div className="w-20 h-20 rounded-full bg-indigo-500/10 flex items-center justify-center mb-4 transition-transform group-hover:scale-110 duration-300">
+                                          <ImageIcon className={`w-10 h-10 transition-all duration-300 ${isDragActive ? "text-indigo-500" : "text-muted-foreground/60 group-hover:text-indigo-400"}`} />
+                                        </div>
                                         <p className="mb-2 text-lg text-foreground font-semibold">
                                             <span className="text-indigo-500">Click to upload</span> or drag and drop
                                         </p>
@@ -108,33 +111,33 @@ export default function MultimodalPage() {
                                 </div>
 
                                 {imageWidth && imageHeight && (
-                                    <div className="mt-4 flex items-center justify-between text-sm bg-muted/40 px-4 py-3 rounded-lg border border-border/50">
+                                    <div className="mt-4 flex items-center justify-between text-sm bg-indigo-500/5 px-4 py-3 rounded-xl border border-indigo-500/20 animate-in fade-in slide-in-from-top-2 duration-300">
                                         <div className="truncate pr-4 flex-1">
-                                            <span className="font-medium text-foreground">{fileName}</span>
+                                            <span className="font-medium text-foreground">{fileName}</span>     
                                         </div>
-                                        <div className="text-muted-foreground shrink-0 tabular-nums">
-                                            {imageWidth}px × {imageHeight}px
+                                        <div className="text-indigo-400 shrink-0 font-mono text-xs">
+                                            {imageWidth}px x {imageHeight}px
                                         </div>
                                     </div>
                                 )}
                             </CardContent>
                         </Card>
 
-                        <Card className="shadow-sm">
+                        <Card className="shadow-sm border-border/40 bg-card/50 backdrop-blur-sm">
                             <CardHeader>
-                                <CardTitle>Vision Model Setup</CardTitle>
+                                <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Vision Model Setup</CardTitle>
                                 <CardDescription>Select a model to see its unique image computation pricing.</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-3">
-                                    <Label htmlFor="visionModel">AI Multimodal Vision Model</Label>
+                                    <Label htmlFor="visionModel" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">AI Multimodal Vision Model</Label>
                                     <Select value={selectedModelId} onValueChange={setSelectedModelId}>
-                                        <SelectTrigger id="visionModel">
+                                        <SelectTrigger id="visionModel" className="h-12 rounded-xl bg-background/50 border-border/50">
                                             <SelectValue placeholder="Select a model" />
                                         </SelectTrigger>
-                                        <SelectContent>
+                                        <SelectContent className="rounded-xl border-border/50">
                                             {visionModels.map((m) => (
-                                                <SelectItem key={m.id} value={m.id}>
+                                                <SelectItem key={m.id} value={m.id} className="h-11 cursor-pointer">
                                                     {m.name}
                                                 </SelectItem>
                                             ))}
@@ -147,69 +150,93 @@ export default function MultimodalPage() {
 
                     {/* Results Panel */}
                     <div className="space-y-6">
-                        <Card className="border-border shadow-sm h-full flex flex-col">
+                        <Card className="border-border shadow-sm h-full flex flex-col border-border/40 bg-card/50 backdrop-blur-sm">
                             <CardHeader className="pb-4">
-                                <CardTitle className="text-lg">Image Token Analysis</CardTitle>
-                                <CardDescription>The final calculated input tokens and cost.</CardDescription>
+                                <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Image Token Analysis</CardTitle>
+                                <CardDescription>The final calculated input tokens and cost.</CardDescription>  
                             </CardHeader>
                             <CardContent className="flex-1 flex flex-col">
                                 {imageWidth && imageHeight ? (
-                                    <div className="space-y-6">
+                                    <div className="space-y-6 animate-in fade-in duration-500">
                                         {imagePreview && (
-                                            <div className="relative w-full h-32 rounded-xl overflow-hidden border border-border/50 bg-black/10">
-                                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
+                                            <div className="relative w-full h-48 rounded-2xl overflow-hidden border border-border/50 bg-black/20 flex items-center justify-center">
+                                                <Image 
+                                                  src={imagePreview} 
+                                                  alt="Preview" 
+                                                  fill
+                                                  unoptimized
+                                                  className="object-contain" 
+                                                />
                                             </div>
                                         )}
 
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="p-4 rounded-xl border bg-card/60 flex flex-col justify-between">
-                                                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div className="p-5 rounded-2xl border border-border/40 bg-card flex flex-col justify-between shadow-sm">
+                                                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
                                                     Token Payload
                                                 </div>
-                                                <div className="text-3xl font-bold tracking-tight text-foreground tabular-nums">
+                                                <div className="text-4xl font-bold tracking-tight text-foreground tabular-nums font-mono">
                                                     {result.tokens.toLocaleString()}
                                                 </div>
                                             </div>
-                                            <div className="p-4 rounded-xl border bg-card/60 flex flex-col justify-between">
-                                                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                                            <div className="p-5 rounded-2xl border border-cyan-500/20 bg-cyan-500/5 flex flex-col justify-between shadow-sm">
+                                                <div className="text-[10px] font-bold uppercase tracking-widest text-cyan-400 mb-2">
                                                     Image Cost
                                                 </div>
-                                                <div className="text-3xl font-bold tracking-tight text-green-500 tabular-nums">
+                                                <div className="text-4xl font-bold tracking-tight text-cyan-400 tabular-nums font-mono">
                                                     ${estimatedCost.toFixed(5)}
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="space-y-2 text-sm text-muted-foreground bg-muted/20 p-4 rounded-lg border border-border/40">
-                                            <p className="font-semibold text-foreground mb-2">Model Calculation Logic:</p>
-                                            {model?.visionPricing?.strategy === "openai-tiles" && (
-                                                <ul className="list-disc pl-4 space-y-1">
-                                                    <li>Base image cost: <span className="font-medium text-foreground">{model.visionPricing.baseTokens} tokens</span></li>
-                                                    <li>Tiles generated: <span className="font-medium text-foreground">{result.tiles} tiles</span> ({model.visionPricing.tileTokens} tokens each)</li>
-                                                    <li>Scaled resolution: {result.scaledWidth}px × {result.scaledHeight}px</li>
-                                                </ul>
-                                            )}
-                                            {model?.visionPricing?.strategy === "anthropic-scale" && (
-                                                <ul className="list-disc pl-4 space-y-1">
-                                                    <li>Scale image to fit within 1568×1568px.</li>
-                                                    <li>Divide scaled area by 750 (Anthropic formula).</li>
-                                                    <li>Scaled resolution: {result.scaledWidth}px × {result.scaledHeight}px</li>
-                                                </ul>
-                                            )}
-                                            {model?.visionPricing?.strategy === "gemini-flat" && (
-                                                <ul className="list-disc pl-4 space-y-1">
-                                                    <li>Gemini charges a flat rate of <span className="font-medium text-foreground">{model.visionPricing.flatTokens} tokens</span> per image.</li>
-                                                    <li>Resolution scaling is handled natively by the model without affecting price.</li>
-                                                </ul>
-                                            )}
+                                        <div className="space-y-3 text-sm text-muted-foreground bg-muted/20 p-5 rounded-2xl border border-border/40">
+                                            <p className="font-bold text-foreground mb-2 text-xs uppercase tracking-wider">Model Calculation Logic:</p>
+                                            <div className="space-y-2 text-xs leading-relaxed">
+                                              {model?.visionPricing?.strategy === "openai-tiles" && (
+                                                  <ul className="space-y-2">
+                                                      <li className="flex justify-between border-b border-border/20 pb-1">
+                                                        <span>Base image cost:</span>
+                                                        <span className="font-bold text-foreground">{model.visionPricing.baseTokens} tokens</span>
+                                                      </li>
+                                                      <li className="flex justify-between border-b border-border/20 pb-1">
+                                                        <span>Tiles generated:</span>
+                                                        <span className="font-bold text-foreground">{result.tiles} tiles (${model.visionPricing.tileTokens} tokens each)</span>
+                                                      </li>
+                                                      <li className="flex justify-between border-b border-border/20 pb-1">
+                                                        <span>Scaled resolution:</span>
+                                                        <span className="font-mono">{result.scaledWidth}px x {result.scaledHeight}px</span>
+                                                      </li>
+                                                  </ul>
+                                              )}
+                                              {model?.visionPricing?.strategy === "anthropic-scale" && (
+                                                  <ul className="space-y-2">
+                                                      <li className="border-b border-border/20 pb-1">Scale image to fit within 1568x1568px.</li>
+                                                      <li className="border-b border-border/20 pb-1">Divide scaled area by 750 (Anthropic formula).</li>     
+                                                      <li className="flex justify-between border-b border-border/20 pb-1">
+                                                        <span>Scaled resolution:</span>
+                                                        <span className="font-mono">{result.scaledWidth}px x {result.scaledHeight}px</span>
+                                                      </li>
+                                                  </ul>
+                                              )}
+                                              {model?.visionPricing?.strategy === "gemini-flat" && (
+                                                  <ul className="space-y-2">
+                                                      <li className="flex justify-between border-b border-border/20 pb-1">
+                                                        <span>Flat rate:</span>
+                                                        <span className="font-bold text-foreground">{model.visionPricing.flatTokens} tokens</span>
+                                                      </li>
+                                                      <li className="text-[10px] text-muted-foreground/60 italic">Resolution scaling is handled natively by Gemini without affecting price.</li>
+                                                  </ul>
+                                              )}
+                                            </div>
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-muted/30 rounded-xl border border-dashed border-border/60">
-                                        <ImageIcon className="w-12 h-12 text-muted-foreground/40 mb-4" />
-                                        <h3 className="text-lg font-medium text-foreground">Awaiting Image</h3>
-                                        <p className="text-sm text-muted-foreground max-w-xs mx-auto mt-2">
+                                    <div className="flex-1 flex flex-col items-center justify-center p-10 text-center bg-muted/20 rounded-2xl border border-dashed border-border/60">
+                                        <div className="w-16 h-16 rounded-full bg-muted/40 flex items-center justify-center mb-4">
+                                          <ImageIcon className="w-8 h-8 text-muted-foreground/40" />
+                                        </div>
+                                        <h3 className="text-lg font-bold text-foreground uppercase tracking-tight">Awaiting Image</h3> 
+                                        <p className="text-sm text-muted-foreground max-w-xs mx-auto mt-2">     
                                             Upload an image to see its exact token dimensions and estimated API cost.
                                         </p>
                                     </div>
@@ -226,16 +253,16 @@ export default function MultimodalPage() {
                         <p className="text-lg text-muted-foreground">
                             Common questions about image tokenization and vision model pricing.
                         </p>
-                        
-                        <div className="bg-card border border-border/40 rounded-2xl p-6 sm:p-8 shadow-sm">
+
+                        <div className="bg-card border border-border/40 rounded-2xl p-6 sm:p-8 shadow-sm">      
                             <Accordion type="single" collapsible className="w-full">
-                                
+
                                 <AccordionItem value="item-1">
                                     <AccordionTrigger className="text-left text-base font-semibold hover:no-underline hover:text-indigo-400">
                                         Why does image size affect token cost more than file size?
                                     </AccordionTrigger>
-                                    <AccordionContent className="text-muted-foreground leading-relaxed">
-                                        LLM image pricing is based on the image&apos;s pixel dimensions (width × height), not the file size in bytes. A 10MB JPEG compressed at low quality and a 2MB PNG at high resolution will have very different token costs. This is because models process the actual visual information (pixels), not the compressed file format. Tokensense-Ai calculates tokens based on image dimensions because that&apos;s how models like GPT-4o, Claude, and Gemini tokenize images for billing.
+                                    <AccordionContent className="text-muted-foreground leading-relaxed">        
+                                        LLM image pricing is based on the image&apos;s pixel dimensions (width x height), not the file size in bytes. A 10MB JPEG compressed at low quality and a 2MB PNG at high resolution will have very different token costs. This is because models process the actual visual information (pixels), not the compressed file format. Tokensense-Ai calculates tokens based on image dimensions because that&apos;s how models like GPT-4o, Claude, and Gemini tokenize images for billing.
                                     </AccordionContent>
                                 </AccordionItem>
 
@@ -243,26 +270,26 @@ export default function MultimodalPage() {
                                     <AccordionTrigger className="text-left text-base font-semibold hover:no-underline hover:text-indigo-400">
                                         What&apos;s the difference between "high detail" and "low detail" mode in GPT-4o vision?
                                     </AccordionTrigger>
-                                    <AccordionContent className="text-muted-foreground leading-relaxed">
-                                        GPT-4o offers two detail modes for images: &quot;low&quot; and &quot;high&quot;. In low detail mode, OpenAI automatically downscales your image, resulting in fewer tokens. High detail mode preserves more of the original resolution and incurs higher token costs. OpenAI also tiles large images in high detail mode, processing them as multiple chunks. Tokensense-Ai shows you the exact token breakdown for your chosen image and model, so you can compare the cost difference between detail levels before submitting.
+                                    <AccordionContent className="text-muted-foreground leading-relaxed">        
+                                        GPT-4o offers two detail modes for images: &quot;low&quot; and &quot;high&quot;. In low detail mode, OpenAI automatically downscales your image, resulting in fewer tokens. High detail mode preserves more of the original resolution and incurs higher token costs. OpenAI also tiles large images in high detail mode, processing them as multiple chunks. Tokensense-Ai shows you the exact token breakdown for your chosen image and model, so you can compare the cost difference between detail levels before submitting.        
                                     </AccordionContent>
                                 </AccordionItem>
 
                                 <AccordionItem value="item-3">
                                     <AccordionTrigger className="text-left text-base font-semibold hover:no-underline hover:text-indigo-400">
-                                        Does sending the same image twice cost the same tokens both times?
+                                        Does sending the same image twice cost the same tokens both times?      
                                     </AccordionTrigger>
-                                    <AccordionContent className="text-muted-foreground leading-relaxed">
-                                        Yes, sending the same image twice will typically cost the same tokens both times — unless you explicitly enable prompt caching (available with some models like Claude). Without caching, each image is processed independently. With caching enabled, you can reuse the same cached image tokens across multiple requests, reducing costs significantly. Organizations doing repeated analysis on the same images should definitely look into prompt caching options offered by their model provider.
+                                    <AccordionContent className="text-muted-foreground leading-relaxed">        
+                                        Yes, sending the same image twice will typically cost the same tokens both times - unless you explicitly enable prompt caching (available with some models like Claude). Without caching, each image is processed independently. With caching enabled, you can reuse the same cached image tokens across multiple requests, reducing costs significantly. Organizations doing repeated analysis on the same images should definitely look into prompt caching options offered by their model provider.
                                     </AccordionContent>
                                 </AccordionItem>
 
                                 <AccordionItem value="item-4" className="border-b-0">
                                     <AccordionTrigger className="text-left text-base font-semibold hover:no-underline hover:text-indigo-400">
-                                        Which vision model gives the most tokens-per-dollar for image analysis?
+                                        Which vision model gives the most tokens-per-dollar for image analysis? 
                                     </AccordionTrigger>
-                                    <AccordionContent className="text-muted-foreground leading-relaxed">
-                                        This depends on your use case and image dimensions. Generally, Gemini 2.0 Flash offers very competitive pricing for images, while Claude 3.5 Sonnet provides strong vision capabilities at a mid-tier price. GPT-4o sits between them in terms of cost but excels in accuracy and detail understanding. The &quot;best&quot; value model changes as pricing updates. Use Tokensense-Ai to upload your typical images and compare the token costs across models — the calculator will show you exact dollar costs so you can make an informed decision based on your actual workflows.
+                                    <AccordionContent className="text-muted-foreground leading-relaxed">        
+                                        This depends on your use case and image dimensions. Generally, Gemini 2.0 Flash offers very competitive pricing for images, while Claude 3.5 Sonnet provides strong vision capabilities at a mid-tier price. GPT-4o sits between them in terms of cost but excels in accuracy and detail understanding. The &quot;best&quot; value model changes as pricing updates. Use Tokensense-Ai to upload your typical images and compare the token costs across models - the calculator will show you exact dollar costs so you can make an informed decision based on your actual workflows.
                                     </AccordionContent>
                                 </AccordionItem>
 

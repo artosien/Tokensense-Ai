@@ -154,8 +154,17 @@ export default function SiteHeader() {
                 className={`fixed top-0 right-0 h-[100dvh] w-[80%] max-w-sm bg-card border-l border-border/40 z-50 shadow-2xl transition-transform duration-500 ease-out md:hidden flex flex-col ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
                     }`}
             >
-                <div className="h-14 flex items-center px-4 border-b border-border/40 justify-start">
+                <div className="h-14 flex items-center px-4 border-b border-border/40 justify-between">
                     <span className="font-semibold text-lg text-foreground tracking-tight ml-2">Menu</span>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                        onClick={closeMenu}
+                    >
+                        <X className="h-5 w-5" />
+                        <span className="sr-only">Close Menu</span>
+                    </Button>
                 </div>
 
                 <nav className="flex flex-col p-4 gap-2 overflow-y-auto">

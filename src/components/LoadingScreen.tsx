@@ -1,16 +1,23 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
-import { Cpu } from 'lucide-react';
+import { Bot } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function LoadingScreen() {
   const [isVisible, setIsVisible] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    // Check if we are on mobile
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
     // Hide loading screen after page loads
     const timer = setTimeout(() => {
       setIsVisible(false);
-    }, 1000);
+    }, 1500); // Slightly longer for mobile delight
 
     // Also hide when page is fully loaded
     if (document.readyState === 'complete') {
@@ -24,6 +31,7 @@ export default function LoadingScreen() {
     window.addEventListener('load', handleLoad);
 
     return () => {
+      window.removeEventListener('resize', checkMobile);
       clearTimeout(timer);
       window.removeEventListener('load', handleLoad);
     };
@@ -34,46 +42,72 @@ export default function LoadingScreen() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
-      <div className="flex flex-col items-center gap-4">
-        {/* Main animated icon */}
-        <div className="relative w-20 h-20">
-          {/* Outer rotating ring */}
-          <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary border-r-primary animate-spin" />
-
-          {/* Middle counter-rotating ring */}
-          <div className="absolute inset-2 rounded-full border-2 border-transparent border-b-accent border-l-accent animate-spin-reverse" />
-
-          {/* Icon center */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Cpu className="w-10 h-10 text-primary animate-pulse" />
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[#09090b]">
+      <div className="flex flex-col items-center gap-8">
+        {/* Discord-like Logo Animation (M15) */}
+        <div className="relative group">
+          {/* Outer glow */}
+          <div className="absolute inset-0 bg-indigo-500/20 rounded-2xl blur-2xl animate-pulse scale-150" />
+          
+          {/* Logo Container with Discord-style twisting/pulsing */}
+          <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-2xl flex items-center justify-center animate-discord-twist overflow-hidden">
+            {/* Glossy overlay */}
+            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-white/10 to-transparent opacity-50" />
+            
+            <Bot className="w-12 h-12 text-white drop-shadow-lg" />
           </div>
+
+          {/* Orbiting ring */}
+          <div className="absolute -inset-4 border-2 border-dashed border-indigo-500/30 rounded-full animate-spin-slow" />
         </div>
 
-        {/* Loading text */}
-        <div className="mt-4 flex items-center gap-1">
-          <span className="text-sm font-medium text-foreground">Loading</span>
-          <span className="flex gap-1">
-            <span className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-            <span className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-            <span className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+        {/* Brand Text */}
+        <div className="flex flex-col items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-300">
+          <span className="text-xl font-bold tracking-tight text-white uppercase tracking-[0.2em] ml-1">
+            TokenSense
           </span>
+          <div className="flex gap-1.5 h-1 items-center">
+            <div className="w-1 h-1 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+            <div className="w-1 h-1 bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
+            <div className="w-1 h-1 bg-purple-400 rounded-full animate-bounce" />
+          </div>
         </div>
       </div>
 
-      {/* CSS for custom animations */}
       <style jsx>{`
-        @keyframes spin-reverse {
+        @keyframes discord-twist {
+          0% {
+            transform: rotate(0deg) scale(1);
+          }
+          25% {
+            transform: rotate(-10deg) scale(1.1);
+          }
+          50% {
+            transform: rotate(0deg) scale(1);
+          }
+          75% {
+            transform: rotate(10deg) scale(1.1);
+          }
+          100% {
+            transform: rotate(0deg) scale(1);
+          }
+        }
+
+        .animate-discord-twist {
+          animation: discord-twist 2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+        }
+
+        @keyframes spin-slow {
           from {
             transform: rotate(0deg);
           }
           to {
-            transform: rotate(-360deg);
+            transform: rotate(360deg);
           }
         }
 
-        .animate-spin-reverse {
-          animation: spin-reverse 2s linear infinite;
+        .animate-spin-slow {
+          animation: spin-slow 8s linear infinite;
         }
       `}</style>
     </div>

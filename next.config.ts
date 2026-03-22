@@ -1,6 +1,9 @@
-import type { NextConfig } from "next";
+﻿import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "export",
+  trailingSlash: true,
+  
   // Turbopack config (Next.js 16+ default bundler)
   turbopack: {},
 

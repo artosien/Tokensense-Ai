@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from "next";
+﻿import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -6,6 +6,7 @@ import BackToTop from "@/components/BackToTop";
 import Footer from "@/components/Footer";
 import LoadingScreen from "@/components/LoadingScreen";
 import ThemeProvider from "@/components/ThemeProvider";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -13,13 +14,13 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Tokensense-Ai — Free LLM Token Cost Calculator",
+  title: "Tokensense-Ai - Free LLM Token Cost Calculator",
   description:
     "Estimate LLM API costs before you send a request. Tokensense-Ai is a free, client-side token cost calculator for GPT-4o, Claude, Gemini, and more. No account needed.",
   keywords: "LLM token cost calculator, token cost estimator, GPT-4o pricing, Claude API cost, AI token counter, OpenAI token calculator, prompt token count, LLM API pricing tool",
   manifest: "/manifest.json",
   openGraph: {
-    title: "Tokensense-Ai — Free LLM Token Cost Calculator",
+    title: "Tokensense-Ai - Free LLM Token Cost Calculator",
     description:
       "Know your token cost before every API call. Supports GPT-4o, Claude, Gemini & more. Free, private, client-side.",
     type: "website",
@@ -28,6 +29,9 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#09090b",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1, // M4: Prevent viewport zoom on input focus
 };
 
 export default function RootLayout({
@@ -59,6 +63,7 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`}>
         <ThemeProvider>
           <LoadingScreen />
+          <PWAInstallPrompt />
           {children}
           <Footer />
           <BackToTop />

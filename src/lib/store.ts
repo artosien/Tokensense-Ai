@@ -1,4 +1,4 @@
-import { create } from "zustand";
+﻿import { create } from "zustand";
 
 interface TokenSenseState {
     // Prompt text
@@ -21,6 +21,9 @@ interface TokenSenseState {
     agentIterations: number;
     avgNewInputTokensPerTurn: number;
 
+    // UI state
+    activeTab: "calculate" | "results";
+
     // Actions
     setSystemPrompt: (text: string) => void;
     setUserPrompt: (text: string) => void;
@@ -32,6 +35,7 @@ interface TokenSenseState {
     setAgentLoopEnabled: (b: boolean) => void;
     setAgentIterations: (n: number) => void;
     setAvgNewInputTokensPerTurn: (n: number) => void;
+    setActiveTab: (tab: "calculate" | "results") => void;
 }
 
 export const useTokenSenseStore = create<TokenSenseState>((set) => ({
@@ -50,6 +54,8 @@ export const useTokenSenseStore = create<TokenSenseState>((set) => ({
     agentIterations: 5,
     avgNewInputTokensPerTurn: 500,
 
+    activeTab: "calculate",
+
     setSystemPrompt: (text) => set({ systemPrompt: text }),
     setUserPrompt: (text) => set({ userPrompt: text }),
     setFileText: (text) => set({ fileText: text }),
@@ -60,4 +66,5 @@ export const useTokenSenseStore = create<TokenSenseState>((set) => ({
     setAgentLoopEnabled: (b) => set({ agentLoopEnabled: b }),
     setAgentIterations: (n) => set({ agentIterations: n }),
     setAvgNewInputTokensPerTurn: (n) => set({ avgNewInputTokensPerTurn: n }),
+    setActiveTab: (tab) => set({ activeTab: tab }),
 }));
