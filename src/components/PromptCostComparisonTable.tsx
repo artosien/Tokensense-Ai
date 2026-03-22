@@ -19,12 +19,30 @@ export default function PromptCostComparisonTable({
 }: PromptCostComparisonTableProps) {
   const { expectedOutputTokens, fileText } = useTokenSenseStore();
 
-  const data = useMemo(() => {
-    const combined = [systemPrompt, prompt, fileText].filter(Boolean).join("\n");
-    const inputTokens = countTokens(combined);
+const [rows, setRows] = useState<PromptCostComparisonTableRow[]>([]);
 
-    const rows = models.map((model) => {
+useEffect(() => {
+  const loadRows = async () => {
+    const combined = [systemPrompt, prompt, fileText].filter(Boolean).join("\n");
+    const inputTokens = await countTokens(combined);
+    const newRows = models.map((model) => {
       const cost = calculateCost(inputTokens, expectedOutputTokens, model);
+      return {
+        id: model.id,
+        name: model.name,
+        provider: model.provider,
+        inputTokens,
+        outputTokens: expectedOutputTokens,
+        inputCost: cost.inputCost,
+        outputCost: cost.outputCost,
+        totalCost: cost.totalCost,
+      };
+    });
+    setRows(newRows);
+  };
+  
+  loadRows();
+}, [systemPrompt, prompt, fileText, expectedOutputTokens, models]);
       return {
         id: model.id,
         name: model.name,
