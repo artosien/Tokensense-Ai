@@ -1,22 +1,30 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, Info, Sparkles, TrendingDown, LayoutGrid, FileDown, Zap, Shield, Rocket, ChevronDown } from "lucide-react";
 import CostDisclaimer from "./CostDisclaimer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // ─── Pricing Data ───────────────────────────────────────────────────────────
 
 const PLATFORM_PRICING = {
   n8n: {
-    name: "n8n",
+    name: "n8n Cloud",
     pricePerExecution: 0.004,
     freeExecs: 2500,
     brandColor: "#00B4FF",
     brandGlow: "rgba(0, 180, 255, 0.5)",
+    billingUnit: "Execution",
+    tooltip: "One full workflow run, regardless of how many steps are inside.",
+    annualDiscount: 0.2, // 20% off
     tiers: [
       { label: "Starter", executions: 2500, price: 0 },
       { label: "Pro", executions: 10000, price: 24 },
-      { label: "Enterprise", executions: 1000000, price: "Custom" },
     ],
   },
   make: {
@@ -25,10 +33,12 @@ const PLATFORM_PRICING = {
     freeOps: 1000,
     brandColor: "#FF6B35",
     brandGlow: "rgba(255, 107, 53, 0.5)",
+    billingUnit: "Operation",
+    tooltip: "Each module that runs inside a scenario. A 5-step scenario uses 5 operations.",
+    annualDiscount: 0.15, // 15% off
     tiers: [
       { label: "Free", ops: 1000, price: 0 },
-      { label: "Team", ops: 100000, price: 99 },
-      { label: "Business", ops: 10000000, price: 299 },
+      { label: "Core", ops: 10000, price: 9 },
     ],
   },
   zapier: {
@@ -37,21 +47,53 @@ const PLATFORM_PRICING = {
     freeTasks: 100,
     brandColor: "#FF4F00",
     brandGlow: "rgba(255, 79, 0, 0.5)",
+    billingUnit: "Task",
+    tooltip: "Each action step performed. Trigger steps are free; actions cost 1 task.",
+    annualDiscount: 0.33, // 33% off
     tiers: [
       { label: "Free", tasks: 100, price: 0 },
-      { label: "Professional", tasks: 750, price: 20 },
-      { label: "Company", tasks: 10000, price: 299 },
+      { label: "Starter", tasks: 750, price: 19.99 },
     ],
   },
 };
 
+const TEMPLATES = [
+  {
+    id: "content",
+    label: "Content Automation Pipeline",
+    executions: 5000,
+    steps: 12,
+    aiCalls: 3,
+    tokens: 2500,
+    model: "gpt4o",
+  },
+  {
+    id: "lead",
+    label: "Lead Enrichment Workflow",
+    executions: 25000,
+    steps: 6,
+    aiCalls: 1,
+    tokens: 1500,
+    model: "gpt4o-mini",
+  },
+  {
+    id: "ecommerce",
+    label: "E-commerce Order Processing",
+    executions: 15000,
+    steps: 8,
+    aiCalls: 2,
+    tokens: 1000,
+    model: "claude-haiku",
+  },
+];
+
 const AI_MODELS = [
   { id: "none", label: "None", inputCost: 0, outputCost: 0 },
-  { id: "gpt4o", label: "GPT-4o", inputCost: 0.005, outputCost: 0.015 },
-  { id: "gpt4o-mini", label: "GPT-4o mini", inputCost: 0.00015, outputCost: 0.0006 },
-  { id: "claude-sonnet", label: "Claude Sonnet", inputCost: 0.003, outputCost: 0.015 },
-  { id: "claude-haiku", label: "Claude Haiku", inputCost: 0.00025, outputCost: 0.00125 },
-  { id: "gemini-flash", label: "Gemini Flash", inputCost: 0.00005, outputCost: 0.00015 },
+  { id: "gpt4o", label: "GPT-4o", inputCost: 5, outputCost: 15 }, // Per 1M
+  { id: "gpt4o-mini", label: "GPT-4o mini", inputCost: 0.15, outputCost: 0.6 },
+  { id: "claude-sonnet", label: "Claude Sonnet", inputCost: 3, outputCost: 15 },
+  { id: "claude-haiku", label: "Claude Haiku", inputCost: 0.25, outputCost: 1.25 },
+  { id: "gemini-flash", label: "Gemini Flash", inputCost: 0.05, outputCost: 0.15 },
 ];
 
 // ─── Helper Functions ───────────────────────────────────────────────────────
@@ -155,45 +197,81 @@ function StatBox({ label, value, unit }: StatBoxProps) {
 
 export default function WorkflowSimulator() {
   const [platform, setPlatform] = useState<keyof typeof PLATFORM_PRICING>("n8n");
-  const [executions, setExecutions] = useState(1000);
-  const [stepsPerExec, setStepsPerExec] = useState(5);
-  const [aiModel, setAiModel] = useState("none");
-  const [aiCalls, setAiCalls] = useState(0);
+  const [executions, setExecutions] = useState(10000); // Default to 10k
+  const [stepsPerExec, setStepsPerExec] = useState(5); // Default to 5
+  const [aiModel, setAiModel] = useState("gpt4o-mini"); // Default to gpt4o-mini
+  const [aiCalls, setAiCalls] = useState(1); // Default to 1 call per exec
   const [tokensPerCall, setTokensPerCall] = useState(1000);
-  const [compareMode, setCompareMode] = useState(false);
+  const [isAnnual, setIsAnnual] = useState(false);
+  const [compareMode, setCompareMode] = useState(true); // Default to true
   const [copied, setCopied] = useState(false);
   const [displayCost, setDisplayCost] = useState(0);
   const animationRef = useRef<number | null>(null);
 
   const model = AI_MODELS.find((m) => m.id === aiModel) || AI_MODELS[0];
 
-  // Calculate costs
-  const calculateCosts = useCallback( () => {
+  // Calculate costs for a specific platform
+  const getCostsForPlatform = useCallback((p: keyof typeof PLATFORM_PRICING) => {
+    const config = PLATFORM_PRICING[p];
     let baseCost = 0;
 
-    if (platform === "n8n") {
-      const config = PLATFORM_PRICING.n8n;
+    if (p === "n8n") {
       baseCost = Math.max(0, (executions - config.freeExecs) * config.pricePerExecution);
-    } else if (platform === "make") {
-      const config = PLATFORM_PRICING.make;
+    } else if (p === "make") {
       const ops = executions * stepsPerExec;
       baseCost = Math.max(0, (ops - config.freeOps) * config.pricePerOp);
-    } else if (platform === "zapier") {
-      const config = PLATFORM_PRICING.zapier;
+    } else if (p === "zapier") {
       baseCost = Math.max(0, (executions - config.freeTasks) * config.pricePerTask);
+    }
+
+    if (isAnnual) {
+        baseCost = baseCost * (1 - config.annualDiscount);
     }
 
     let aiCost = 0;
     if (aiModel !== "none" && aiCalls > 0) {
-      const inputTokens = aiCalls * tokensPerCall;
+      const inputTokens = (executions * aiCalls) * tokensPerCall;
       const outputTokens = inputTokens * 0.3; // Assume 30% of input for output
       aiCost = inputTokens * (model.inputCost / 1000000) + outputTokens * (model.outputCost / 1000000);
     }
 
     return { baseCost, aiCost, total: baseCost + aiCost };
-  }, [platform, executions, stepsPerExec, aiModel, aiCalls, tokensPerCall, model]);
+  }, [executions, stepsPerExec, aiModel, aiCalls, tokensPerCall, model, isAnnual]);
 
-  const costs = calculateCosts();
+  const costs = getCostsForPlatform(platform);
+
+  const allPlatformCosts = useMemo(() => {
+    return {
+        n8n: getCostsForPlatform("n8n"),
+        make: getCostsForPlatform("make"),
+        zapier: getCostsForPlatform("zapier")
+    };
+  }, [getCostsForPlatform]);
+
+  const recommendations = useMemo(() => {
+    const sorted = Object.entries(allPlatformCosts).sort((a, b) => a[1].total - b[1].total);
+    const cheapest = sorted[0][0] as keyof typeof PLATFORM_PRICING;
+    const diff = sorted[1][1].total - sorted[0][1].total;
+    
+    return {
+        cheapest,
+        savings: diff,
+        scalable: "n8n" as const,
+        aiHeavy: "n8n" as const, // n8n is generally better for complex AI flows due to execution-based pricing
+    };
+  }, [allPlatformCosts]);
+
+  // Template handler
+  const applyTemplate = (templateId: string) => {
+    const t = TEMPLATES.find(tmp => tmp.id === templateId);
+    if (t) {
+        setExecutions(t.executions);
+        setStepsPerExec(t.steps);
+        setAiCalls(t.aiCalls);
+        setTokensPerCall(t.tokens);
+        setAiModel(t.model);
+    }
+  };
 
   // Animate cost display
   useEffect(() => {
@@ -224,17 +302,21 @@ export default function WorkflowSimulator() {
 
   // Copy summary functionality
   const copySummary = useCallback(async () => {
-    const summary = `Platform: ${PLATFORM_PRICING[platform].name}
+    const summary = `FlowCost Summary — A TokenSense-AI Tool
+-----------------------------------------
+Platform: ${PLATFORM_PRICING[platform].name}
+Billing: ${isAnnual ? 'Annual (Monthly Avg)' : 'Monthly'}
 Executions: ${fmtK(executions)}
 Steps per Execution: ${stepsPerExec}
 AI Model: ${model.label}
-AI Calls: ${fmtK(aiCalls)}
+AI Calls: ${fmtK(executions * aiCalls)} total/mo
 Tokens per Call: ${fmtK(tokensPerCall)}
 
-Base Cost (Monthly): ${fmt(costs.baseCost)}
-AI Cost (Monthly): ${fmt(costs.aiCost)}
-Total Cost (Monthly): ${fmt(costs.total)}
-Annual Cost: ${fmt(costs.total * 12)}`;
+Base Platform Cost: ${fmt(costs.baseCost)}
+AI Model Cost: ${fmt(costs.aiCost)}
+Total Monthly: ${fmt(costs.total)}
+-----------------------------------------
+Calculated at: tokensense-ai.com/workflow`;
 
     try {
       await navigator.clipboard.writeText(summary);
@@ -243,284 +325,280 @@ Annual Cost: ${fmt(costs.total * 12)}`;
     } catch (err) {
       console.error("Failed to copy:", err);
     }
-  }, [platform, executions, stepsPerExec, aiModel, aiCalls, tokensPerCall, costs, model.label]);
+  }, [platform, executions, stepsPerExec, aiModel, aiCalls, tokensPerCall, costs, model.label, isAnnual]);
 
-  const getPlatformConfig = () => {
-    if (platform === "n8n") return PLATFORM_PRICING.n8n;
-    if (platform === "make") return PLATFORM_PRICING.make;
-    return PLATFORM_PRICING.zapier;
-  };
-  const platformConfig = getPlatformConfig();
-  const annualBase = costs.baseCost * 12;
-  const annualGrowth = costs.baseCost * 12 * 1.2; // 20% growth projection
+  const platformConfig = PLATFORM_PRICING[platform];
+  const annualBase = costs.total * 12;
 
   return (
-    <div className="min-h-screen" style={{ background: "linear-gradient(135deg, #080e1a 0%, #0a1628 100%)" }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400;500&display=swap');
+    <div className="flow-cost">
+      <TooltipProvider>
+      <div className="grid-background p-4 md:p-8 rounded-3xl border border-white/5 overflow-hidden relative">
+        <div className="max-w-6xl mx-auto space-y-10 relative z-10">
+          
+          {/* Header & Brand */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-8">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-indigo-400 font-bold text-xs uppercase tracking-widest">
+                <LayoutGrid className="w-4 h-4" />
+                FlowCost — A TokenSense-AI Tool
+              </div>
+              <h1 className="text-4xl md:text-5xl font-black text-white" style={{ fontFamily: "'Syne', sans-serif" }}>
+                Workflow <span className="text-slate-500">Estimator</span>
+              </h1>
+            </div>
 
-        .flow-cost {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        }
+            <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center space-x-2 bg-white/5 rounded-full px-4 py-2 border border-white/10">
+                    <Label htmlFor="billing-toggle" className={`text-xs font-bold uppercase tracking-wider ${!isAnnual ? 'text-indigo-400' : 'text-slate-500'}`}>Monthly</Label>
+                    <Switch 
+                        id="billing-toggle" 
+                        checked={isAnnual} 
+                        onCheckedChange={setIsAnnual}
+                    />
+                    <Label htmlFor="billing-toggle" className={`text-xs font-bold uppercase tracking-wider ${isAnnual ? 'text-indigo-400' : 'text-slate-500'}`}>Annual</Label>
+                    {isAnnual && <span className="ml-2 text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded-md font-bold">SAVING UP TO 33%</span>}
+                </div>
 
-        .grid-background {
-          background-image:
-            linear-gradient(0deg, rgba(0, 198, 255, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 198, 255, 0.03) 1px, transparent 1px);
-          background-size: 50px 50px;
-        }
-
-        .platform-btn {
-          transition: all 0.3s ease;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .platform-btn.active {
-          box-shadow: 0 0 20px var(--glow-color);
-          border-color: currentColor;
-        }
-
-        @keyframes pulse-glow {
-          0%, 100% { filter: brightness(1); }
-          50% { filter: brightness(1.2); }
-        }
-
-        .pulse-glow { animation: pulse-glow 3s infinite; }
-
-        .slider {
-          outline: none;
-        }
-
-        .slider::-webkit-slider-thumb {
-          appearance: none;
-          width: 20px;
-          height: 20px;
-          border-radius: 50%;
-          background: #00c6ff;
-          cursor: pointer;
-          border: 2px solid #080e1a;
-          box-shadow: 0 0 10px rgba(0, 198, 255, 0.5);
-        }
-
-        .slider::-moz-range-thumb {
-          width: 20px;
-          height: 20px;
-          border-radius: 50%;
-          background: #00c6ff;
-          cursor: pointer;
-          border: 2px solid #080e1a;
-          box-shadow: 0 0 10px rgba(0, 198, 255, 0.5);
-        }
-      `}</style>
-
-      <div className="grid-background min-h-screen p-6">
-        <div className="max-w-6xl mx-auto space-y-6">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-black text-white mb-2" style={{ fontFamily: "'Syne', sans-serif" }}>
-              FlowCost
-            </h1>
-            <p className="text-slate-400 text-sm">Workflow Platform Cost Calculator</p>
-          </div>
-
-          {/* Platform Selector */}
-          <div className="flex gap-3 justify-center flex-wrap mb-8">
-            {Object.entries(PLATFORM_PRICING).map(([key, config]) => (
-              <button
-                key={key}
-                onClick={() => setPlatform(key as keyof typeof PLATFORM_PRICING)}
-                className={`platform-btn px-6 py-3 rounded-lg font-bold text-sm uppercase border-2 transition-all ${
-                  platform === key
-                    ? "text-white border-opacity-100"
-                    : "text-slate-400 border-slate-600 border-opacity-50 hover:border-opacity-100"
-                }`}
-                style={{
-                  "--glow-color": platform === key ? config.brandGlow : "transparent",
-                } as React.CSSProperties}
-              >
-                {config.name}
-              </button>
-            ))}
-          </div>
-
-          {/* Main Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Configuration Panel */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-6 space-y-6">
-                <h2 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Workflow Configuration</h2>
-
-                <Slider
-                  label="Monthly Executions"
-                  value={executions}
-                  min={100}
-                  max={100000}
-                  step={100}
-                  onChange={setExecutions}
-                  unit="runs"
-                />
-
-                <Slider
-                  label="Steps Per Execution"
-                  value={stepsPerExec}
-                  min={1}
-                  max={30}
-                  onChange={setStepsPerExec}
-                />
-
-                <div className="pt-4 border-t border-white/10">
-                  <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4">AI Node Configuration</h3>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-xs font-semibold text-slate-300 uppercase block mb-2">Model</label>
-                      <select
-                        value={aiModel}
-                        onChange={(e) => setAiModel(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg bg-slate-800/50 border border-white/10 text-slate-200 text-sm"
-                      >
-                        {AI_MODELS.map((m) => (
-                          <option key={m.id} value={m.id}>
-                            {m.label}
-                          </option>
+                <Select onValueChange={applyTemplate}>
+                    <SelectTrigger className="w-[240px] bg-white/5 border-white/10 h-10 text-xs font-bold uppercase tracking-wider text-slate-300">
+                        <Rocket className="w-4 h-4 mr-2 text-indigo-400" />
+                        <SelectValue placeholder="Quick Templates" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-900 border-white/10">
+                        {TEMPLATES.map(t => (
+                            <SelectItem key={t.id} value={t.id} className="text-xs">{t.label}</SelectItem>
                         ))}
-                      </select>
-                    </div>
-
-                    {aiModel !== "none" && (
-                      <>
-                        <Slider
-                          label="AI Calls per Execution"
-                          value={aiCalls}
-                          min={0}
-                          max={50000}
-                          step={100}
-                          onChange={setAiCalls}
-                        />
-                        <Slider
-                          label="Tokens per Call"
-                          value={tokensPerCall}
-                          min={100}
-                          max={8000}
-                          step={100}
-                          onChange={setTokensPerCall}
-                        />
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Hero Cost Panel */}
-            <div className="rounded-2xl border-2 bg-gradient-to-br from-slate-900 to-slate-800 p-6 space-y-4" style={{ borderColor: platformConfig.brandColor }}>
-              <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Monthly Cost</div>
-              <div className="pulse-glow">
-                <div className="text-5xl font-black text-white font-mono">
-                  ${displayCost.toFixed(2)}
-                </div>
-              </div>
-              <div className="text-xs text-slate-500 font-mono">
-                Base: ${costs.baseCost.toFixed(2)} | AI: ${costs.aiCost.toFixed(2)}
-              </div>
-
-              <button
-                onClick={copySummary}
-                className="w-full mt-4 flex items-center justify-center gap-2 py-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 transition-all text-sm font-semibold"
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-4 h-4" /> Copied!
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4" /> Copy Summary
-                  </>
-                )}
-              </button>
-
-              <CostDisclaimer className="mt-4 text-[10px]" />
+                    </SelectContent>
+                </Select>
             </div>
           </div>
 
-          {/* Receipt Breakdown */}
-          <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-6 space-y-3">
-            <h2 className="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4">Cost Breakdown</h2>
-            <LineItem label={`${platform.toUpperCase()} Base Cost`} value={fmt(costs.baseCost)} highlight={false} />
-            {aiModel !== "none" && <LineItem label="AI Model Cost" value={fmt(costs.aiCost)} sublabel={`${fmtK(aiCalls)} calls × ${fmtK(tokensPerCall)} tokens`} />}
-            <div className="pt-3 border-t border-white/10">
-              <LineItem label="Total Monthly" value={fmt(costs.total)} highlight={true} />
-            </div>
-          </div>
+          {/* ── Side-by-Side Comparison Row (New Default) ── */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {Object.entries(allPlatformCosts).map(([key, pCosts]) => {
+              const p = key as keyof typeof PLATFORM_PRICING;
+              const config = PLATFORM_PRICING[p];
+              const isSelected = platform === p;
+              const isCheapest = recommendations.cheapest === p;
 
-          {/* Annual Projection */}
-          <div className="grid grid-cols-2 gap-4">
-            <StatBox label="Annual (Base)" value={fmt(annualBase)} />
-            <StatBox label="Annual (+20% Growth)" value={fmt(annualGrowth)} />
-          </div>
-
-          {/* Platform Comparison Mode */}
-          <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-6 space-y-4">
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id="compare"
-                checked={compareMode}
-                onChange={(e) => setCompareMode(e.target.checked)}
-                className="w-4 h-4 rounded"
-              />
-              <label htmlFor="compare" className="text-sm font-semibold text-slate-300 cursor-pointer">
-                Compare All Platforms
-              </label>
-            </div>
-
-            {compareMode && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                {Object.entries(PLATFORM_PRICING).map(([key, config]) => {
-                  let cost = 0;
-                  if (key === "n8n") {
-                    cost = Math.max(0, (executions - (config as typeof PLATFORM_PRICING.n8n).freeExecs) * (config as typeof PLATFORM_PRICING.n8n).pricePerExecution);
-                  } else if (key === "make") {
-                    const ops = executions * stepsPerExec;
-                    cost = Math.max(0, (ops - (config as typeof PLATFORM_PRICING.make).freeOps) * (config as typeof PLATFORM_PRICING.make).pricePerOp);
-                  } else if (key === "zapier") {
-                    cost = Math.max(0, (executions - (config as typeof PLATFORM_PRICING.zapier).freeTasks) * (config as typeof PLATFORM_PRICING.zapier).pricePerTask);
-                  }
-
-                  const n8nCost = Math.max(0, (executions - PLATFORM_PRICING.n8n.freeExecs) * PLATFORM_PRICING.n8n.pricePerExecution);
-                  const makeCost = Math.max(0, (executions * stepsPerExec - PLATFORM_PRICING.make.freeOps) * PLATFORM_PRICING.make.pricePerOp);
-                  const zapierCost = Math.max(0, (executions - PLATFORM_PRICING.zapier.freeTasks) * PLATFORM_PRICING.zapier.pricePerTask);
-                  const isBest = cost === Math.min(n8nCost, makeCost, zapierCost);
-
-                  return (
-                    <div
-                      key={key}
-                      className={`rounded-lg p-4 border-2 ${
-                        isBest
-                          ? "border-green-500/50 bg-green-500/10"
-                          : "border-white/10 bg-white/5"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <div
-                          className="text-sm font-bold uppercase"
-                          style={{ color: config.brandColor }}
-                        >
-                          {config.name}
+              return (
+                <div 
+                    key={p}
+                    onClick={() => setPlatform(p)}
+                    className={`relative cursor-pointer group rounded-2xl border-2 p-5 transition-all duration-300 ${
+                        isSelected 
+                        ? 'bg-white/10 border-indigo-500/50 shadow-2xl shadow-indigo-500/10' 
+                        : 'bg-white/5 border-white/5 hover:border-white/20'
+                    }`}
+                >
+                    {isCheapest && (
+                        <div className="absolute -top-3 left-4 bg-green-500 text-black text-[10px] font-black px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
+                            <TrendingDown className="w-3 h-3" />
+                            CHEAPEST
                         </div>
-                        {isBest && <span className="text-xs font-bold text-green-400 bg-green-500/20 px-2 py-1 rounded">BEST VALUE</span>}
-                      </div>
-                      <div className="text-2xl font-black text-white font-mono">${cost.toFixed(2)}</div>
-                      <div className="text-xs text-slate-400 mt-2">/month</div>
+                    )}
+                    {p === recommendations.scalable && (
+                        <div className="absolute -top-3 right-4 bg-indigo-500 text-white text-[10px] font-black px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
+                            <Shield className="w-3 h-3" />
+                            MOST SCALABLE
+                        </div>
+                    )}
+
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="text-sm font-black uppercase tracking-widest" style={{ color: config.brandColor }}>{config.name}</div>
+                        <div className={`p-1 rounded-full transition-colors ${isSelected ? 'bg-indigo-500 text-white' : 'bg-white/10 text-slate-500'}`}>
+                            <Check className={`w-3 h-3 ${isSelected ? 'opacity-100' : 'opacity-0'}`} />
+                        </div>
                     </div>
-                  );
-                })}
+                    
+                    <div className="space-y-1">
+                        <div className="text-3xl font-black text-white font-mono">{fmt(pCosts.total)}<span className="text-xs text-slate-500 ml-1">/mo</span></div>
+                        <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                            ${pCosts.baseCost.toFixed(2)} Base + ${pCosts.aiCost.toFixed(2)} AI
+                        </div>
+                    </div>
+
+                    {isCheapest && platform !== p && (
+                        <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-2 text-[11px] text-green-400 font-bold">
+                            <Sparkles className="w-3.5 h-3.5" />
+                            Save {fmt(recommendations.savings)}/mo
+                        </div>
+                    )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Main Configurator */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Left: Controls */}
+            <div className="lg:col-span-8 space-y-8">
+              <div className="bg-white/5 border border-white/10 rounded-3xl p-8 space-y-8">
+                <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                    <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                        <Zap className="w-5 h-5 text-indigo-400" />
+                        Workflow Parameters
+                    </h2>
+                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Adjust to your scale</div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+                    <div className="space-y-6">
+                        <div className="flex items-center gap-2">
+                            <Slider
+                                label="Monthly Executions"
+                                value={executions}
+                                min={100}
+                                max={100000}
+                                step={100}
+                                onChange={setExecutions}
+                                unit="runs"
+                            />
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Info className="w-3.5 h-3.5 text-slate-600 hover:text-slate-400 cursor-help mt-6" />
+                                </TooltipTrigger>
+                                <TooltipContent className="bg-slate-900 border-white/10 text-xs p-3 max-w-[200px]">
+                                    How many times the entire workflow runs in a single month.
+                                </TooltipContent>
+                            </Tooltip>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <Slider
+                                label="Steps Per Execution"
+                                value={stepsPerExec}
+                                min={1}
+                                max={30}
+                                onChange={setStepsPerExec}
+                            />
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Info className="w-3.5 h-3.5 text-slate-600 hover:text-slate-400 cursor-help mt-6" />
+                                </TooltipTrigger>
+                                <TooltipContent className="bg-slate-900 border-white/10 text-xs p-3 max-w-[200px]">
+                                    <p className="font-bold mb-1">What counts as a step?</p>
+                                    {platformConfig.tooltip}
+                                </TooltipContent>
+                            </Tooltip>
+                        </div>
+                    </div>
+
+                    <div className="space-y-6">
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-slate-300 uppercase tracking-widest block mb-2">Primary AI Model</label>
+                            <Select value={aiModel} onValueChange={setAiModel}>
+                                <SelectTrigger className="w-full bg-white/5 border-white/10 h-11 text-sm">
+                                    <SelectValue placeholder="Select model" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-900 border-white/10">
+                                    {AI_MODELS.map(m => (
+                                        <SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {aiModel !== "none" && (
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">AI Calls / Run</label>
+                                    <Input 
+                                        type="number" 
+                                        value={aiCalls} 
+                                        onChange={(e) => setAiCalls(Number(e.target.value))}
+                                        className="bg-white/5 border-white/10 h-10 text-sm font-mono"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Tokens / Call</label>
+                                    <Input 
+                                        type="number" 
+                                        value={tokensPerCall} 
+                                        onChange={(e) => setTokensPerCall(Number(e.target.value))}
+                                        className="bg-white/5 border-white/10 h-10 text-sm font-mono"
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
               </div>
-            )}
+            </div>
+
+            {/* Right: Summary Card */}
+            <div className="lg:col-span-4 space-y-6">
+                <div className="bg-slate-900 border-2 rounded-3xl p-8 sticky top-6 shadow-2xl transition-all duration-500" style={{ borderColor: platformConfig.brandColor }}>
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{platformConfig.name} Estimate</div>
+                            <div className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[9px] font-bold text-slate-400">MARCH 2026</div>
+                        </div>
+
+                        <div className="space-y-1">
+                            <div className="text-5xl font-black text-white font-mono tracking-tighter">${displayCost.toFixed(2)}</div>
+                            <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Per Month (Avg)</div>
+                        </div>
+
+                        <div className="space-y-4 pt-6 border-t border-white/5">
+                            <div className="flex items-center justify-between text-sm">
+                                <span className="text-slate-400 font-medium">Platform Fees</span>
+                                <span className="text-white font-mono font-bold">{fmt(costs.baseCost)}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                                <span className="text-slate-400 font-medium">AI Token Cost</span>
+                                <span className="text-white font-mono font-bold">{fmt(costs.aiCost)}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-lg font-bold pt-4 border-t border-white/10">
+                                <span className="text-white">Annual Total</span>
+                                <span className="text-indigo-400 font-mono">{fmt(annualBase)}</span>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 pt-6">
+                            <Button 
+                                onClick={copySummary}
+                                className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-wider py-6"
+                            >
+                                {copied ? <Check className="w-4 h-4 mr-2 text-green-400" /> : <Copy className="w-4 h-4 mr-2 text-slate-400" />}
+                                {copied ? "Copied" : "Copy Summary"}
+                            </Button>
+                            <Button 
+                                variant="outline"
+                                className="border-indigo-500/30 bg-indigo-500/5 hover:bg-indigo-500/10 text-indigo-400 font-bold text-xs uppercase tracking-wider py-6"
+                            >
+                                <FileDown className="w-4 h-4 mr-2" />
+                                PDF
+                            </Button>
+                        </div>
+
+                        <p className="text-[9px] text-slate-600 leading-relaxed text-center">
+                            * {platformConfig.name} billing unit: {platformConfig.billingUnit}s. AI costs estimated on typical input/output ratios. 
+                            {isAnnual ? ' Annual pricing includes standard platform prepay discounts.' : ''}
+                        </p>
+                    </div>
+                </div>
+                
+                {/* Insights Panel */}
+                <div className="bg-indigo-500/5 border border-indigo-500/20 rounded-3xl p-6 space-y-4">
+                    <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-2">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        Platform Insights
+                    </h3>
+                    <div className="space-y-3">
+                        <div className="text-sm text-slate-300 leading-relaxed">
+                            💡 {platform === "zapier" ? "Zapier is great for simple connections, but at this volume, n8n Cloud would save you significant platform fees." : ""}
+                            {platform === "make" ? "Your multi-step workflow uses many operations. Monitor your Make usage closely as it can scale costs faster than executions." : ""}
+                            {platform === "n8n" ? "Your workflow is well-optimized for n8n's execution-based billing. High step counts don't increase your platform bill here." : ""}
+                        </div>
+                    </div>
+                </div>
+            </div>
           </div>
         </div>
       </div>
+      </TooltipProvider>
     </div>
   );
 }
