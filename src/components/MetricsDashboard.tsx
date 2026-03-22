@@ -288,7 +288,7 @@ export default function MetricsDashboard() {
                             <><Check className="w-4 h-4" /> Link copied!</>
                         ) : (
                             <div className="flex items-center gap-2">
-                              {(typeof navigator !== "undefined" && navigator.share && window.innerWidth < 768) ? (
+                              {(typeof navigator !== "undefined" && "share" in navigator && window.innerWidth < 768) ? (
                                 <><Share2 className="w-4 h-4" /> Share estimate</>
                               ) : (
                                 <><Link2 className="w-4 h-4" /> Copy share link</>
