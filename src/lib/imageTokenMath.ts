@@ -13,7 +13,8 @@ export interface ImageTokenResult {
 export function calculateImageTokens(
     width: number,
     height: number,
-    model: ModelConfig
+    model: ModelConfig,
+    detail: "low" | "high" = "high"
 ): ImageTokenResult {
     const strategy = model.visionPricing?.strategy;
 
@@ -27,7 +28,18 @@ export function calculateImageTokens(
     }
 
     if (strategy === "openai-tiles") {
-        // OpenAI Low/High Res Logic (simplified high-res)
+        const baseTokens = model.visionPricing?.baseTokens || 85;
+
+        if (detail === "low") {
+            return {
+                tokens: baseTokens,
+                tiles: 0,
+                scaledWidth: width > 512 || height > 512 ? 512 : width,
+                scaledHeight: width > 512 || height > 512 ? 512 : height,
+            };
+        }
+
+        // OpenAI High Res Logic (simplified high-res)
         // 1. Scale image to fit within a 2048 x 2048 square
         let scaledW = width;
         let scaledH = height;
@@ -51,7 +63,6 @@ export function calculateImageTokens(
         const tilesH = Math.ceil(scaledH / 512);
         const totalTiles = tilesW * tilesH;
 
-        const baseTokens = model.visionPricing?.baseTokens || 85;
         const tileTokens = model.visionPricing?.tileTokens || 170;
 
         return {
