@@ -1,15 +1,16 @@
 "use client";
 
 import React, { useState, useCallback, useMemo, useId } from "react";
-import { Plus, Trash2, Zap, Brain, Trophy, TrendingDown, Copy, Check, ChevronUp, ChevronDown, ChevronsUpDown, Clock } from "lucide-react";
+import { Plus, Trash2, Zap, Brain, Trophy, TrendingDown, Copy, Check, ChevronUp, ChevronDown, ChevronsUpDown, Clock, Search, Filter, Sparkles, Calculator, ArrowRight, MousePointer2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import Link from "next/link";
 
 // ─── 2026 Pricing Data with Context Windows ────────────────────────────────────
 
-const PRICING_DATA = {
-    last_updated: "March 9, 2026",
+export const PRICING_DATA = {
+    last_updated: "March 22, 2026",
     providers: [
         {
             name: "OpenAI",
@@ -120,9 +121,9 @@ function calcCosts(
 function getHeatmapColor(value: number, min: number, max: number): string {
     if (min === max) return "transparent";
     const ratio = (value - min) / (max - min);
-    if (ratio <= 0.33) return "rgba(0, 255, 213, 0.15)"; // Cyan for low
-    if (ratio >= 0.67) return "rgba(255, 80, 80, 0.15)"; // Red for high
-    return "transparent"; // Neutral for mid-range
+    if (ratio <= 0.33) return "rgba(34, 197, 94, 0.15)"; // Green for low (cheap)
+    if (ratio >= 0.67) return "rgba(239, 68, 68, 0.15)"; // Red for high (expensive)
+    return "transparent";
 }
 
 function getRealCostEstimate(inputRate: number, outputRate: number): string {
@@ -292,7 +293,14 @@ export default function ModelComparisonTable() {
     const [sortColumn, setSortColumn] = useState<SortColumn>(null);
     const [sortDir, setSortDir] = useState<SortDirection>(null);
     const [activeProviderFilter, setActiveProviderFilter] = useState<string>("All");
+    const [searchQuery, setSearchQuery] = useState("");
+    const [activeHighlight, setActiveHighlight] = useState<string | null>(null);
     const [copiedId, setCopiedId] = useState<string | null>(null);
+
+    // Recommendation State
+    const [recStep, setRecStep] = useState(0);
+    const [recAnswers, setRecAnswers] = useState<Record<string, string>>({});
+    const [showRecResult, setShowRecResult] = useState(false);
 
     const inputTokens = useMemo(() => {
         if (inputPreset === "custom") return parseInt(customInput) || 0;
@@ -374,6 +382,31 @@ export default function ModelComparisonTable() {
             data = data.filter((item) => item.provider === activeProviderFilter);
         }
 
+        // Filter by search
+        if (searchQuery) {
+            const q = searchQuery.toLowerCase();
+            data = data.filter(
+                (item) =>
+                    item.name.toLowerCase().includes(q) ||
+                    item.provider.toLowerCase().includes(q)
+            );
+        }
+
+        // Filter by highlights
+        if (activeHighlight) {
+            if (activeHighlight === "Cheapest") {
+                const minInput = Math.min(...data.map(m => m.input_1m));
+                data = data.filter(m => m.input_1m <= minInput * 1.5);
+            } else if (activeHighlight === "Fastest") {
+                data = data.filter(m => getModelTier(m.name) === "speed");
+            } else if (activeHighlight === "Intelligence") {
+                data = data.filter(m => getModelTier(m.name) === "intelligence");
+            } else if (activeHighlight === "Max Context") {
+                const maxCtx = Math.max(...data.map(m => m.maxContext || 0));
+                data = data.filter(m => (m.maxContext || 0) >= maxCtx * 0.8);
+            }
+        }
+
         // Sort
         if (sortColumn && sortDir) {
             data.sort((a, b) => {
@@ -398,10 +431,11 @@ export default function ModelComparisonTable() {
         }
 
         return data;
-    }, [activeProviderFilter, sortColumn, sortDir]);
+    }, [activeProviderFilter, searchQuery, activeHighlight, sortColumn, sortDir]);
 
     // Calculate heat map values
     const heatmapStats = useMemo(() => {
+        if (pricingTableData.length === 0) return { inputMin: 0, inputMax: 1, outputMin: 0, outputMax: 1, contextMax: 1 };
         const inputs = pricingTableData.map((m) => m.input_1m);
         const outputs = pricingTableData.map((m) => m.output_1m);
         return {
@@ -412,6 +446,41 @@ export default function ModelComparisonTable() {
             contextMax: Math.max(...pricingTableData.map((m) => m.maxContext || 200000)),
         };
     }, [pricingTableData]);
+
+    // Recommendation Logic
+    const recommendedModel = useMemo(() => {
+        if (!showRecResult) return null;
+        const { useCase, volume, budget } = recAnswers;
+        
+        let targetProvider = "";
+        let targetModel = "";
+
+        if (useCase === "Coding") {
+            if (budget === "High") {
+                targetProvider = "Anthropic";
+                targetModel = "Claude 4.6 Opus";
+            } else {
+                targetProvider = "DeepSeek";
+                targetModel = "DeepSeek V3.2";
+            }
+        } else if (useCase === "Creative") {
+            targetProvider = "Anthropic";
+            targetModel = "Claude 4.6 Sonnet";
+        } else { // General
+            if (volume === "High") {
+                targetProvider = "OpenAI";
+                targetModel = "GPT-5.2 (Flagship)";
+            } else {
+                targetProvider = "OpenAI";
+                targetModel = "GPT-5 Nano";
+            }
+        }
+
+        const provider = PRICING_DATA.providers.find(p => p.name === targetProvider);
+        const model = provider?.models.find(m => m.name === targetModel);
+        
+        return model ? { ...model, provider: targetProvider } : null;
+    }, [showRecResult, recAnswers]);
 
     // Find best value in filtered set
     const bestValueId = useMemo(() => {
@@ -449,109 +518,201 @@ export default function ModelComparisonTable() {
     const providerList = ["All", ...new Set(PRICING_DATA.providers.map((p) => p.name))];
 
     return (
-        <div className="space-y-6">
-            {/* ── Global Controls ── */}
-            <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-5 shadow-xl space-y-5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                    <h2 className="text-sm font-semibold text-slate-100 tracking-wide uppercase">
-                        Global Token Volume
-                    </h2>
-                    <button
-                        onClick={applyCommonPreset}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-400 hover:bg-amber-500/20 hover:border-amber-400/50 transition-all"
-                    >
-                        <TrendingDown className="w-3.5 h-3.5" />
-                        Common Use Case
-                        <span className="hidden sm:inline text-amber-300/60">
-                            (500 in / 200 out)
-                        </span>
-                    </button>
+        <div className="space-y-12">
+            {/* ── AI Model Matchmaker ── */}
+            <div className="space-y-4">
+                <div className="space-y-1 ml-1">
+                    <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-widest">AI Model Matchmaker</h3>
+                    <p className="text-sm text-slate-400">Tell us your job, we&apos;ll find your best-fit models. Choose your use case (General, Coding, or Creative) to get personalized recommendations.</p>
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    {/* Input tokens */}
-                    <div className="space-y-2">
-                        <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">
-                            Input Tokens
-                        </label>
-                        <div className="flex flex-wrap gap-1.5">
-                            {(["1K", "10K", "100K", "1M"] as const).map((p) => (
-                                <PresetButton
-                                    key={p}
-                                    label={p}
-                                    active={inputPreset === p}
-                                    onClick={() => setInputPreset(p)}
-                                />
-                            ))}
-                            <PresetButton
-                                label="Custom"
-                                active={inputPreset === "custom"}
-                                onClick={() => setInputPreset("custom")}
-                            />
+                <div className="rounded-2xl border border-indigo-500/30 bg-indigo-500/5 backdrop-blur-md p-6 shadow-xl relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <Sparkles className="w-12 h-12 text-indigo-400" />
+                    </div>
+                    
+                    {!showRecResult ? (
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2 text-indigo-400">
+                                <Brain className="w-5 h-5" />
+                                <h3 className="font-bold text-lg">AI Model Matchmaker</h3>
+                            </div>
+                            
+                            {recStep === 0 && (
+                                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                                    <p className="text-slate-300">What is your primary use case?</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {["General", "Coding", "Creative"].map(v => (
+                                            <Button key={v} variant="outline" size="sm" onClick={() => { setRecAnswers({...recAnswers, useCase: v}); setRecStep(1); }} className="bg-white/5 border-white/10 hover:bg-indigo-500/20">{v}</Button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            {recStep === 1 && (
+                                <div className="space-y-4 animate-in fade-in slide-in-from-left-2">
+                                    <p className="text-slate-300">What is your expected message volume?</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {["Low", "Medium", "High"].map(v => (
+                                            <Button key={v} variant="outline" size="sm" onClick={() => { setRecAnswers({...recAnswers, volume: v}); setRecStep(2); }} className="bg-white/5 border-white/10 hover:bg-indigo-500/20">{v}</Button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            {recStep === 2 && (
+                                <div className="space-y-4 animate-in fade-in slide-in-from-left-2">
+                                    <p className="text-slate-300">Prioritize performance or cost?</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {["Cost-First", "High-Performance"].map(v => (
+                                            <Button key={v} variant="outline" size="sm" onClick={() => { setRecAnswers({...recAnswers, budget: v === "Cost-First" ? "Low" : "High"}); setShowRecResult(true); }} className="bg-white/5 border-white/10 hover:bg-indigo-500/20">{v}</Button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                        {inputPreset === "custom" && (
-                            <Input
-                                type="number"
-                                min="0"
-                                value={customInput}
-                                onChange={(e) => setCustomInput(e.target.value)}
-                                placeholder="e.g. 50000"
-                                className="bg-white/5 border-white/10 text-slate-100 h-8 text-sm focus-visible:ring-indigo-500"
-                            />
-                        )}
-                        <p className="text-xs text-slate-500">
-                            ={" "}
-                            <span className="text-slate-300 font-mono">
-                                {inputTokens.toLocaleString()}
-                            </span>{" "}
-                            tokens
-                        </p>
+                    ) : (
+                        <div className="flex flex-col md:flex-row items-center gap-6 animate-in zoom-in-95 duration-300">
+                            <div className="flex-1 space-y-2 text-center md:text-left">
+                                <div className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500 px-2.5 py-0.5 text-[11px] font-bold text-white mb-2 uppercase tracking-wider">
+                                    Recommended Match
+                                </div>
+                                <h4 className="text-2xl font-bold text-white">{recommendedModel?.name}</h4>
+                                <p className="text-slate-400 text-sm">Best for {recAnswers.useCase} with {recAnswers.volume} volume.</p>
+                            </div>
+                            <div className="flex flex-wrap gap-3">
+                                <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => { setRecStep(0); setShowRecResult(false); }}
+                                    className="bg-white/5 border-white/10"
+                                >
+                                    Start Over
+                                </Button>
+                                {recommendedModel && (
+                                    <Link href={`/?model=${encodeURIComponent(recommendedModel.name)}`}>
+                                        <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2">
+                                            Use in Calculator
+                                            <ArrowRight className="w-4 h-4" />
+                                        </Button>
+                                    </Link>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* ── Global Token Volume ── */}
+            <div className="space-y-4">
+                <div className="space-y-1 ml-1">
+                    <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-widest">Global Token Volume</h3>
+                    <p className="text-sm text-slate-400">Set your exact token needs. Pick input/output volumes or use common scenarios to calculate real costs for your workload.</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-5 shadow-xl space-y-5">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                        <h2 className="text-sm font-semibold text-slate-100 tracking-wide uppercase">
+                            Global Token Volume
+                        </h2>
+                        <button
+                            onClick={applyCommonPreset}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-400 hover:bg-amber-500/20 hover:border-amber-400/50 transition-all"
+                        >
+                            <TrendingDown className="w-3.5 h-3.5" />
+                            Common Use Case
+                            <span className="hidden sm:inline text-amber-300/60">
+                                (500 in / 200 out)
+                            </span>
+                        </button>
                     </div>
 
-                    {/* Output tokens */}
-                    <div className="space-y-2">
-                        <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">
-                            Output Tokens
-                        </label>
-                        <div className="flex flex-wrap gap-1.5">
-                            {(["1K", "10K", "100K", "1M"] as const).map((p) => (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        {/* Input tokens */}
+                        <div className="space-y-2">
+                            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+                                Input Tokens
+                            </label>
+                            <div className="flex flex-wrap gap-1.5">
+                                {(["1K", "10K", "100K", "1M"] as const).map((p) => (
+                                    <PresetButton
+                                        key={p}
+                                        label={p}
+                                        active={inputPreset === p}
+                                        onClick={() => setInputPreset(p)}
+                                    />
+                                ))}
                                 <PresetButton
-                                    key={p}
-                                    label={p}
-                                    active={outputPreset === p}
-                                    onClick={() => setOutputPreset(p)}
+                                    label="Custom"
+                                    active={inputPreset === "custom"}
+                                    onClick={() => setInputPreset("custom")}
                                 />
-                            ))}
-                            <PresetButton
-                                label="Custom"
-                                active={outputPreset === "custom"}
-                                onClick={() => setOutputPreset("custom")}
-                            />
+                            </div>
+                            {inputPreset === "custom" && (
+                                <Input
+                                    type="number"
+                                    min="0"
+                                    value={customInput}
+                                    onChange={(e) => setCustomInput(e.target.value)}
+                                    placeholder="e.g. 50000"
+                                    className="bg-white/5 border-white/10 text-slate-100 h-8 text-sm focus-visible:ring-indigo-500"
+                                />
+                            )}
+                            <p className="text-xs text-slate-500">
+                                ={" "}
+                                <span className="text-slate-300 font-mono">
+                                    {inputTokens.toLocaleString()}
+                                </span>{" "}
+                                tokens
+                            </p>
                         </div>
-                        {outputPreset === "custom" && (
-                            <Input
-                                type="number"
-                                min="0"
-                                value={customOutput}
-                                onChange={(e) => setCustomOutput(e.target.value)}
-                                placeholder="e.g. 2000"
-                                className="bg-white/5 border-white/10 text-slate-100 h-8 text-sm focus-visible:ring-indigo-500"
-                            />
-                        )}
-                        <p className="text-xs text-slate-500">
-                            ={" "}
-                            <span className="text-slate-300 font-mono">
-                                {outputTokens.toLocaleString()}
-                            </span>{" "}
-                            tokens
-                        </p>
+
+                        {/* Output tokens */}
+                        <div className="space-y-2">
+                            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+                                Output Tokens
+                            </label>
+                            <div className="flex flex-wrap gap-1.5">
+                                {(["1K", "10K", "100K", "1M"] as const).map((p) => (
+                                    <PresetButton
+                                        key={p}
+                                        label={p}
+                                        active={outputPreset === p}
+                                        onClick={() => setOutputPreset(p)}
+                                    />
+                                ))}
+                                <PresetButton
+                                    label="Custom"
+                                    active={outputPreset === "custom"}
+                                    onClick={() => setOutputPreset("custom")}
+                                />
+                            </div>
+                            {outputPreset === "custom" && (
+                                <Input
+                                    type="number"
+                                    min="0"
+                                    value={customOutput}
+                                    onChange={(e) => setCustomOutput(e.target.value)}
+                                    placeholder="e.g. 2000"
+                                    className="bg-white/5 border-white/10 text-slate-100 h-8 text-sm focus-visible:ring-indigo-500"
+                                />
+                            )}
+                            <p className="text-xs text-slate-500">
+                                ={" "}
+                                <span className="text-slate-300 font-mono">
+                                    {outputTokens.toLocaleString()}
+                                </span>{" "}
+                                tokens
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* ── Comparison Rows ── */}
-            <div className="space-y-3">
-                {rows.map((row, idx) => {
+            {/* ── Best Value Highlight ── */}
+            <div className="space-y-4">
+                <div className="space-y-1 ml-1">
+                    <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-widest">Best Value Highlight</h3>
+                    <p className="text-sm text-slate-400">Instant cost winner. See the top 2 models side-by-side with full cost breakdowns—input, output, and total—for your volume.</p>
+                </div>
+                <div className="space-y-3">
+                    {rows.map((row, idx) => {
                     const providerData = PRICING_DATA.providers.find(
                         (p) => p.name === row.provider
                     );
@@ -750,233 +911,276 @@ export default function ModelComparisonTable() {
                 Add Model for Comparison
             </Button>
 
-            {/* ── Pricing Reference Table with Enhancements ── */}
-            {rowCosts.some((c) => c.valid) && (
+            {/* ── Full Pricing Reference Table ── */}
+            <div className="space-y-4">
+                <div className="space-y-1 ml-1">
+                    <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-widest">Full Pricing Reference Table</h3>
+                    <p className="text-sm text-slate-400">Browse all models at once. Filter by provider, search by name, sort by price/speed/intelligence, and view context windows to compare every option.</p>
+                </div>
                 <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md overflow-hidden space-y-4 p-5">
                     <div className="space-y-4">
                         {/* Header */}
-                        <div>
-                            <h3 className="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
-                                <span>Full Pricing Reference</span>
-                                <Clock className="w-4 h-4 text-slate-500" />
-                            </h3>
+                        <div className="space-y-6">
+                            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                                <div className="space-y-1">
+                                    <h3 className="text-sm font-semibold text-slate-300 flex items-center gap-2">
+                                        <span>Full Pricing Reference</span>
+                                        <Clock className="w-4 h-4 text-slate-500" />
+                                    </h3>
+                                    <div className="text-xs font-mono text-slate-600 flex items-center gap-1.5">
+                                        <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                                        Prices last verified: {PRICING_DATA.last_updated}
+                                    </div>
+                                </div>
 
-                            {/* Prices Last Verified */}
-                            <div className="text-xs font-mono text-slate-600 flex items-center gap-1.5 mb-4">
-                                <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                                Prices last verified: {PRICING_DATA.last_updated}
+                                {/* Search & Filter Bar */}
+                                <div className="space-y-2 flex-1 max-w-xl">
+                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Search & Filter Bar</p>
+                                    <div className="flex flex-col sm:flex-row gap-3">
+                                        <div className="relative flex-1">
+                                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                            <Input 
+                                                placeholder="Search models or providers..." 
+                                                className="pl-9 bg-white/5 border-white/10 h-9 text-sm focus-visible:ring-indigo-500"
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                            />
+                                        </div>
+                                        <Select value={activeProviderFilter} onValueChange={setActiveProviderFilter}>
+                                            <SelectTrigger className="w-full sm:w-[160px] bg-white/5 border-white/10 h-9 text-sm">
+                                                <Filter className="w-3.5 h-3.5 mr-2 text-slate-500" />
+                                                <SelectValue placeholder="Provider" />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-slate-900 border-white/10">
+                                                {providerList.map(p => (
+                                                    <SelectItem key={p} value={p}>{p}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <p className="text-[10px] text-slate-500 ml-1">Find fast. Search model names or providers, then filter results to narrow down your options in seconds.</p>
+                                </div>
                             </div>
 
-                            {/* Provider Filter Pills */}
-                            <div className="flex flex-wrap gap-2 mb-4">
-                                {providerList.map((provider) => (
-                                    <ProviderPill
-                                        key={provider}
-                                        label={provider}
-                                        active={activeProviderFilter === provider}
-                                        onClick={() => setActiveProviderFilter(provider)}
-                                    />
-                                ))}
+                            {/* Quick Filters/Highlights */}
+                            <div className="space-y-3 border-t border-white/5 pt-4">
+                                <div className="flex flex-wrap gap-2">
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest self-center mr-2">Quick Filters:</span>
+                                    {["Cheapest", "Fastest", "Intelligence", "Max Context"].map(h => (
+                                        <button
+                                            key={h}
+                                            onClick={() => setActiveHighlight(activeHighlight === h ? null : h)}
+                                            className={`px-3 py-1 rounded-full text-[11px] font-bold border transition-all flex items-center gap-1.5 ${
+                                                activeHighlight === h
+                                                    ? "bg-indigo-500/20 border-indigo-500 text-indigo-400 shadow-sm shadow-indigo-500/10"
+                                                    : "bg-white/5 border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-300"
+                                            }`}
+                                        >
+                                            {h === "Cheapest" && <TrendingDown className="w-3 h-3" />}
+                                            {h === "Fastest" && <Zap className="w-3 h-3" />}
+                                            {h === "Intelligence" && <Brain className="w-3 h-3" />}
+                                            {h === "Max Context" && <MousePointer2 className="w-3 h-3" />}
+                                            {h}
+                                        </button>
+                                    ))}
+                                </div>
+                                <p className="text-[10px] text-slate-500">Jump to what matters. Tap Cheapest, Fastest, Intelligence, or Max Context badges to instantly surface models that match your priority.</p>
                             </div>
                         </div>
 
-                        {/* Desktop Table */}
-                        <div className="hidden md:block overflow-x-auto">
-                            <table className="w-full text-xs text-left">
-                                <thead>
-                                    <tr className="border-b border-white/10">
-                                        <th className="pb-3 pr-4 text-slate-400">
+                    {/* Desktop Table */}
+                    <div className="hidden md:block overflow-x-auto max-h-[600px] overflow-y-auto custom-scrollbar">
+                        <table className="w-full text-xs text-left border-separate border-spacing-0">
+                            <thead className="sticky top-0 z-10">
+                                <tr className="bg-slate-900/95 backdrop-blur-sm shadow-sm">
+                                    <th className="py-4 pr-4 pl-2 text-slate-400 border-b border-white/10 first:rounded-tl-lg">
+                                        <SortHeader
+                                            label="Provider"
+                                            column="provider"
+                                            currentSort={sortColumn}
+                                            currentDir={sortDir}
+                                            onClick={() => handleSort("provider")}
+                                        />
+                                    </th>
+                                    <th className="py-4 pr-4 text-slate-400 border-b border-white/10">
+                                        <SortHeader
+                                            label="Model"
+                                            column="model"
+                                            currentSort={sortColumn}
+                                            currentDir={sortDir}
+                                            onClick={() => handleSort("model")}
+                                        />
+                                    </th>
+                                    <th className="py-4 pr-4 text-right text-slate-400 border-b border-white/10">
+                                        <div className="flex items-center justify-end">
                                             <SortHeader
-                                                label="Provider"
-                                                column="provider"
+                                                label="Input / 1M"
+                                                column="input"
                                                 currentSort={sortColumn}
                                                 currentDir={sortDir}
-                                                onClick={() => handleSort("provider")}
+                                                onClick={() => handleSort("input")}
                                             />
-                                        </th>
-                                        <th className="pb-3 pr-4 text-slate-400">
+                                            <CostTooltip inputRate={1} outputRate={0} />
+                                        </div>
+                                    </th>
+                                    <th className="py-4 pr-4 text-right text-slate-400 border-b border-white/10">
+                                        <div className="flex items-center justify-end">
                                             <SortHeader
-                                                label="Model"
-                                                column="model"
+                                                label="Output / 1M"
+                                                column="output"
                                                 currentSort={sortColumn}
                                                 currentDir={sortDir}
-                                                onClick={() => handleSort("model")}
+                                                onClick={() => handleSort("output")}
                                             />
-                                        </th>
-                                        <th className="pb-3 pr-4 text-right text-slate-400">
-                                            <div className="flex items-center justify-end">
-                                                <SortHeader
-                                                    label="Input / 1M"
-                                                    column="input"
-                                                    currentSort={sortColumn}
-                                                    currentDir={sortDir}
-                                                    onClick={() => handleSort("input")}
-                                                />
-                                                <CostTooltip inputRate={1} outputRate={0} />
-                                            </div>
-                                        </th>
-                                        <th className="pb-3 pr-4 text-right text-slate-400">
-                                            <div className="flex items-center justify-end">
-                                                <SortHeader
-                                                    label="Output / 1M"
-                                                    column="output"
-                                                    currentSort={sortColumn}
-                                                    currentDir={sortDir}
-                                                    onClick={() => handleSort("output")}
-                                                />
-                                                <CostTooltip inputRate={0} outputRate={1} />
-                                            </div>
-                                        </th>
-                                        <th className="pb-3 text-right text-slate-400">
-                                            <SortHeader
-                                                label="Context Window"
-                                                column="context"
-                                                currentSort={sortColumn}
-                                                currentDir={sortDir}
-                                                onClick={() => handleSort("context")}
-                                            />
-                                        </th>
-                                        <th className="pb-3 text-right text-slate-400">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {pricingTableData.map((model, idx) => {
-                                        const tier = getModelTier(model.name);
-                                        const isBest = model.id === bestValueId;
-                                        const inputBg = getHeatmapColor(model.input_1m, heatmapStats.inputMin, heatmapStats.inputMax);
-                                        const outputBg = getHeatmapColor(model.output_1m, heatmapStats.outputMin, heatmapStats.outputMax);
+                                            <CostTooltip inputRate={0} outputRate={1} />
+                                        </div>
+                                    </th>
+                                    <th className="py-4 pr-4 text-right text-slate-400 border-b border-white/10">
+                                        <SortHeader
+                                            label="Context"
+                                            column="context"
+                                            currentSort={sortColumn}
+                                            currentDir={sortDir}
+                                            onClick={() => handleSort("context")}
+                                        />
+                                    </th>
+                                    <th className="py-4 pr-2 text-right text-slate-400 border-b border-white/10 last:rounded-tr-lg">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {pricingTableData.map((model, idx) => {
+                                    const tier = getModelTier(model.name);
+                                    const isBest = model.id === bestValueId;
+                                    const inputBg = getHeatmapColor(model.input_1m, heatmapStats.inputMin, heatmapStats.inputMax);
+                                    const outputBg = getHeatmapColor(model.output_1m, heatmapStats.outputMin, heatmapStats.outputMax);
 
-                                        return (
-                                            <tr
-                                                key={model.id}
-                                                className={`border-b border-white/5 hover:bg-white/8 hover:border-l-2 hover:border-l-cyan-400 transition-all ${
-                                                    idx % 2 === 0 ? "bg-white/2" : "bg-white/1"
-                                                } ${isBest ? "bg-cyan-500/8 border-l-2 border-l-cyan-400" : ""}`}
-                                            >
-                                                <td className="py-3 pr-4 text-slate-400">{model.provider}</td>
-                                                <td className="py-3 pr-4 flex items-center gap-2">
-                                                    <span className="text-slate-200">{model.name}</span>
+                                    return (
+                                        <tr
+                                            key={model.id}
+                                            className={`border-b border-white/5 hover:bg-white/5 transition-colors group ${
+                                                idx % 2 === 0 ? "bg-white/[0.01]" : "bg-transparent"
+                                            }`}
+                                        >
+                                            <td className="py-3.5 pr-4 pl-2 text-slate-400 font-medium">{model.provider}</td>
+                                            <td className="py-3.5 pr-4">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-slate-100 font-semibold">{model.name}</span>
                                                     {tier && <TierBadge tier={tier} />}
-                                                    {isBest && (
-                                                        <span className="inline-flex items-center gap-1 rounded-full bg-cyan-500/20 border border-cyan-400 px-1.5 py-0.5 text-[9px] font-semibold text-cyan-400 ml-1">
-                                                            <Trophy className="w-2.5 h-2.5" />
-                                                            Best
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td
-                                                    className="py-3 pr-4 text-right font-mono text-slate-300 transition-colors"
-                                                    style={{ backgroundColor: inputBg }}
-                                                >
-                                                    ${model.input_1m.toFixed(3)}
-                                                </td>
-                                                <td
-                                                    className="py-3 pr-4 text-right font-mono text-slate-300 transition-colors"
-                                                    style={{ backgroundColor: outputBg }}
-                                                >
-                                                    ${model.output_1m.toFixed(3)}
-                                                </td>
-                                                <td className="py-3 pr-4 text-right">
-                                                    <ContextBar value={model.maxContext || 200000} max={heatmapStats.contextMax} />
-                                                </td>
-                                                <td className="py-3 pr-4 text-right">
+                                                </div>
+                                            </td>
+                                            <td
+                                                className="py-3.5 pr-4 text-right font-mono text-slate-200"
+                                                style={{ backgroundColor: inputBg }}
+                                            >
+                                                ${model.input_1m.toFixed(3)}
+                                            </td>
+                                            <td
+                                                className="py-3.5 pr-4 text-right font-mono text-slate-200"
+                                                style={{ backgroundColor: outputBg }}
+                                            >
+                                                ${model.output_1m.toFixed(3)}
+                                            </td>
+                                            <td className="py-3.5 pr-4 text-right">
+                                                <ContextBar value={model.maxContext || 200000} max={heatmapStats.contextMax} />
+                                            </td>
+                                            <td className="py-3.5 pr-2 text-right">
+                                                <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <Link href={`/?model=${encodeURIComponent(model.name)}`}>
+                                                        <button
+                                                            className="p-1.5 rounded bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 transition-colors"
+                                                            title="Use in Calculator"
+                                                        >
+                                                            <Calculator className="w-3.5 h-3.5" />
+                                                        </button>
+                                                    </Link>
                                                     <button
                                                         onClick={() => handleCopyRow(model)}
-                                                        className="inline-flex items-center gap-1.5 p-2 rounded hover:bg-white/10 transition-colors"
-                                                        title="Copy row"
+                                                        className="p-1.5 rounded hover:bg-white/10 text-slate-400 transition-colors"
+                                                        title="Copy Info"
                                                     >
                                                         {copiedId === model.id ? (
-                                                            <Check className="w-4 h-4 text-green-400" />
+                                                            <Check className="w-3.5 h-3.5 text-green-400" />
                                                         ) : (
-                                                            <Copy className="w-4 h-4 text-slate-400 hover:text-cyan-400" />
+                                                            <Copy className="w-3.5 h-3.5" />
                                                         )}
                                                     </button>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* Mobile Card View */}
-                        <div className="md:hidden space-y-3">
-                            {pricingTableData.map((model) => {
-                                const tier = getModelTier(model.name);
-                                const isBest = model.id === bestValueId;
-
-                                return (
-                                    <div
-                                        key={model.id}
-                                        className={`rounded-lg border p-3.5 space-y-2.5 transition-all ${
-                                            isBest
-                                                ? "border-cyan-400/50 bg-cyan-500/10"
-                                                : "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/8"
-                                        }`}
-                                    >
-                                        {/* Header */}
-                                        <div className="flex items-start justify-between gap-2">
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <span className="text-xs font-semibold text-slate-400 uppercase">
-                                                        {model.provider}
-                                                    </span>
-                                                    <span className="inline-flex items-center rounded-full bg-slate-700 px-1.5 py-0.5 text-[10px] font-medium text-slate-300">
-                                                        Client
-                                                    </span>
                                                 </div>
-                                                <div className="flex items-center gap-2 flex-wrap">
-                                                    <h4 className="font-semibold text-slate-100">{model.name}</h4>
-                                                    {tier && <TierBadge tier={tier} />}
-                                                    {isBest && (
-                                                        <span className="inline-flex items-center gap-1 rounded-full bg-cyan-500/20 border border-cyan-400 px-1.5 py-0.5 text-[9px] font-semibold text-cyan-400">
-                                                            <Trophy className="w-2.5 h-2.5" />
-                                                            Best
-                                                        </span>
-                                                    )}
-                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Mobile Card View - Enhanced */}
+                    <div className="md:hidden space-y-4">
+                        {pricingTableData.map((model) => {
+                            const tier = getModelTier(model.name);
+                            return (
+                                <div
+                                    key={model.id}
+                                    className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-4 hover:border-indigo-500/30 transition-colors"
+                                >
+                                    <div className="flex justify-between items-start">
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider bg-indigo-500/10 px-1.5 py-0.5 rounded">
+                                                    {model.provider}
+                                                </span>
+                                                {tier && <TierBadge tier={tier} />}
                                             </div>
-                                            <button
-                                                onClick={() => handleCopyRow(model)}
-                                                className="p-1.5 rounded hover:bg-white/10 transition-colors flex-shrink-0"
-                                                title="Copy row"
-                                            >
-                                                {copiedId === model.id ? (
-                                                    <Check className="w-4 h-4 text-green-400" />
-                                                ) : (
-                                                    <Copy className="w-4 h-4 text-slate-400" />
-                                                )}
-                                            </button>
+                                            <h4 className="font-bold text-slate-100">{model.name}</h4>
                                         </div>
+                                        <button
+                                            onClick={() => handleCopyRow(model)}
+                                            className="p-2 rounded bg-white/5 text-slate-400"
+                                        >
+                                            {copiedId === model.id ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                                        </button>
+                                    </div>
 
-                                        {/* Cost Details */}
-                                        <div className="space-y-2 pt-2 border-t border-white/10">
-                                            <div className="flex justify-between items-center text-xs">
-                                                <span className="text-slate-400">Input</span>
-                                                <span className="font-mono text-slate-200">
-                                                    ${model.input_1m.toFixed(3)}/M tokens
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between items-center text-xs">
-                                                <span className="text-slate-400">Output</span>
-                                                <span className="font-mono text-slate-200">
-                                                    ${model.output_1m.toFixed(3)}/M tokens
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between items-center text-xs">
-                                                <span className="text-slate-400">Context</span>
-                                                <span className="font-mono text-slate-200">
-                                                    {formatContext(model.maxContext || 200000)}
-                                                </span>
-                                            </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="bg-white/5 rounded-lg p-2.5 space-y-0.5 border border-white/5">
+                                            <span className="text-[10px] text-slate-500 uppercase font-bold">Input / 1M</span>
+                                            <p className="font-mono text-sm text-indigo-300">${model.input_1m.toFixed(3)}</p>
+                                        </div>
+                                        <div className="bg-white/5 rounded-lg p-2.5 space-y-0.5 border border-white/5">
+                                            <span className="text-[10px] text-slate-500 uppercase font-bold">Output / 1M</span>
+                                            <p className="font-mono text-sm text-indigo-300">${model.output_1m.toFixed(3)}</p>
                                         </div>
                                     </div>
-                                );
-                            })}
-                        </div>
+
+                                    <div className="flex items-center justify-between gap-4 pt-2 border-t border-white/5">
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] text-slate-500 uppercase font-bold">Context Window</span>
+                                            <span className="text-xs text-slate-300 font-mono">{formatContext(model.maxContext || 200000)}</span>
+                                        </div>
+                                        <Link href={`/?model=${encodeURIComponent(model.name)}`} className="flex-1 max-w-[160px]">
+                                            <Button size="sm" variant="outline" className="w-full h-9 text-xs border-indigo-500/30 hover:bg-indigo-500/10 text-indigo-400 gap-2">
+                                                Use in Calculator
+                                                <ArrowRight className="w-3 h-3" />
+                                            </Button>
+                                        </Link>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
+                    
+                    {pricingTableData.length === 0 && (
+                        <div className="py-20 text-center space-y-4">
+                            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/5 text-slate-600">
+                                <Search className="w-6 h-6" />
+                            </div>
+                            <p className="text-slate-500 text-sm">No models found matching your filters.</p>
+                            <Button variant="link" onClick={() => { setSearchQuery(""); setActiveProviderFilter("All"); setActiveHighlight(null); }} className="text-indigo-400">Clear all filters</Button>
+                        </div>
+                    )}
                 </div>
-            )}
+            </div>
         </div>
+    </div>
+</div>
     );
 }

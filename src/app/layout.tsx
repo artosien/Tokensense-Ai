@@ -19,6 +19,11 @@ export const metadata: Metadata = {
     "Estimate LLM API costs before you send a request. Tokensense-Ai is a free, client-side token cost calculator for GPT-4o, Claude, Gemini, and more. No account needed.",
   keywords: "LLM token cost calculator, token cost estimator, GPT-4o pricing, Claude API cost, AI token counter, OpenAI token calculator, prompt token count, LLM API pricing tool",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
   openGraph: {
     title: "Tokensense-Ai - Free LLM Token Cost Calculator",
     description:

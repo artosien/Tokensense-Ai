@@ -21,22 +21,22 @@ export default function ComparisonPage() {
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-gradient-to-b from-indigo-600/10 via-purple-600/5 to-transparent rounded-full blur-3xl" />
                 </div>
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-                    <div className="space-y-4 text-center md:text-left">
-                        <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-400">
-                            <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                    <div className="space-y-4 text-center">
+                        <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-emerald-400 shadow-lg shadow-emerald-500/10 animate-in fade-in slide-in-from-top-4 duration-700">
+                            <span className="relative flex h-2.5 w-2.5">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                             </span>
-                            Updated March 2026
+                            Live Pricing Verified: March 2026
                         </div>
-                        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
-                            Token Cost{" "}
+                        <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-foreground">
+                            LLM Pricing{" "}
                             <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                                Comparison Table
+                                Comparison
                             </span>
                         </h1>
-                        <p className="text-lg text-muted-foreground max-w-2xl">
-                            The ultimate LLM <strong>Model Comparison 2026</strong> tool. Compare real-time token pricing across every major provider.
+                        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+                            The ultimate <strong>Model Comparison 2026</strong> tool. Compare real-time token pricing across every major provider.
                             Pick your volume, select your models, and instantly see which
                             gives you the best bang for your token.
                         </p>
