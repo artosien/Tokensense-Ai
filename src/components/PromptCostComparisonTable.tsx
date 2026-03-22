@@ -1,12 +1,23 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { models } from "@/lib/models";
 import { calculateCost } from "@/lib/costEngine";
 import { countTokens } from "@/lib/tokenizer";
 import { useTokenSenseStore } from "@/lib/store";
 import { Trophy } from "lucide-react";
 import { InfoTooltip } from "./InfoTooltip";
+
+interface PromptCostComparisonTableRow {
+  id: string;
+  name: string;
+  provider: string;
+  inputTokens: number;
+  outputTokens: number;
+  inputCost: number;
+  outputCost: number;
+  totalCost: number;
+}
 
 interface PromptCostComparisonTableProps {
   prompt: string;
@@ -18,47 +29,31 @@ export default function PromptCostComparisonTable({
   systemPrompt,
 }: PromptCostComparisonTableProps) {
   const { expectedOutputTokens, fileText } = useTokenSenseStore();
+  const [rows, setRows] = useState<PromptCostComparisonTableRow[]>([]);
 
-const [rows, setRows] = useState<PromptCostComparisonTableRow[]>([]);
+  useEffect(() => {
+    const loadRows = async () => {
+      const combined = [systemPrompt, prompt, fileText].filter(Boolean).join("\n");
+      const inputTokens = await countTokens(combined);
+      const newRows = models.map((model) => {
+        const cost = calculateCost(inputTokens, expectedOutputTokens, model);
+        return {
+          id: model.id,
+          name: model.name,
+          provider: model.provider,
+          inputTokens,
+          outputTokens: expectedOutputTokens,
+          inputCost: cost.inputCost,
+          outputCost: cost.outputCost,
+          totalCost: cost.totalCost,
+        };
+      });
+      newRows.sort((a, b) => a.totalCost - b.totalCost);
+      setRows(newRows);
+    };
 
-useEffect(() => {
-  const loadRows = async () => {
-    const combined = [systemPrompt, prompt, fileText].filter(Boolean).join("\n");
-    const inputTokens = await countTokens(combined);
-    const newRows = models.map((model) => {
-      const cost = calculateCost(inputTokens, expectedOutputTokens, model);
-      return {
-        id: model.id,
-        name: model.name,
-        provider: model.provider,
-        inputTokens,
-        outputTokens: expectedOutputTokens,
-        inputCost: cost.inputCost,
-        outputCost: cost.outputCost,
-        totalCost: cost.totalCost,
-      };
-    });
-    setRows(newRows);
-  };
-  
-  loadRows();
-}, [systemPrompt, prompt, fileText, expectedOutputTokens, models]);
-      return {
-        id: model.id,
-        name: model.name,
-        provider: model.provider,
-        inputTokens,
-        outputTokens: expectedOutputTokens,
-        inputCost: cost.inputCost,
-        outputCost: cost.outputCost,
-        totalCost: cost.totalCost,
-      };
-    });
-
-    // Sort by total cost ascending
-    rows.sort((a, b) => a.totalCost - b.totalCost);
-    return rows;
-  }, [prompt, systemPrompt, expectedOutputTokens, fileText]);
+    loadRows();
+  }, [systemPrompt, prompt, fileText, expectedOutputTokens]);
 
   const formatCost = (v: number) => {
     if (v === 0) return "$0.00";
@@ -69,9 +64,9 @@ useEffect(() => {
 
   const formatTokens = (n: number) => n.toLocaleString();
 
-  if (data.length === 0) return null;
+  if (rows.length === 0) return null;
 
-  const cheapestId = data[0].id;
+  const cheapestId = rows[0].id;
 
   return (
     <div className="rounded-2xl border border-border/40 bg-card/50 backdrop-blur-sm overflow-hidden">
@@ -106,7 +101,7 @@ useEffect(() => {
             </tr>
           </thead>
           <tbody>
-            {data.map((row) => {
+            {rows.map((row) => {
               const isCheapest = row.id === cheapestId;
               return (
                 <tr
@@ -147,7 +142,7 @@ useEffect(() => {
 
       {/* Mobile Cards */}
       <div className="md:hidden divide-y divide-border/30">
-        {data.map((row) => {
+        {rows.map((row) => {
           const isCheapest = row.id === cheapestId;
           return (
             <div
