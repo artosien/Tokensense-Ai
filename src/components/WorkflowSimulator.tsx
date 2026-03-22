@@ -212,20 +212,23 @@ export default function WorkflowSimulator() {
 
   // Calculate costs for a specific platform
   const getCostsForPlatform = useCallback((p: keyof typeof PLATFORM_PRICING) => {
-    const config = PLATFORM_PRICING[p];
     let baseCost = 0;
 
     if (p === "n8n") {
+      const config = PLATFORM_PRICING.n8n;
       baseCost = Math.max(0, (executions - config.freeExecs) * config.pricePerExecution);
     } else if (p === "make") {
+      const config = PLATFORM_PRICING.make;
       const ops = executions * stepsPerExec;
       baseCost = Math.max(0, (ops - config.freeOps) * config.pricePerOp);
     } else if (p === "zapier") {
+      const config = PLATFORM_PRICING.zapier;
       baseCost = Math.max(0, (executions - config.freeTasks) * config.pricePerTask);
     }
 
+    const platformConfig = PLATFORM_PRICING[p];
     if (isAnnual) {
-        baseCost = baseCost * (1 - config.annualDiscount);
+        baseCost = baseCost * (1 - platformConfig.annualDiscount);
     }
 
     let aiCost = 0;
