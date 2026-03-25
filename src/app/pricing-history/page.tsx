@@ -1,4 +1,6 @@
 import { Metadata } from 'next';
+import PricingHistoryClient from "@/components/PricingHistoryClient";
+import SiteHeader from "@/components/SiteHeader";
 
 export const metadata: Metadata = {
   title: "LLM Pricing Tracker | Historical AI Token Cost Trends",
@@ -61,42 +63,46 @@ function PricingSchema() {
 
 export default function PricingHistoryPage() {
   return (
-    <main>
+    <div className="min-h-screen bg-background flex flex-col">
       <PricingSchema />
-      {/* Hero Section from UI */}
-      <section className="text-center py-12">
-        <span className="text-xs font-bold uppercase tracking-widest text-indigo-400 bg-indigo-400/10 border border-indigo-400/30 px-3 py-1 rounded-full">
-          Historical Price Index
-        </span>
-        <h1 className="mt-4 text-4xl font-black text-white sm:text-6xl uppercase">
-          LLM <span className="text-indigo-500">Pricing</span> Tracker
-        </h1>
-        <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-          The intelligence deflation is real. Track every major price cut and model release since 2023.
-        </p>
-      </section>
+      <SiteHeader />
+      
+      <main className="flex-1">
+        {/* Hero Section from UI */}
+        <section className="text-center py-12 px-4">
+          <span className="text-xs font-bold uppercase tracking-widest text-indigo-400 bg-indigo-400/10 border border-indigo-400/30 px-3 py-1 rounded-full">
+            Historical Price Index
+          </span>
+          <h1 className="mt-4 text-4xl font-black text-white sm:text-6xl uppercase">
+            LLM <span className="text-indigo-500">Pricing</span> Tracker
+          </h1>
+          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
+            The intelligence deflation is real. Track every major price cut and model release since 2023.
+          </p>
+        </section>
 
-      {/* CHARTS AND TIMELINE COMPONENTS HERE */}
+        <PricingHistoryClient />
 
-      {/* SEMANTIC DATA FOR CRAWLERS (Based on 'Economics of LLM Pricing' section) */}
-      <div className="sr-only">
-        <h2>The Economics of LLM Pricing</h2>
-        <p>LLM pricing is driven by hardware efficiency (H100/B200 clusters), architectural breakthroughs (MoE), and fierce market competition.</p>
-        
-        <h3>Milestone Timeline 2026:</h3>
-        <ul>
-          <li><strong>March 2026:</strong> Anthropic Claude 4.6 Series launch.</li>
-          <li><strong>January 2026:</strong> OpenAI GPT-5.2 Series - Optimized inference reduced input costs.</li>
-          <li><strong>October 2025:</strong> DeepSeek V3 - Set a new floor for open-weights performance.</li>
-        </ul>
+        {/* SEMANTIC DATA FOR CRAWLERS (Based on 'Economics of LLM Pricing' section) */}
+        <div className="sr-only">
+          <h2>The Economics of LLM Pricing</h2>
+          <p>LLM pricing is driven by hardware efficiency (H100/B200 clusters), architectural breakthroughs (MoE), and fierce market competition.</p>
+          
+          <h3>Milestone Timeline 2026:</h3>
+          <ul>
+            <li><strong>March 2026:</strong> Anthropic Claude 4.6 Series launch.</li>
+            <li><strong>January 2026:</strong> OpenAI GPT-5.2 Series - Optimized inference reduced input costs.</li>
+            <li><strong>October 2025:</strong> DeepSeek V3 - Set a new floor for open-weights performance.</li>
+          </ul>
 
-        <h3>Model Tier Price Floors (Per 1M Tokens):</h3>
-        <ul>
-          <li>Frontier (GPT-5/Opus): $1.75 - $5.00</li>
-          <li>Balanced (Sonnet/Pro): $1.25 - $3.00</li>
-          <li>Efficient (Flash/Haiku): $0.05 - $0.50</li>
-        </ul>
-      </div>
-    </main>
+          <h3>Model Tier Price Floors (Per 1M Tokens):</h3>
+          <ul>
+            <li>Frontier (GPT-5/Opus): $1.75 - $5.00</li>
+            <li>Balanced (Sonnet/Pro): $1.25 - $3.00</li>
+            <li>Efficient (Flash/Haiku): $0.05 - $0.50</li>
+          </ul>
+        </div>
+      </main>
+    </div>
   );
 }
