@@ -1,0 +1,88 @@
+# robots.txt for tokensense-ai.com
+# Updated: 2026-03-26
+
+# -----------------------------------------------
+# Standard search engine crawlers — allow all
+# -----------------------------------------------
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+# -----------------------------------------------
+# AI training & retrieval crawlers — allow all
+# -----------------------------------------------
+
+# OpenAI / ChatGPT
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+# Anthropic / Claude
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# Perplexity AI
+User-agent: PerplexityBot
+Allow: /
+
+# Google Gemini / AI Overview
+User-agent: Google-Extended
+Allow: /
+
+# Meta AI
+User-agent: FacebookBot
+Allow: /
+
+# Amazon Alexa / Bedrock
+User-agent: Amazonbot
+Allow: /
+
+# Apple
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# Common Crawl (used for LLM training datasets)
+User-agent: CCBot
+Allow: /
+
+# Cohere
+User-agent: cohere-ai
+Allow: /
+
+# Diffbot (AI knowledge graph)
+User-agent: Diffbot
+Allow: /
+
+# You.com
+User-agent: YouBot
+Allow: /
+
+# -----------------------------------------------
+# Catch-all: allow every other crawler
+# -----------------------------------------------
+User-agent: *
+Allow: /
+
+# -----------------------------------------------
+# Sitemap
+# -----------------------------------------------
+Sitemap: https://www.tokensense-ai.com/sitemap.xml

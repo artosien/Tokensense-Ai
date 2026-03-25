@@ -93,10 +93,50 @@ const TYPE_LABELS: Record<string, string> = {
   remove: "REMOVED",
 };
 
-export default function ChangelogPage() {
+function ChangelogSchema() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": "https://www.tokensense-ai.com/changelog/#webpage",
+        "url": "https://www.tokensense-ai.com/changelog",
+        "name": "Tokensense-Ai Changelog",
+        "description": "Stay updated with the latest features, improvements, and model pricing updates for Tokensense-Ai.",
+        "breadcrumb": {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://www.tokensense-ai.com"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Changelog"
+            }
+          ]
+        }
+      }
+    ]
+  };
+
   return (
-    <div className="min-h-screen bg-background">
-      <SiteHeader />
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
+}
+
+export default function ChangelogPage() {
+    return (
+        <div className="min-h-screen bg-background flex flex-col">
+            <ChangelogSchema />
+            <SiteHeader />
+
       <main className="mx-auto max-w-3xl px-4 sm:px-6 py-12 space-y-10">
         {/* Page header */}
         <div className="space-y-3">

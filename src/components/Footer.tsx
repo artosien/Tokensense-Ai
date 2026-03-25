@@ -16,8 +16,8 @@ export default function Footer() {
 
           {/* Main Links */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Links</h4>
-            <ul className="space-y-2">
+            <h4 className="text-white font-semibold mb-4 text-center md:text-left">Links</h4>
+            <ul className="flex flex-row flex-wrap justify-center md:justify-start md:flex-col gap-x-6 gap-y-2 md:gap-0 md:space-y-2">
               <li>
                 <Link
                   href="/"
@@ -47,8 +47,8 @@ export default function Footer() {
 
           {/* Legal Links */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Legal</h4>
-            <ul className="space-y-2">
+            <h4 className="text-white font-semibold mb-4 text-center md:text-left">Legal</h4>
+            <ul className="flex flex-row flex-wrap justify-center md:justify-start md:flex-col gap-x-6 gap-y-2 md:gap-0 md:space-y-2">
               <li>
                 <Link
                   href="/privacy"
@@ -70,9 +70,9 @@ export default function Footer() {
 
           {/* Support Section */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Support</h4>
-            <ul className="space-y-2">
-              <li>
+            <h4 className="text-white font-semibold mb-4 text-center md:text-left">Support</h4>
+            <ul className="flex flex-row flex-wrap justify-center md:justify-start md:flex-col gap-x-6 gap-y-2 md:gap-0 md:space-y-2">
+              <li className="text-center md:text-left">
                 <a
                   href="https://github.com/artosien"
                   target="_blank"
@@ -81,14 +81,17 @@ export default function Footer() {
                 >
                   GitHub
                 </a>
+                <p className="text-[10px] text-gray-500 mt-1 max-w-[150px] mx-auto md:mx-0">
+                  If you find the tool useful, please give it a star on GitHub.
+                </p>
               </li>
             </ul>
           </div>
         </div>
 
         {/* Sponsor Section */}
-        <div className="border-t border-gray-800 pt-8 flex flex-col sm:flex-row items-center justify-between">
-          <div className="mb-4 sm:mb-0">
+        <div className="border-t border-gray-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
             <p className="text-gray-400 text-sm mb-3">
               Support Tokensense Development
             </p>

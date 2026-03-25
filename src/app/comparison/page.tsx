@@ -1,18 +1,65 @@
 import ModelComparisonTable from "@/components/ModelComparisonTable";
 import SiteHeader from "@/components/SiteHeader";
+import SocialShareBar from "@/components/SocialShareBar";
 import Link from "next/link";
 import type { Metadata } from "next";
 
+export const dynamic = 'force-static';
+
 export const metadata: Metadata = {
-    title: "Token Cost Comparison Table | Tokensense-Ai",
-    description:
-        "Compare the real-time token cost of every major LLM provider side by side — OpenAI, Anthropic, Google, DeepSeek, xAI and more. Find the best value model for your workload.",
+  title: "LLM Model Pricing Comparison | GPT-4o vs Claude 3.5 vs Gemini",
+  description: "Side-by-side cost comparison of top AI models. Analyze input/output token pricing and find the most cost-effective LLM for your scale.",
+  alternates: {
+    canonical: 'https://www.tokensense-ai.com/comparison',
+  },
+  openGraph: {
+    title: "LLM Price Comparison Tool | Tokensense",
+    description: "Real-time pricing data for OpenAI, Anthropic, and Google models.",
+    url: 'https://www.tokensense-ai.com/comparison',
+    type: 'website',
+    images: [{ url: '/comparison-og.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "LLM Pricing Comparison",
+    description: "Find the cheapest LLM for your project.",
+    images: ['/comparison-og.png'],
+  },
 };
+function ComparisonSchema() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "LLM Model Pricing Comparison Tool",
+        "description": "Compare token pricing and features across GPT-4, Claude 3.5, Gemini 1.5, and more.",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Web",
+        "url": "https://www.tokensense-ai.com/comparison",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    ]
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
+}
 
 export default function ComparisonPage() {
     return (
         <div className="min-h-screen bg-background flex flex-col">
+            <ComparisonSchema />
             <SiteHeader />
+
 
             {/* Hero Section */}
             <div className="relative overflow-hidden border-b border-border/40">
@@ -46,6 +93,8 @@ export default function ComparisonPage() {
 
             {/* Main Content */}
             <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+                <SocialShareBar variant="top" />
+
                 <ModelComparisonTable />
 
                 {/* Disclaimer */}
@@ -54,6 +103,21 @@ export default function ComparisonPage() {
                     Actual costs may vary. Always verify with the provider before
                     production use.
                 </p>
+
+                <SocialShareBar variant="bottom" />
+
+                {/* ACCESSIBILITY TIP / SEO DATA */}
+                <div className="sr-only">
+                    <h2>Comparing models including:</h2>
+                    <ul>
+                        <li>Claude 4.6 Sonnet & Opus</li>
+                        <li>GPT-5.2 (Flagship) & Pro</li>
+                        <li>Gemini 3.1 Pro & Flash</li>
+                        <li>DeepSeek V3.2</li>
+                        <li>Llama 3.3 70B</li>
+                        <li>Grok 4</li>
+                    </ul>
+                </div>
             </main>
 
         </div>

@@ -1,18 +1,66 @@
 import WorkflowSimulator from "@/components/WorkflowSimulator";
 import SiteHeader from "@/components/SiteHeader";
+import SocialShareBar from "@/components/SocialShareBar";
 import Link from "next/link";
 import type { Metadata } from "next";
 
+export const dynamic = 'force-static';
+
 export const metadata: Metadata = {
-    title: "Workflow Cost Estimator | Tokensense-Ai",
-    description:
-        "Estimate your monthly AI automation costs using the Blueprint Model. Compare Zapier, Make, n8n Cloud, and Self-Hosted pricing across real workflows.",
+  title: "AI Workflow Cost Estimator | n8n, Make & Zapier Pricing",
+  description: "Compare monthly automation costs between n8n, Make, and Zapier. Estimate LLM token bills for complex agentic workflows and blueprints.",
+  alternates: {
+    canonical: 'https://www.tokensense-ai.com/workflow',
+  },
+  openGraph: {
+    title: "AI Workflow Cost Estimator | Tokensense",
+    description: "Compare platform fees and LLM costs for AI automations.",
+    url: 'https://www.tokensense-ai.com/workflow',
+    type: 'website',
+    images: [{ url: '/workflow-og.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "AI Workflow Estimator",
+    description: "n8n vs Make vs Zapier AI cost comparison.",
+    images: ['/workflow-og.png'],
+  },
 };
 
-export default function WorkflowPage() {
+function WorkflowSchema() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "LLM Agentic Workflow Simulator",
+        "description": "Simulate and estimate the cost of complex AI agent loops and multi-step workflows.",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Web",
+        "url": "https://www.tokensense-ai.com/workflow",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    ]
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
+}
+
+export default function WorkflowSimulatorPage() {
     return (
         <div className="min-h-screen bg-background flex flex-col">
+            <WorkflowSchema />
             <SiteHeader />
+
 
             {/* Hero Section */}
             <div className="relative overflow-hidden border-b border-border/40">
@@ -45,12 +93,28 @@ export default function WorkflowPage() {
 
             {/* Main Content */}
             <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+                <SocialShareBar variant="top" />
+
                 <WorkflowSimulator />
 
                 <p className="mt-8 text-center text-xs text-muted-foreground/50">
                     Estimates are based on publicly available API pricing and typical
                     platform per-operation costs as of March 2026. Actual costs may vary.
                 </p>
+
+                <SocialShareBar variant="bottom" />
+
+                {/* HIDDEN SEMANTIC CONTENT FOR CRAWLERS */}
+                <div className="sr-only">
+                    <h2>Automation Platforms Supported:</h2>
+                    <ul>
+                        <li>n8n Cloud (Self-hosted & Cloud)</li>
+                        <li>Make (formerly Integromat)</li>
+                        <li>Zapier (Standard & Professional)</li>
+                    </ul>
+                    <h3>AI Models Included:</h3>
+                    <p>GPT-4o, GPT-4o mini, Claude 3.5 Sonnet, and more.</p>
+                </div>
 
                 {/* ──── EXPLAINER: How Workflow Costs Are Calculated ──── */}
                 <section className="mt-16 border-t border-border/40 pt-16">

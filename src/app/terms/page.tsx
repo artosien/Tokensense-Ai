@@ -1,11 +1,92 @@
+import { Metadata } from 'next';
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 
+export const metadata: Metadata = {
+  title: "Terms of Service | Tokensense-Ai",
+  description: "Please read the Terms of Service for Tokensense-Ai. Understand the guidelines, permitted uses, and disclaimers for our free browser-based LLM cost estimation tool.",
+  alternates: {
+    canonical: 'https://www.tokensense-ai.com/terms',
+  },
+  openGraph: {
+    title: "Terms of Service | Tokensense-Ai",
+    description: "Usage policies and legal guidelines for our privacy-first AI token calculator.",
+    url: 'https://www.tokensense-ai.com/terms',
+    type: 'article',
+    images: [
+      {
+        url: '/og-terms.png', // Recommended: A simple graphic with 'Terms of Service' text
+        width: 1200,
+        height: 630,
+        alt: 'Tokensense-Ai Terms of Service',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary',
+    title: "Terms of Service | Tokensense-Ai",
+    description: "Legal and usage guidelines for Tokensense-Ai.",
+    images: ['/og-terms.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
+function TermsSchema() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": "https://www.tokensense-ai.com/terms/#webpage",
+        "url": "https://www.tokensense-ai.com/terms",
+        "name": "Terms of Service",
+        "description": "The legal terms and conditions governing the use of the Tokensense-Ai web application.",
+        "datePublished": "2026-03-08T00:00:00+00:00",
+        "dateModified": "2026-03-08T00:00:00+00:00",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Tokensense-Ai",
+          "url": "https://www.tokensense-ai.com"
+        },
+        "breadcrumb": {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://www.tokensense-ai.com"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Terms of Service"
+            }
+          ]
+        }
+      }
+    ]
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
+}
+
+export const dynamic = 'force-static';
+
 export default function TermsOfServicePage() {
     return (
         <div className="min-h-screen bg-background flex flex-col">
-      <SiteHeader />
+            <TermsSchema />
+            <SiteHeader />
 
             {/* Main Content */}
             <main className="flex-1 mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8 py-10 md:py-16">
@@ -27,7 +108,7 @@ export default function TermsOfServicePage() {
                     <div>
                         <h2 className="text-xl font-semibold text-foreground mb-2">1. About the Service</h2>
                         <p>
-                            Tokensense-Ai ("the Service") is a free, browser-based LLM token cost estimation tool available at tokensense-ai.com. It allows users to estimate the approximate cost of API calls to large language model providers — including OpenAI, Anthropic, and Google — based on user-supplied prompts and selected models. All computation occurs client-side within your browser.
+                            Tokensense-Ai (&quot;the Service&quot;) is a free, browser-based LLM token cost estimation tool available at tokensense-ai.com. It allows users to estimate the approximate cost of API calls to large language model providers — including OpenAI, Anthropic, and Google — based on user-supplied prompts and selected models. All computation occurs client-side within your browser.
                         </p>
                     </div>
 
@@ -59,7 +140,7 @@ export default function TermsOfServicePage() {
                         <div className="bg-muted/30 border border-border/50 p-4 rounded-lg my-4">
                             <p className="font-semibold text-foreground mb-2">WARRANTY DISCLAIMER</p>
                             <p className="uppercase text-xs leading-relaxed space-y-2">
-                                THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, TOKENSENSE-AI AND ITS OPERATOR EXPRESSLY DISCLAIM ALL WARRANTIES, INCLUDING BUT NOT LIMITED TO:
+                                THE SERVICE IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE,&quot; WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, TOKENSENSE-AI AND ITS OPERATOR EXPRESSLY DISCLAIM ALL WARRANTIES, INCLUDING BUT NOT LIMITED TO:
                             </p>
                             <ul className="list-disc pl-6 space-y-1 mt-2 uppercase text-xs">
                                 <li>WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE</li>

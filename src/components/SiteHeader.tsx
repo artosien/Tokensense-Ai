@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Bot, Menu, X, Sun, Moon, ChevronDown } from "lucide-react";
+import { Bot, Menu, X, Sun, Moon, ChevronDown, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/ThemeProvider";
 import {
@@ -82,6 +82,15 @@ export default function SiteHeader() {
                                 <DropdownMenuItem asChild>
                                     <Link href="/caching">Context Caching</Link>
                                 </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    <Link href="/tools/compression">Prompt Compression</Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    <Link href="/tools/batch">Batch Cost Planner</Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    <Link href="/tools/context">Context Window Visualizer</Link>
+                                </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                         <DropdownMenu>
@@ -98,10 +107,29 @@ export default function SiteHeader() {
                                     <Link href="/faq">FAQ</Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
+                                    <Link href="/pricing-history">Pricing History</Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
                                     <Link href="/contact">Contact Us</Link>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
+
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            asChild
+                            className="text-muted-foreground hover:text-indigo-400 border border-transparent hover:border-indigo-500/30 hover:bg-indigo-500/10 transition-all"
+                        >
+                            <a
+                                href="https://github.com/artosien/Tokensense-Ai.git"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="View TokenSense AI on GitHub"
+                            >
+                                <Github className="h-5 w-5" />
+                            </a>
+                        </Button>
 
                         <Button
                             variant="ghost"
@@ -196,18 +224,31 @@ export default function SiteHeader() {
                             className="flex items-center justify-between w-full py-3 px-4 rounded-md text-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors font-medium border border-transparent hover:border-indigo-500/20"
                         >
                             Tools
-                            <ChevronDown className={`h-4 w-4 transition-transform ${mobileToolsOpen ? "rotate-180" : ""}`} />
+                            <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${mobileToolsOpen ? "rotate-180" : ""}`} />
                         </button>
-                        {mobileToolsOpen && (
-                            <div className="pl-4 mt-1 flex flex-col gap-1">
+                        <div 
+                            className={`grid transition-all duration-300 ease-in-out ${
+                                mobileToolsOpen ? "grid-rows-[1fr] opacity-100 mt-1" : "grid-rows-[0fr] opacity-0"
+                            }`}
+                        >
+                            <div className="overflow-hidden pl-4 flex flex-col gap-1">
                                 <Link href="/multimodal" onClick={closeMenu} className="py-2.5 px-4 rounded-md text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors text-sm border border-transparent hover:border-indigo-500/20">
                                     Image Estimator
                                 </Link>
                                 <Link href="/caching" onClick={closeMenu} className="py-2.5 px-4 rounded-md text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors text-sm border border-transparent hover:border-indigo-500/20">
                                     Context Caching
                                 </Link>
+                                <Link href="/tools/compression" onClick={closeMenu} className="py-2.5 px-4 rounded-md text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors text-sm border border-transparent hover:border-indigo-500/20">
+                                    Prompt Compression
+                                </Link>
+                                <Link href="/tools/batch" onClick={closeMenu} className="py-2.5 px-4 rounded-md text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors text-sm border border-transparent hover:border-indigo-500/20">
+                                    Batch Cost Planner
+                                </Link>
+                                <Link href="/tools/context" onClick={closeMenu} className="py-2.5 px-4 rounded-md text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors text-sm border border-transparent hover:border-indigo-500/20">
+                                    Context Visualizer
+                                </Link>
                             </div>
-                        )}
+                        </div>
                     </div>
                     <div>
                         <button
@@ -216,21 +257,28 @@ export default function SiteHeader() {
                             className="flex items-center justify-between w-full py-3 px-4 rounded-md text-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors font-medium border border-transparent hover:border-indigo-500/20"
                         >
                             About
-                            <ChevronDown className={`h-4 w-4 transition-transform ${mobileAboutOpen ? "rotate-180" : ""}`} />
+                            <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${mobileAboutOpen ? "rotate-180" : ""}`} />
                         </button>
-                        {mobileAboutOpen && (
-                            <div className="pl-4 mt-1 flex flex-col gap-1">
+                        <div 
+                            className={`grid transition-all duration-300 ease-in-out ${
+                                mobileAboutOpen ? "grid-rows-[1fr] opacity-100 mt-1" : "grid-rows-[0fr] opacity-0"
+                            }`}
+                        >
+                            <div className="overflow-hidden pl-4 flex flex-col gap-1">
                                 <Link href="/about" onClick={closeMenu} className="py-2.5 px-4 rounded-md text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors text-sm border border-transparent hover:border-indigo-500/20">
                                     About
                                 </Link>
                                 <Link href="/faq" onClick={closeMenu} className="py-2.5 px-4 rounded-md text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors text-sm border border-transparent hover:border-indigo-500/20">
                                     FAQ
                                 </Link>
+                                <Link href="/pricing-history" onClick={closeMenu} className="py-2.5 px-4 rounded-md text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors text-sm border border-transparent hover:border-indigo-500/20">
+                                    Pricing History
+                                </Link>
                                 <Link href="/contact" onClick={closeMenu} className="py-2.5 px-4 rounded-md text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors text-sm border border-transparent hover:border-indigo-500/20">
                                     Contact Us
                                 </Link>
                             </div>
-                        )}
+                        </div>
                     </div>
 
                     <div className="mt-8 pt-6 border-t border-border/40 flex flex-col gap-4">

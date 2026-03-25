@@ -14,7 +14,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Tokensense-Ai - Free LLM Token Cost Calculator",
+  metadataBase: new URL('https://www.tokensense-ai.com'),
+  title: {
+    default: "Tokensense-Ai - Free LLM Token Cost Calculator",
+    template: "%s | Tokensense-Ai" 
+  },
   description:
     "Estimate LLM API costs before you send a request. Tokensense-Ai is a free, client-side token cost calculator for GPT-4o, Claude, Gemini, and more. No account needed.",
   keywords: "LLM token cost calculator, token cost estimator, GPT-4o pricing, Claude API cost, AI token counter, OpenAI token calculator, prompt token count, LLM API pricing tool",

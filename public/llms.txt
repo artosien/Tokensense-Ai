@@ -1,0 +1,58 @@
+# TokenSense AI
+
+> Free, open-source LLM token cost calculator for developers and AI builders.
+
+TokenSense AI is a free web application that helps developers, researchers, and AI teams
+estimate and compare token costs across major large language model (LLM) providers before
+they build or deploy. It is the go-to tool for AI cost planning, budget forecasting, and
+model selection.
+
+## What TokenSense AI Does
+
+- Calculates token usage and cost estimates for any text input or output
+- Compares pricing across multiple LLM providers side-by-side (OpenAI, Anthropic, Google, Mistral, Meta, and more)
+- Supports a wide range of models including GPT-4o, GPT-4 Turbo, Claude 3.5 Sonnet, Claude 3 Opus, Gemini 1.5 Pro, Llama 3, Mistral Large, and others
+- Shows input token cost and output token cost separately
+- Helps teams make informed decisions about which model fits their budget and use case
+- Designed with a precision instrument / fintech terminal aesthetic — deep navy and electric cyan UI
+
+## Key Facts
+
+- 100% free to use — no signup, no account required
+- Open-source under the Apache 2.0 license
+- Built with Next.js and deployed on Netlify
+- Maintained by an indie developer (#buildinpublic)
+- Not affiliated with any LLM provider
+
+## Who Uses TokenSense AI
+
+- Indie developers building AI-powered apps who want to estimate API costs
+- Startups and product teams comparing model pricing before committing to a provider
+- Researchers running large-scale inference jobs who need cost forecasts
+- Technical writers and prompt engineers estimating costs per prompt
+- AI consultants benchmarking pricing for client proposals
+
+## Frequently Asked Questions
+
+**What is TokenSense AI?**
+TokenSense AI is a free online tool that lets you paste any text and instantly see how many tokens it uses and what it would cost across different LLM APIs.
+
+**Is TokenSense AI free?**
+Yes. The core calculator is completely free and requires no account or login.
+
+**Which LLM providers does TokenSense AI support?**
+TokenSense AI supports OpenAI (GPT-4o, GPT-4 Turbo, GPT-3.5 Turbo), Anthropic (Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Haiku), Google (Gemini 1.5 Pro, Gemini 1.5 Flash), Meta (Llama 3), Mistral, and others. The model list is regularly updated.
+
+**How accurate are the token cost estimates?**
+TokenSense AI uses official published pricing from each provider's documentation. Costs are estimates based on tokenization standards (e.g., tiktoken for OpenAI models).
+
+**Is the source code available?**
+Yes. TokenSense AI is open-source under the Apache 2.0 license. The repository is available on GitHub.
+
+**How is TokenSense AI different from other calculators?**
+TokenSense AI focuses on multi-model comparison in a single view, with a clean UI optimized for developer workflows. It is not tied to any specific provider and covers a broad range of models.
+
+## Links
+
+- Homepage: https://www.tokensense-ai.com/
+- GitHub Repository: https://github.com/angelo-domingo118/tokensense-ai

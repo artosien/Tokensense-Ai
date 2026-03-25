@@ -1,11 +1,100 @@
+import { Metadata } from 'next';
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 
+export const metadata: Metadata = {
+  title: "Privacy Policy | Tokensense-Ai",
+  description: "Tokensense-Ai is built on the principle that your prompts are yours. We process all LLM token counts and costs 100% client-side. No servers, no tracking, no data collection.",
+  alternates: {
+    canonical: 'https://www.tokensense-ai.com/privacy',
+  },
+  openGraph: {
+    title: "Privacy Policy | Tokensense-Ai",
+    description: "Your prompts never leave your browser. Read our commitment to 100% private, client-side AI cost estimation.",
+    url: 'https://www.tokensense-ai.com/privacy',
+    type: 'article',
+    images: [
+      {
+        url: '/og-privacy.png', // Recommended: A simple, trust-focused graphic
+        width: 1200,
+        height: 630,
+        alt: 'Tokensense-Ai Privacy Commitment',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary',
+    title: "Privacy Policy | Tokensense-Ai",
+    description: "Built for privacy: No prompts or API keys are ever transmitted to a server.",
+    images: ['/og-privacy.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
+function PrivacySchema() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": "https://www.tokensense-ai.com/privacy/#webpage",
+        "url": "https://www.tokensense-ai.com/privacy",
+        "name": "Privacy Policy",
+        "description": "The official privacy policy for Tokensense-Ai, detailing our zero-data collection architecture and 100% client-side processing.",
+        "datePublished": "2026-03-08T00:00:00+00:00",
+        "dateModified": "2026-03-08T00:00:00+00:00",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Tokensense-Ai",
+          "url": "https://www.tokensense-ai.com",
+          "logo": {
+            "@type": "Organization",
+            "url": "https://www.tokensense-ai.com",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://www.tokensense-ai.com/logo.png"
+            }
+          }
+        },
+        "breadcrumb": {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://www.tokensense-ai.com"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Privacy Policy"
+            }
+          ]
+        }
+      }
+    ]
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
+}
+
+export const dynamic = 'force-static';
+
 export default function PrivacyPolicyPage() {
     return (
         <div className="min-h-screen bg-background flex flex-col">
-      <SiteHeader />
+            <PrivacySchema />
+            <SiteHeader />
 
             {/* Main Content */}
             <main className="flex-1 mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8 py-10 md:py-16">
@@ -93,7 +182,7 @@ export default function PrivacyPolicyPage() {
                             Tokensense-Ai does not use tracking cookies or advertising cookies of any kind.
                         </p>
                         <p>
-                            The Service may use your browser's local storage to remember your preferences between visits — for example, your last selected model or output length slider position. This data is:
+                            The Service may use your browser&apos;s local storage to remember your preferences between visits — for example, your last selected model or output length slider position. This data is:
                         </p>
                         <ul className="list-disc pl-6 space-y-1 mt-2">
                             <li>Stored only on your own device</li>
@@ -118,12 +207,12 @@ export default function PrivacyPolicyPage() {
                             Conventional data security concerns — breaches, unauthorized access, data leakage — do not apply to Tokensense-Ai in the traditional sense, because we do not hold your data. There is no centralized repository of user prompts or personal information that could be compromised.
                         </p>
                         <p>
-                            The only data that exists in relation to your session is data you have chosen to enter into your own browser. It lives in your browser's memory and is discarded the moment you leave the page.
+                            The only data that exists in relation to your session is data you have chosen to enter into your own browser. It lives in your browser&apos;s memory and is discarded the moment you leave the page.
                         </p>
                     </div>
 
                     <div>
-                        <h2 className="text-xl font-semibold text-foreground mb-2">7. Children's Privacy</h2>
+                        <h2 className="text-xl font-semibold text-foreground mb-2">7. Children&apos;s Privacy</h2>
                         <p>
                             The Service is not directed to children under the age of 13, and we do not knowingly collect personal information from children. If you believe a child has provided personal information through the Service, please contact us so we may take appropriate steps.
                         </p>

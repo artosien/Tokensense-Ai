@@ -49,17 +49,12 @@ export function ModelPickerModal({ selectedModelId, onChange }: ModelPickerModal
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [focusedIndex, setFocusedIndex] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
   const [mounted, setMounted] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   const selectedModel = models.find((m) => m.id === selectedModelId) ?? models[0];
@@ -83,57 +78,28 @@ export function ModelPickerModal({ selectedModelId, onChange }: ModelPickerModal
 
   useEffect(() => {
     if (open) {
-      setTimeout(() => searchRef.current?.focus(), 150);
+      setTimeout(() => searchRef.current?.focus(), 50);
       setFocusedIndex(0);
-      document.body.style.overflow = "hidden";
     } else {
       setSearch("");
-      document.body.style.overflow = "";
     }
-    return () => { document.body.style.overflow = ""; };
   }, [open]);
 
-  // Handle back gesture (Android)
+  // Handle click outside to close
   useEffect(() => {
     if (!open) return;
-    const onPopState = (e: PopStateEvent) => {
-      e.preventDefault();
-      setOpen(false);
-    };
-    window.history.pushState({ open: true }, "");
-    window.addEventListener("popstate", onPopState);
-    return () => {
-      window.removeEventListener("popstate", onPopState);
-      if (window.history.state?.open) window.history.back();
-    };
-  }, [open]);
-
-  // Global keydown listener when open
-  useEffect(() => {
-    if (!open) return;
-
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setOpen(false);
-      } else if (e.key === "ArrowDown") {
-        e.preventDefault();
-        setFocusedIndex((i) => Math.min(i + 1, flatFiltered.length - 1));
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        setFocusedIndex((i) => Math.max(i - 1, 0));
-      } else if (e.key === "Enter" && flatFiltered[focusedIndex]) {
-        e.preventDefault();
-        handleSelect(flatFiltered[focusedIndex].id);
       }
     };
-
-    window.addEventListener("keydown", handleGlobalKeyDown);
-    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
-  }, [open, flatFiltered, focusedIndex]);
+    window.addEventListener("mousedown", handleClickOutside);
+    return () => window.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
 
   const handleOpen = () => {
     triggerHaptic(15);
-    setOpen(true);
+    setOpen((o) => !o);
   };
 
   const handleSelect = (id: string) => {
@@ -144,129 +110,8 @@ export function ModelPickerModal({ selectedModelId, onChange }: ModelPickerModal
 
   if (!mounted) return null;
 
-  const modalContent = (
-    <>
-      {/* Backdrop */}
-      <div 
-        className={cn(
-          "fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm transition-opacity duration-300",
-          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        )} 
-        onClick={() => setOpen(false)} 
-      />      
-
-      {/* Modal / Bottom Sheet */}
-      <div
-        ref={dialogRef}
-        className={cn(
-          "fixed z-[110] transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] bg-[#0d1117] border-slate-700/60 shadow-2xl overflow-hidden flex flex-col",
-          "md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-lg md:rounded-2xl md:border md:h-auto",
-          "inset-x-0 bottom-0 rounded-t-[24px] border-t max-h-[85vh] h-auto pb-[env(safe-area-inset-bottom)]",
-          open ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 md:opacity-0 md:scale-95"
-        )}
-      >
-        <div className="flex justify-center pt-3 pb-1 md:hidden">
-          <div className="w-12 h-1.5 bg-slate-700/50 rounded-full" />
-        </div>
-
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800">
-          <span className="text-sm font-semibold text-foreground">Select Model</span>
-          <button
-            onClick={() => setOpen(false)}
-            className="w-10 h-10 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-slate-800 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="px-4 py-3 border-b border-slate-800">
-          <div className="flex items-center gap-2 bg-slate-900 border border-slate-700/50 rounded-xl px-3 h-12">
-            <Search className="w-4 h-4 text-muted-foreground shrink-0" />
-            <input
-              ref={searchRef}
-              type="text"
-              placeholder="Search by name or provider..."
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setFocusedIndex(0); }}
-              className="flex-1 bg-transparent text-base text-foreground placeholder:text-muted-foreground/50 focus:outline-none font-mono"
-            />
-            {search && (
-              <button onClick={() => setSearch("")} className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-foreground">
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className="overflow-y-auto flex-1 p-3 space-y-4 md:max-h-[50vh]">
-          {Object.entries(grouped).map(([provider, providerModels]) => {
-            const pStyle = PROVIDER_COLORS[provider];
-            return (
-              <div key={provider}>
-                <div className={cn("text-[10px] font-mono font-bold uppercase tracking-widest px-2 mb-1.5", pStyle?.accent ?? "text-muted-foreground")}>
-                  {provider}
-                </div>
-                <div className="space-y-1">
-                  {providerModels.map((model) => {
-                    const flatIdx = flatFiltered.indexOf(model);
-                    const isSelected = model.id === selectedModelId;
-                    const isFocused = flatIdx === focusedIndex;
-                    const tier = MODEL_TIERS[model.id];
-
-                    return (
-                      <button
-                        key={model.id}
-                        onClick={() => handleSelect(model.id)}
-                        onMouseEnter={() => !isMobile && setFocusedIndex(flatIdx)}
-                        className={cn(
-                          "w-full flex items-center justify-between gap-2 px-3 rounded-xl text-left transition-all duration-100 min-h-[56px] py-3",
-                          isSelected ? "bg-cyan-500/15 border border-cyan-500/30" : "border border-transparent",
-                          isFocused && !isSelected && !isMobile ? "bg-slate-800/60" : "",
-                          !isSelected && !isFocused && !isMobile ? "hover:bg-slate-800/40" : ""
-                        )}
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          {isSelected && <span className="text-cyan-400 text-xs shrink-0 font-bold">✓</span>}       
-                          <span className={cn("text-base font-medium truncate", isSelected ? "text-cyan-300" : "text-foreground")}>
-                            {model.name}
-                          </span>
-                          {tier && (
-                            <span className={cn("hidden xs:inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono border shrink-0", TIER_STYLES[tier])}>
-                              {tier}
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-right shrink-0">
-                          <div className="text-[11px] font-mono text-muted-foreground/60 whitespace-nowrap">
-                             ${model.inputPricePer1M.toFixed(2)} / ${model.outputPricePer1M.toFixed(2)}
-                          </div>
-                          <div className="text-[9px] text-muted-foreground/40 font-mono">
-                            per 1M tokens
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
-          {flatFiltered.length === 0 && (
-            <p className="text-center text-sm text-muted-foreground/50 py-12">No models match "{search}"</p> 
-          )}
-        </div>
-
-        <div className="hidden md:flex px-4 py-2 border-t border-slate-800 items-center gap-3 text-[10px] font-mono text-muted-foreground/40">
-          <span>↑↓ navigate</span>
-          <span>↵ select</span>
-          <span>Esc close</span>
-        </div>
-      </div>
-    </>
-  );
-
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       {/* Trigger pill */}
       <button
         type="button"
@@ -275,27 +120,88 @@ export function ModelPickerModal({ selectedModelId, onChange }: ModelPickerModal
           "w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-all duration-150 min-h-[44px]",
           providerStyle?.border ?? "border-border/50",
           providerStyle?.bg ?? "bg-card/50",
-          "hover:border-cyan-500/40 hover:bg-cyan-500/5"
+          "hover:border-cyan-500/40 hover:bg-cyan-500/5",
+          open && "ring-2 ring-cyan-500/20 border-cyan-500/40"
         )}
       >
         <div className="flex items-center gap-2 min-w-0">
-          <span className={cn("text-xs font-mono shrink-0", providerStyle?.accent ?? "text-muted-foreground")}>   
+          <span className={cn("text-[10px] font-mono shrink-0 font-bold uppercase", providerStyle?.accent ?? "text-muted-foreground")}>   
             {selectedModel.provider}
           </span>
           <span className="text-sm font-semibold text-foreground truncate">
             {selectedModel.name}
           </span>
-          {MODEL_TIERS[selectedModelId] && (
-            <span className={cn("hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono font-bold border shrink-0", TIER_STYLES[MODEL_TIERS[selectedModelId]])}>
-              {MODEL_TIERS[selectedModelId]}
-            </span>
-          )}
         </div>
-        <ChevronDown className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+        <ChevronDown className={cn("w-3.5 h-3.5 text-muted-foreground shrink-0 transition-transform", open && "rotate-180")} />
       </button>
 
-      {/* Portal for Modal */}
-      {typeof document !== 'undefined' && createPortal(modalContent, document.body)}
+      {/* Dropdown Menu */}
+      {open && (
+        <div 
+          className={cn(
+            "absolute top-full left-0 w-full mt-2 z-[100] bg-[#0d1117] border border-slate-700/60 shadow-2xl rounded-xl overflow-hidden flex flex-col animate-in fade-in slide-in-from-top-2 duration-200",
+            "max-h-[400px]"
+          )}
+        >
+          {/* Search Header */}
+          <div className="px-3 py-2 border-b border-slate-800 shrink-0">
+            <div className="flex items-center gap-2 bg-slate-900 border border-slate-700/50 rounded-lg px-2 h-9">
+              <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+              <input
+                ref={searchRef}
+                type="text"
+                placeholder="Search..."
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); setFocusedIndex(0); }}
+                className="flex-1 bg-transparent text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none font-mono min-w-0"
+              />
+            </div>
+          </div>
+
+          {/* Model List */}
+          <div className="overflow-y-auto flex-1 p-1.5 space-y-3 custom-scrollbar">
+            {Object.entries(grouped).map(([provider, providerModels]) => {
+              const pStyle = PROVIDER_COLORS[provider];
+              return (
+                <div key={provider}>
+                  <div className={cn("text-[9px] font-mono font-bold uppercase tracking-widest px-2 mb-1", pStyle?.accent ?? "text-muted-foreground")}>
+                    {provider}
+                  </div>
+                  <div className="space-y-0.5">
+                    {providerModels.map((model) => {
+                      const isSelected = model.id === selectedModelId;
+                      
+                      return (
+                        <button
+                          key={model.id}
+                          onClick={() => handleSelect(model.id)}
+                          className={cn(
+                            "w-full flex items-center justify-between gap-3 px-2 rounded-lg text-left transition-all duration-100 min-h-[44px] py-2",
+                            isSelected ? "bg-cyan-500/10 border border-cyan-500/20" : "border border-transparent hover:bg-slate-800/40"
+                          )}
+                        >
+                          <div className="flex flex-col min-w-0">
+                            <span className={cn("text-xs font-medium truncate", isSelected ? "text-cyan-400" : "text-foreground")}>
+                              {model.name}
+                            </span>
+                            <span className="text-[9px] text-muted-foreground/50 font-mono">
+                              ${model.inputPricePer1M}/${model.outputPricePer1M}
+                            </span>
+                          </div>
+                          {isSelected && <span className="text-cyan-400 text-[10px] shrink-0 font-bold">✓</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+            {flatFiltered.length === 0 && (
+              <p className="text-center text-xs text-muted-foreground/50 py-8">No results for "{search}"</p> 
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

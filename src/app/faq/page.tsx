@@ -1,14 +1,100 @@
-"use client";
-
+import { Metadata } from 'next';
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 
+export const metadata: Metadata = {
+  title: "Tokensense-Ai FAQ | Understanding AI Tokens & API Costs",
+  description: "Find answers to common questions about AI tokens, LLM API pricing, and how Tokensense-Ai calculates costs privately for GPT-4, Claude, and Gemini.",
+  alternates: {
+    canonical: 'https://www.tokensense-ai.com/faq',
+  },
+  openGraph: {
+    title: "Frequently Asked Questions | Tokensense-Ai",
+    description: "Everything you need to know about AI tokens, API pricing, and privacy-first cost estimation.",
+    url: 'https://www.tokensense-ai.com/faq',
+    type: 'website',
+    images: [
+      {
+        url: '/og-faq.png', // Recommended: An image with FAQ text or a clean screenshot of the UI
+        width: 1200,
+        height: 630,
+        alt: 'Tokensense-Ai FAQ',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "AI Token & Pricing FAQ",
+    description: "Get answers to common questions about LLM economics and privacy.",
+    images: ['/og-faq.png'],
+  },
+};
+
+function FAQSchema() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is a token in AI?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A token is the basic unit of text that large language models process. In English, one token is roughly 3–4 characters or about 3/4 of a word. Pricing for LLM APIs like OpenAI and Anthropic is based on the number of tokens consumed."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does Tokensense-Ai count tokens without sending my data to a server?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Tokensense-Ai uses tiktoken, OpenAI's open-source tokenizer library, compiled to WebAssembly and running entirely in your browser. Your text is tokenized locally—nothing is transmitted to any server."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does Tokensense-Ai store my prompts?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Tokensense-Ai is 100% client-side. Your prompts are processed locally in your browser and never sent to any server, ensuring total privacy."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is an agentic loop in LLM cost estimation?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "An agentic loop is when an AI agent calls an LLM repeatedly across multiple steps (planning, tool use, reflection). Tokensense-Ai's Agentic Loop Simulator shows the compounding total cost across these iterations so you can budget accurately."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use Tokensense-Ai to estimate costs for a chatbot or multi-turn conversation?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The Agentic Loop Simulator is designed for this. Set your system prompt, average message length, and number of turns to see how compounding token costs affect your full conversation bill."
+        }
+      }
+    ]
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
+}
+
+export const dynamic = 'force-static';
+
 export default function FAQPage() {
     return (
         <div className="min-h-screen bg-background">
-      <SiteHeader />
+            <FAQSchema />
+            <SiteHeader />
 
             {/* Main Content */}
             <main className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-12 md:py-20">

@@ -11,9 +11,50 @@ export const metadata: Metadata = {
         "Get in touch with the Tokensense-Ai team. Have a question, feedback, or a feature request? We would love to hear from you.",
 };
 
+export const dynamic = 'force-static';
+
+function ContactSchema() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "ContactPage",
+        "@id": "https://www.tokensense-ai.com/contact/#webpage",
+        "url": "https://www.tokensense-ai.com/contact",
+        "name": "Contact Tokensense-Ai",
+        "description": "Get in touch with the Tokensense-Ai team for feedback, bug reports, or feature requests.",
+        "breadcrumb": {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://www.tokensense-ai.com"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Contact"
+            }
+          ]
+        }
+      }
+    ]
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
+}
+
 export default function ContactPage() {
     return (
         <div className="min-h-screen bg-background flex flex-col">
+            <ContactSchema />
             <SiteHeader />
 
             {/* Main Content */}
@@ -57,7 +98,7 @@ export default function ContactPage() {
                             <div>
                                 <h3 className="text-lg font-semibold text-foreground m-0">Community</h3>
                                 <p className="text-sm text-muted-foreground mt-1">
-                                    Join our Discord community or visit our {" "}
+                                    Visit our {" "}
                                     <a 
                                         href="https://github.com/artosien/Tokensense-Ai.git" 
                                         target="_blank" 
