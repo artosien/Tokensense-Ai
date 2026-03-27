@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTokenSenseStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { FileText, Info } from "lucide-react";
+import { FileText, Info, Files, BookOpen } from "lucide-react";
 
 interface Preset {
   label: string;
@@ -26,10 +26,10 @@ const PRESETS: Preset[] = [
   {
     label: "Doc Summary",
     icon: "📄",
-    inputTokens: 4000,
-    outputTokens: 500,
+    inputTokens: 0, // Dynamic
+    outputTokens: 0, // Dynamic
     modelId: "claude-3-5-haiku",
-    description: "Summarize a document",
+    description: "Summarize multiple documents",
   },
   {
     label: "Content Rewrite",
@@ -72,6 +72,13 @@ const WORD_COUNT_RANGES = [
   { label: "Max (90K+)", min: 90000, max: 120000, avg: 105000 },
 ];
 
+const DOC_SIZE_PRESETS = [
+  { label: "Short (1k words)", words: 1000 },
+  { label: "Medium (4k words)", words: 4000 },
+  { label: "Long (12k words)", words: 12000 },
+  { label: "Deep (25k words)", words: 25000 },
+];
+
 export function ScenarioPresets() {
   const { setUserPrompt, setExpectedOutputTokens, setSelectedModelId, setInputTokenCount } =
     useTokenSenseStore();
@@ -80,6 +87,10 @@ export function ScenarioPresets() {
   // Dynamic state for Content Rewrite
   const [postCount, setPostCount] = useState(1);
   const [wordRangeIdx, setWordRangeIdx] = useState(0);
+
+  // Dynamic state for Doc Summary
+  const [docCount, setDocCount] = useState(1);
+  const [docSizeIdx, setDocSizeIdx] = useState(0);
 
   const applyPreset = (preset: Preset, forceUpdate: boolean = false) => {
     if (activePreset === preset.label && !forceUpdate) return;
@@ -90,19 +101,23 @@ export function ScenarioPresets() {
 
     if (preset.label === "Content Rewrite") {
       const range = WORD_COUNT_RANGES[wordRangeIdx];
-      // Average words * 1.35 tokens/word * number of posts
       const totalWords = range.avg * postCount;
       inTokens = Math.round(totalWords * 1.35);
-      outTokens = inTokens; // Usually rewrite is roughly 1:1
+      outTokens = inTokens; 
+    } else if (preset.label === "Doc Summary") {
+      const size = DOC_SIZE_PRESETS[docSizeIdx];
+      const totalWords = size.words * docCount;
+      inTokens = Math.round(totalWords * 1.35);
+      outTokens = 500 * docCount; // ~500 tokens summary per doc
     }
 
     const samplePrompts: Record<string, string> = {
       "Chatbot Turn":
         "Hi, can you help me understand how transformer models handle long-range dependencies in text?",
       "Doc Summary":
-        `Please summarize the following document regarding quarterly performance...`,
+        `Please provide a concise executive summary for the following ${docCount} documents. Each document is approximately ${DOC_SIZE_PRESETS[docSizeIdx].words.toLocaleString()} words.\n\n[Document data for ${docCount} files would appear here...]`,
       "Content Rewrite": 
-        `You are an expert editor. Please rewrite the following ${postCount} blog articles (totaling ~${(WORD_COUNT_RANGES[wordRangeIdx].avg * postCount).toLocaleString()} words) to improve SEO, readability, and engagement. Maintain the original core message but modernize the tone.\n\n[Content of ${postCount} articles would follow here...]`,
+        `You are an expert editor. Please rewrite the following ${postCount} blog articles (totaling ~${(WORD_COUNT_RANGES[wordRangeIdx].avg * postCount).toLocaleString()} words) to improve SEO, readability, and engagement.\n\n[Content of ${postCount} articles would follow here...]`,
       "Code Review":
         `Please review this Python function for bugs and style...`,
       "Long Report":
@@ -219,7 +234,68 @@ export function ScenarioPresets() {
         </div>
       )}
 
-      {activePreset && activePreset !== "Content Rewrite" && (
+      {/* Dynamic Controls for Doc Summary */}
+      {activePreset === "Doc Summary" && (
+        <div className="bg-plasma-500/5 border border-plasma-500/10 rounded-2xl p-4 animate-in slide-in-from-top-2 duration-300">
+          <div className="flex flex-col md:flex-row md:items-center gap-6">
+            <div className="flex-1 space-y-3">
+              <label className="text-[10px] font-bold text-plasma-400 uppercase tracking-widest flex items-center gap-2">
+                <Files className="w-3 h-3" />
+                Number of Documents
+              </label>
+              <div className="flex items-center gap-3">
+                <input 
+                  type="number"
+                  min="1"
+                  max="1000"
+                  value={docCount}
+                  onChange={(e) => {
+                    const val = Math.max(1, parseInt(e.target.value) || 1);
+                    setDocCount(val);
+                    applyPreset(PRESETS.find(p => p.label === "Doc Summary")!, true);
+                  }}
+                  className="w-full h-10 bg-plasma-500/10 border border-plasma-500/20 rounded-lg px-3 font-mono text-white focus:outline-none focus:border-plasma-500/50 transition-colors"
+                />
+              </div>
+            </div>
+
+            <div className="flex-1 space-y-3">
+              <label className="text-[10px] font-bold text-plasma-400 uppercase tracking-widest flex items-center gap-2">
+                <BookOpen className="w-3 h-3" />
+                Size per Document
+              </label>
+              <div className="grid grid-cols-2 xs:grid-cols-4 gap-2">
+                {DOC_SIZE_PRESETS.map((size, idx) => (
+                  <button
+                    key={size.label}
+                    onClick={() => {
+                      setDocSizeIdx(idx);
+                      applyPreset(PRESETS.find(p => p.label === "Doc Summary")!, true);
+                    }}
+                    className={cn(
+                      "px-2 py-2 rounded-lg text-[9px] font-bold uppercase transition-all border",
+                      docSizeIdx === idx
+                        ? "bg-plasma-500 text-black border-plasma-400"
+                        : "bg-plasma-500/5 text-plasma-400 border-plasma-500/20 hover:border-plasma-500/40"
+                    )}
+                  >
+                    {size.label.split(" ")[0]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-4 pt-3 border-t border-plasma-500/10 flex items-center justify-between text-[10px] font-mono">
+            <span className="text-muted-foreground">Estimated Word Total:</span>
+            <span className="text-plasma-400 font-bold">
+              ~{(DOC_SIZE_PRESETS[docSizeIdx].words * docCount).toLocaleString()} words
+            </span>
+          </div>
+        </div>
+      )}
+
+      {activePreset && activePreset !== "Content Rewrite" && activePreset !== "Doc Summary" && (
         <p className="text-[10px] text-plasma-500/70 font-mono animate-in fade-in duration-300">
           Preset applied
         </p>
