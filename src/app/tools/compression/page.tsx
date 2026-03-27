@@ -62,7 +62,7 @@ export default function PromptCompressionPage() {
             <SiteHeader />
 
             {/* Main Content */}
-            <main className="flex-1 mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-10 md:py-16">
+            <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-16">
                 <SocialShareBar variant="top" />
 
                 <div className="space-y-4 mb-10 text-center md:text-left relative">

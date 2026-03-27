@@ -57,9 +57,9 @@ export default function ContextVisualizerPage() {
       <ContextSchema />
       <SiteHeader />
 
-      <main className="flex-1">
+      <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-16">
         {/* Semantic H1 and Description from your UI */}
-        <section className="text-center mb-12 py-12 px-4">
+        <section className="text-center mb-12">
           <h1 className="text-4xl font-black text-white sm:text-6xl uppercase tracking-tight">
             Context <span className="text-indigo-400">Window</span> Visualizer
           </h1>

@@ -172,8 +172,16 @@ export default function AboutPage() {
                             </div>
                         </div>
                         <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar text-foreground/80 selection:bg-cyan-500/30">
-                            <p className="text-cyan-400 font-bold mb-3">[2026-03-23] v0.2.0 — UI/UX Refresh & Platform Update</p>
-                            <p className="pl-4 border-l border-cyan-500/20 py-0.5 hover:bg-cyan-500/5 transition-colors">Redesigned About page build log section into a scrollable terminal-style text area.</p>
+                             <p className="text-cyan-400 font-bold mb-3">[2026-03-27] v1.5.0 — The "Abundance" Update & CMS Release</p>
+                             <p className="pl-4 border-l border-cyan-500/20 py-0.5 hover:bg-cyan-500/5 transition-colors">Launched Local Blog Admin Dashboard with live preview, media management, and draft scheduling.</p>
+                             <p className="pl-4 border-l border-cyan-500/20 py-0.5 hover:bg-cyan-500/5 transition-colors">Integrated "Create Image (Gemini)" AI assistant into the blog workflow with auto-copy prompt logic.</p>
+                             <p className="pl-4 border-l border-cyan-500/20 py-0.5 hover:bg-cyan-500/5 transition-colors">Redesigned Homepage Hero and Feature Showcase for high-impact UX and tool discoverability.</p>
+                             <p className="pl-4 border-l border-cyan-500/20 py-0.5 hover:bg-cyan-500/5 transition-colors">Implemented Sample Use Cases (Light/Medium/Heavy) in Prompt Editor for instant benchmarking.</p>
+                             <p className="pl-4 border-l border-cyan-500/20 py-0.5 hover:bg-cyan-500/5 transition-colors">Refactored Global Navigation with persistent "Tools" dropdown and better IA hierarchy.</p>
+                             <p className="pl-4 border-l border-cyan-500/20 py-0.5 hover:bg-cyan-500/5 transition-colors">Standardized support badges: Resized Product Hunt badge to match GitHub Sponsors button.</p>
+                             <p className="pl-4 border-l border-cyan-500/20 py-0.5 hover:bg-cyan-500/5 transition-colors">Optimized FAQ structure and removed friction points by relocating the bug report form.</p>
+
+                             <p className="text-cyan-400 font-bold mb-3 mt-6">[2026-03-23] v0.2.0 — UI/UX Refresh & Platform Update</p>                            <p className="pl-4 border-l border-cyan-500/20 py-0.5 hover:bg-cyan-500/5 transition-colors">Redesigned About page build log section into a scrollable terminal-style text area.</p>
                             <p className="pl-4 border-l border-cyan-500/20 py-0.5 hover:bg-cyan-500/5 transition-colors">Updated header social share icons: removed Facebook, added Reddit and GitHub with brand colors.</p>
                             <p className="pl-4 border-l border-cyan-500/20 py-0.5 hover:bg-cyan-500/5 transition-colors">Added GitHub repository link to the site navigation bar for developer accessibility.</p>
                             <p className="pl-4 border-l border-cyan-500/20 py-0.5 hover:bg-cyan-500/5 transition-colors">Removed the "Join Community" Discord badge and invitation links from the Contact page.</p>

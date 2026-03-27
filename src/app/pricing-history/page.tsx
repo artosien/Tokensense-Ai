@@ -67,9 +67,9 @@ export default function PricingHistoryPage() {
       <PricingSchema />
       <SiteHeader />
       
-      <main className="flex-1">
+      <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-16">
         {/* Hero Section from UI */}
-        <section className="text-center py-12 px-4">
+        <section className="text-center mb-10">
           <span className="text-xs font-bold uppercase tracking-widest text-indigo-400 bg-indigo-400/10 border border-indigo-400/30 px-3 py-1 rounded-full">
             Historical Price Index
           </span>

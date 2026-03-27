@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-03-27
+
+### Added
+- Local Blog Admin Dashboard (/admin/blog) for local content management.
+- Blog features: Live side-by-side preview, draft/scheduling system, and media management.
+- AI Integration: "Create Image (Gemini)" tool in blog editor with automatic prompt generation.
+- Prompt Editor: "Sample Use Cases" (Light, Medium, Heavy) for quick benchmarking.
+- Content Toolbar: Rich text formatting tools for blog article creation.
+
+### Changed
+- Major UI Redesign: New Hero section with primary/secondary CTAs and dashboard visual preview.
+- Navigation Overhaul: Refactored header with a unified "Tools" dropdown.
+- Tool Discoverability: Moved "Pricing History" into the core Tools menu.
+- Feature Showcase: Updated interactive cards with prominent "Launch Tool" actions.
+- Support Badges: Resized Product Hunt badge to align perfectly with GitHub Sponsors button.
+- Hierarchy: Renamed and reorganized FAQ sections for better user flow.
+
+### Removed
+- Relocated Bug Report form from the main homepage flow to dedicated feedback areas.
+
 ## [0.2.0] - 2026-03-23
 
 ### Added

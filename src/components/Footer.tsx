@@ -42,6 +42,14 @@ export default function Footer() {
                   Contact Us
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/changelog"
+                  className="text-gray-400 hover:text-cyan-400 transition text-sm"
+                >
+                  Changelog
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -95,13 +103,28 @@ export default function Footer() {
             <p className="text-gray-400 text-sm mb-3">
               Support Tokensense Development
             </p>
-            <iframe
-              src="https://github.com/sponsors/artosien/button"
-              title="Sponsor artosien"
-              height="32"
-              width="114"
-              style={{ border: 0, borderRadius: "6px" }}
-            />
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4">
+              <iframe
+                src="https://github.com/sponsors/artosien/button"
+                title="Sponsor artosien"
+                height="32"
+                width="114"
+                style={{ border: 0, borderRadius: "6px" }}
+              />
+              <a
+                href="https://www.producthunt.com/products/tokensense-2?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-tokensense-2"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block"
+              >
+                <img
+                  alt="Tokensense - See exactly what your LLM calls cost – instantly | Product Hunt"
+                  width="148"
+                  height="32"
+                  src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1102621&theme=dark&t=1774570421882"
+                />
+              </a>
+            </div>
           </div>
 
           {/* Copyright */}

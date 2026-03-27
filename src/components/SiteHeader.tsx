@@ -63,57 +63,75 @@ export default function SiteHeader() {
                         <Button variant="ghost" className="text-muted-foreground hover:text-indigo-400 border border-transparent hover:border-indigo-500/30 hover:bg-indigo-500/10 transition-all font-medium" asChild>
                             <Link href="/">Home</Link>
                         </Button>
-                        <Button variant="ghost" className="text-muted-foreground hover:text-indigo-400 border border-transparent hover:border-indigo-500/30 hover:bg-indigo-500/10 transition-all font-medium" asChild>
-                            <Link href="/comparison">Comparison Table</Link>
-                        </Button>
-                        <Button variant="ghost" className="text-muted-foreground hover:text-indigo-400 border border-transparent hover:border-indigo-500/30 hover:bg-indigo-500/10 transition-all font-medium" asChild>
-                            <Link href="/workflow">Workflow Estimator</Link>
-                        </Button>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="text-muted-foreground hover:text-indigo-400 border border-transparent hover:border-indigo-500/30 hover:bg-indigo-500/10 transition-all font-medium gap-1">
                                     Tools <ChevronDown className="h-4 w-4" />
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start" className="min-w-[10rem]">
-                                <DropdownMenuItem asChild>
-                                    <Link href="/multimodal">Image Estimator</Link>
+                            <DropdownMenuContent align="start" className="min-w-[12rem] p-2 space-y-1">
+                                <DropdownMenuItem asChild className="rounded-lg cursor-pointer focus:bg-indigo-500/10 focus:text-indigo-400 transition-colors">
+                                    <Link href="/#calculate-section" className="flex items-center gap-2 py-2">
+                                        <div className="w-8 h-8 rounded-md bg-indigo-500/10 flex items-center justify-center">
+                                            <Bot className="w-4 h-4" />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-semibold">Token Counter</span>
+                                            <span className="text-[10px] text-muted-foreground">Instant estimation</span>
+                                        </div>
+                                    </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <Link href="/caching">Context Caching</Link>
+                                <DropdownMenuItem asChild className="rounded-lg cursor-pointer focus:bg-indigo-500/10 focus:text-indigo-400 transition-colors">
+                                    <Link href="/workflow" className="flex items-center gap-2 py-2">
+                                        <div className="w-8 h-8 rounded-md bg-purple-500/10 flex items-center justify-center">
+                                            <ChevronDown className="w-4 h-4" />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-semibold">Workflow Estimator</span>
+                                            <span className="text-[10px] text-muted-foreground">Multi-step simulator</span>
+                                        </div>
+                                    </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <Link href="/tools/compression">Prompt Compression</Link>
+                                <DropdownMenuItem asChild className="rounded-lg cursor-pointer focus:bg-indigo-500/10 focus:text-indigo-400 transition-colors">
+                                    <Link href="/comparison" className="flex items-center gap-2 py-2">
+                                        <div className="w-8 h-8 rounded-md bg-cyan-500/10 flex items-center justify-center">
+                                            <ChevronDown className="w-4 h-4" />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-semibold">Comparison Table</span>
+                                            <span className="text-[10px] text-muted-foreground">Compare LLM costs</span>
+                                        </div>
+                                    </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <Link href="/tools/batch">Batch Cost Planner</Link>
+                                <div className="h-px bg-border/40 my-1" />
+                                <DropdownMenuItem asChild className="rounded-md cursor-pointer">
+                                    <Link href="/pricing-history" className="text-xs px-2 py-1.5">Pricing History</Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <Link href="/tools/context">Context Window Visualizer</Link>
+                                <DropdownMenuItem asChild className="rounded-md cursor-pointer">
+                                    <Link href="/multimodal" className="text-xs px-2 py-1.5">Image Estimator</Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild className="rounded-md cursor-pointer">
+                                    <Link href="/caching" className="text-xs px-2 py-1.5">Context Caching</Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild className="rounded-md cursor-pointer">
+                                    <Link href="/tools/compression" className="text-xs px-2 py-1.5">Prompt Compression</Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild className="rounded-md cursor-pointer">
+                                    <Link href="/tools/batch" className="text-xs px-2 py-1.5">Batch Cost Planner</Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild className="rounded-md cursor-pointer">
+                                    <Link href="/tools/context" className="text-xs px-2 py-1.5">Context Visualizer</Link>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="text-muted-foreground hover:text-indigo-400 border border-transparent hover:border-indigo-500/30 hover:bg-indigo-500/10 transition-all font-medium gap-1">
-                                    About <ChevronDown className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start" className="min-w-[10rem]">
-                                <DropdownMenuItem asChild>
-                                    <Link href="/about">About</Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <Link href="/faq">FAQ</Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <Link href="/pricing-history">Pricing History</Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <Link href="/contact">Contact Us</Link>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <Button variant="ghost" className="text-muted-foreground hover:text-indigo-400 border border-transparent hover:border-indigo-500/30 hover:bg-indigo-500/10 transition-all font-medium" asChild>
+                            <Link href="/blog">Blog</Link>
+                        </Button>
+                        <Button variant="ghost" className="text-muted-foreground hover:text-indigo-400 border border-transparent hover:border-indigo-500/30 hover:bg-indigo-500/10 transition-all font-medium" asChild>
+                            <Link href="/faq">FAQ</Link>
+                        </Button>
+
+                        <div className="w-px h-6 bg-border/40 mx-2" />
 
                         <Button
                             variant="ghost"
@@ -148,6 +166,13 @@ export default function SiteHeader() {
                                 <div className="h-5 w-5" />
                             )}
                             <span className="sr-only">Toggle theme</span>
+                        </Button>
+
+                        <Button 
+                            className="ml-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 px-6 font-bold"
+                            asChild
+                        >
+                            <Link href="/#calculate-section">Try Calculator</Link>
                         </Button>
                     </nav>
 
@@ -216,6 +241,13 @@ export default function SiteHeader() {
                         className="flex items-center py-3 px-4 rounded-md text-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors font-medium border border-transparent hover:border-indigo-500/20"
                     >
                         Workflow Estimator
+                    </Link>
+                    <Link
+                        href="/blog"
+                        onClick={closeMenu}
+                        className="flex items-center py-3 px-4 rounded-md text-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors font-medium border border-transparent hover:border-indigo-500/20"
+                    >
+                        Blog
                     </Link>
                     <div>
                         <button

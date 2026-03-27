@@ -18,6 +18,7 @@ import { useTokenSenseStore } from "@/lib/store";
 import { countTokens, countTokensSync } from "@/lib/tokenizer";
 import { compressBasic, compressAdvanced } from "@/lib/compressor";
 import { ScenarioPresets } from "@/components/ScenarioPresets";
+import { SamplePromptSelection } from "@/components/SamplePromptSelection";
 import { TermTooltip } from "@/components/TermTooltip";
 import { cn } from "@/lib/utils";
 
@@ -245,6 +246,9 @@ export default function PromptEditor() {
 
             {/* Scenario Presets */}
             <ScenarioPresets />
+
+            {/* Sample Prompt Use Cases */}
+            <SamplePromptSelection />
 
             {/* User Prompt */}
             <div className="space-y-2">
