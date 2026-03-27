@@ -86,6 +86,8 @@ const handler = (req: any, res: any) => {
     hasSecret: !!process.env.NEXTAUTH_SECRET,
     hasGoogleId: !!process.env.GOOGLE_CLIENT_ID,
     hasGoogleSecret: !!process.env.GOOGLE_CLIENT_SECRET,
+    hasGithubId: !!process.env.GITHUB_ID,
+    hasGithubSecret: !!process.env.GITHUB_SECRET,
     nodeEnv: process.env.NODE_ENV
   });
   return NextAuth(req, res, authOptions);
