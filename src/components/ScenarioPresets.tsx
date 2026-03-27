@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTokenSenseStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { FileText, Info } from "lucide-react";
 
 interface Preset {
   label: string;
@@ -16,112 +17,110 @@ interface Preset {
 const PRESETS: Preset[] = [
   {
     label: "Chatbot Turn",
-    icon: "??",
+    icon: "💬",
     inputTokens: 500,
     outputTokens: 300,
-    modelId: "gpt-5-mini",
+    modelId: "gpt-4o-mini",
     description: "Typical back-and-forth message",
   },
   {
     label: "Doc Summary",
-    icon: "??",
+    icon: "📄",
     inputTokens: 4000,
     outputTokens: 500,
-    modelId: "claude-4.5-haiku",
+    modelId: "claude-3-5-haiku",
     description: "Summarize a document",
   },
   {
-    label: "RAG Chunk",
-    icon: "??",
-    inputTokens: 1500,
-    outputTokens: 400,
-    modelId: "gpt-5-mini",
-    description: "Retrieval-augmented generation",
+    label: "Content Rewrite",
+    icon: "✍️",
+    inputTokens: 0, // Dynamic
+    outputTokens: 0, // Dynamic
+    modelId: "claude-3-5-sonnet",
+    description: "Bulk rewriting existing blog articles",
   },
   {
     label: "Code Review",
-    icon: "??",
+    icon: "💻",
     inputTokens: 2000,
     outputTokens: 800,
-    modelId: "claude-4.6-sonnet",
+    modelId: "claude-3-5-sonnet",
     description: "Review a code file",
   },
   {
-    label: "Email Draft",
-    icon: "??",
-    inputTokens: 300,
-    outputTokens: 250,
-    modelId: "gpt-5-mini",
-    description: "Compose a short email",
-  },
-  {
     label: "Long Report",
-    icon: "??",
+    icon: "📊",
     inputTokens: 8000,
     outputTokens: 2000,
-    modelId: "gemini-3.1-pro",
+    modelId: "gemini-1-5-pro",
     description: "Analyse and write a full report",
   },
   {
-    label: "Translation",
-    icon: "??",
-    inputTokens: 1000,
-    outputTokens: 1000,
-    modelId: "gpt-5-mini",
-    description: "Translate a passage",
-  },
-  {
     label: "Agent Loop",
-    icon: "??",
+    icon: "🔄",
     inputTokens: 3000,
     outputTokens: 1200,
-    modelId: "claude-4.6-sonnet",
+    modelId: "claude-3-5-sonnet",
     description: "Multi-step agentic task",
   },
 ];
 
+const WORD_COUNT_RANGES = [
+  { label: "Low (10K-20K)", min: 10000, max: 20000, avg: 15000 },
+  { label: "Medium (30K-50K)", min: 30000, max: 50000, avg: 40000 },
+  { label: "High (55K-80K)", min: 55000, max: 80000, avg: 67500 },
+  { label: "Max (90K+)", min: 90000, max: 120000, avg: 105000 },
+];
+
 export function ScenarioPresets() {
-  const { setUserPrompt, setExpectedOutputTokens, setSelectedModelId } =
+  const { setUserPrompt, setExpectedOutputTokens, setSelectedModelId, setInputTokenCount } =
     useTokenSenseStore();
   const [activePreset, setActivePreset] = useState<string | null>(null);
+  
+  // Dynamic state for Content Rewrite
+  const [postCount, setPostCount] = useState(1);
+  const [wordRangeIdx, setWordRangeIdx] = useState(0);
 
-  const applyPreset = (preset: Preset) => {
+  const applyPreset = (preset: Preset, forceUpdate: boolean = false) => {
+    if (activePreset === preset.label && !forceUpdate) return;
     setActivePreset(preset.label);
+
+    let inTokens = preset.inputTokens;
+    let outTokens = preset.outputTokens;
+
+    if (preset.label === "Content Rewrite") {
+      const range = WORD_COUNT_RANGES[wordRangeIdx];
+      // Average words * 1.35 tokens/word * number of posts
+      const totalWords = range.avg * postCount;
+      inTokens = Math.round(totalWords * 1.35);
+      outTokens = inTokens; // Usually rewrite is roughly 1:1
+    }
 
     const samplePrompts: Record<string, string> = {
       "Chatbot Turn":
-        "Hi, can you help me understand how transformer models handle long-range dependencies in text? I'm working on a NLP project and want to know the trade-offs between attention mechanisms.",
+        "Hi, can you help me understand how transformer models handle long-range dependencies in text?",
       "Doc Summary":
-        `Please summarize the following document:\n\n` +
-        `Introduction\nThis report covers quarterly performance metrics across all business units. The analysis includes revenue, operational costs, customer acquisition, and retention rates.\n\n` +
-        `Key Findings\nRevenue grew 14% year-over-year, driven primarily by enterprise subscriptions. Operational costs increased 8%, within projected range. Customer churn dropped to 3.2%, the lowest in 18 months.\n\n` +   
-        `Recommendations\nInvest in customer success programs. Expand enterprise sales team. Review infrastructure costs for Q3 optimization.`,
-      "RAG Chunk":
-        "Based on the following context, answer the user's question.\n\nContext: [Retrieved document chunk about vector databases and embedding models]\n\nQuestion: What are the main advantages of using a vector database over a traditional relational database for semantic search?",
+        `Please summarize the following document regarding quarterly performance...`,
+      "Content Rewrite": 
+        `You are an expert editor. Please rewrite the following ${postCount} blog articles (totaling ~${(WORD_COUNT_RANGES[wordRangeIdx].avg * postCount).toLocaleString()} words) to improve SEO, readability, and engagement. Maintain the original core message but modernize the tone.\n\n[Content of ${postCount} articles would follow here...]`,
       "Code Review":
-        `Please review this Python function for bugs, performance issues, and style:\n\n` +
-        `def process_data(records):\n    results = []\n    for i in range(len(records)):\n        item = records[i]\n        if item['status'] == 'active':\n            results.append({'id': item['id'], 'value': item['value'] * 1.1})\n    return results`,
-      "Email Draft":
-        "Write a professional follow-up email to a client after a product demo. Mention the key features they showed interest in (AI automation and reporting), offer to answer questions, and suggest scheduling a technical call next week.",
+        `Please review this Python function for bugs and style...`,
       "Long Report":
-        "Analyze the following market data and write a comprehensive report covering trends, competitive landscape, opportunities, and risks for an AI SaaS company entering the healthcare sector in 2025.\n\n[Market data would appear here, including TAM estimates, regulatory overview, competitor analysis, and growth projections across 5 years...]",
-      "Translation":
-        "Translate the following text from English to Spanish, preserving the formal business tone:\n\nDear valued client, we are pleased to inform you that your account has been successfully upgraded to our Professional tier. You now have access to all premium features including advanced analytics, priority support, and unlimited API calls.",
+        "Analyze the following market data and write a comprehensive report...",
       "Agent Loop":
-        "You are an autonomous research agent. Your goal is to: 1) Search for recent papers on multi-modal AI models, 2) Summarize the top 3 most cited papers from 2024, 3) Extract key methodologies from each, 4) Compare their approaches and identify trends, 5) Write a synthesis report with your findings and recommendations for practitioners.",
+        "You are an autonomous research agent. Your goal is to search and synthesize papers...",
     };
 
-    const promptText =
-      samplePrompts[preset.label] ||
-      `[${preset.description} - approximately ${preset.inputTokens} input tokens]`;
+    const promptText = samplePrompts[preset.label] || `[Preset applied]`;
 
     setUserPrompt(promptText);
-    setExpectedOutputTokens(preset.outputTokens);
+    setInputTokenCount(inTokens);
+    setExpectedOutputTokens(outTokens);
     setSelectedModelId(preset.modelId);
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div className="flex items-center gap-2">
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
           Quick Presets
@@ -129,7 +128,6 @@ export function ScenarioPresets() {
         <div className="flex-1 h-px bg-border/40" />
       </div>
 
-      {/* Horizontal scroll on mobile, wrap on desktop */}
       <div className="relative group/scroll">
         <div className="flex md:flex-wrap gap-2 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 scrollbar-none mask-fade-right md:mask-none -mx-4 px-4 md:mx-0 md:px-0">
           {PRESETS.map((preset) => {
@@ -139,11 +137,10 @@ export function ScenarioPresets() {
                 key={preset.label}
                 type="button"
                 onClick={() => applyPreset(preset)}
-                title={preset.description}
                 className={cn(
                   "relative inline-flex items-center gap-2 px-4 py-2.5 md:px-3 md:py-1.5 rounded-full text-xs font-medium border transition-all duration-200 whitespace-nowrap min-h-[44px] md:min-h-0",
                   isActive
-                    ? "border-plasma-400 bg-plasma-500/15 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.2)]"      
+                    ? "border-plasma-400 bg-plasma-500/15 text-plasma-300 shadow-[0_0_12px_rgba(0,229,255,0.2)]"      
                     : "border-border/50 bg-card/50 text-muted-foreground hover:border-plasma-500/60 hover:bg-plasma-500/8 hover:text-plasma-400"
                 )}
               >
@@ -158,7 +155,71 @@ export function ScenarioPresets() {
         </div>
       </div>
 
-      {activePreset && (
+      {/* Dynamic Controls for Content Rewrite */}
+      {activePreset === "Content Rewrite" && (
+        <div className="bg-plasma-500/5 border border-plasma-500/10 rounded-2xl p-4 animate-in slide-in-from-top-2 duration-300">
+          <div className="flex flex-col md:flex-row md:items-center gap-6">
+            <div className="flex-1 space-y-3">
+              <label className="text-[10px] font-bold text-plasma-400 uppercase tracking-widest flex items-center gap-2">
+                <FileText className="w-3 h-3" />
+                Number of Articles
+              </label>
+              <div className="flex items-center gap-3">
+                <input 
+                  type="range" 
+                  min="1" 
+                  max="100" 
+                  value={postCount}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value);
+                    setPostCount(val);
+                    applyPreset(PRESETS.find(p => p.label === "Content Rewrite")!, true);
+                  }}
+                  className="flex-1 h-1.5 bg-plasma-500/20 rounded-lg appearance-none cursor-pointer accent-plasma-500"
+                />
+                <span className="font-mono text-sm font-bold text-white bg-plasma-500/20 px-3 py-1 rounded-md min-w-[3rem] text-center">
+                  {postCount}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex-1 space-y-3">
+              <label className="text-[10px] font-bold text-plasma-400 uppercase tracking-widest flex items-center gap-2">
+                <Info className="w-3 h-3" />
+                Word Count Scale (Total)
+              </label>
+              <div className="grid grid-cols-2 xs:grid-cols-4 gap-2">
+                {WORD_COUNT_RANGES.map((range, idx) => (
+                  <button
+                    key={range.label}
+                    onClick={() => {
+                      setWordRangeIdx(idx);
+                      applyPreset(PRESETS.find(p => p.label === "Content Rewrite")!, true);
+                    }}
+                    className={cn(
+                      "px-2 py-2 rounded-lg text-[9px] font-bold uppercase transition-all border",
+                      wordRangeIdx === idx
+                        ? "bg-plasma-500 text-black border-plasma-400"
+                        : "bg-plasma-500/5 text-plasma-400 border-plasma-500/20 hover:border-plasma-500/40"
+                    )}
+                  >
+                    {range.label.split(" ")[0]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-4 pt-3 border-t border-plasma-500/10 flex items-center justify-between text-[10px] font-mono">
+            <span className="text-muted-foreground">Estimated Payload:</span>
+            <span className="text-plasma-400 font-bold">
+              ~{(WORD_COUNT_RANGES[wordRangeIdx].avg * postCount).toLocaleString()} words total
+            </span>
+          </div>
+        </div>
+      )}
+
+      {activePreset && activePreset !== "Content Rewrite" && (
         <p className="text-[10px] text-plasma-500/70 font-mono animate-in fade-in duration-300">
           Preset applied
         </p>
