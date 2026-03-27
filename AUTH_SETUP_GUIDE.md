@@ -1,68 +1,39 @@
-# Authentication Production Setup Guide
+# Authentication Production Readiness Checklist
 
-This guide outlines the steps to configure Google and GitHub Login (NextAuth.js) for your live website, **tokensense-ai.com**.
+You are moving to production! To ensure Google and GitHub sign-ins work on **tokensense-ai.com**, you must update these settings in your provider consoles and Netlify.
 
-## 1. Google Cloud Console Configuration
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
-2. Create a new project or select your existing one.
-3. Navigate to **APIs & Services > Credentials**.
-4. Click **Create Credentials > OAuth client ID**.
-5. Select **Web application** as the application type.
-6. **Name:** Tokensense Production
-7. **Authorized JavaScript origins:**
-   - `http://localhost:3000` (for testing)
-   - `https://www.tokensense-ai.com`
-8. **Authorized redirect URIs:**
-   - `http://localhost:3000/api/auth/callback/google` (for testing)
-   - `https://www.tokensense-ai.com/api/auth/callback/google`
-9. Click **Create** and copy your **Client ID** and **Client Secret**.
+## 1. Google Cloud Console Checklist
+Go to the [Google Cloud Console Credentials](https://console.cloud.google.com/apis/credentials).
 
-## 2. GitHub Developer Settings Configuration
-1. Go to [GitHub Settings > Developer settings > OAuth Apps](https://github.com/settings/developers).
-2. Click **New OAuth App**.
-3. **Application name:** Tokensense-Ai
-4. **Homepage URL:** `https://www.tokensense-ai.com`
-5. **Authorization callback URL:**
-   - `http://localhost:3000/api/auth/callback/github` (for testing)
-   - `https://www.tokensense-ai.com/api/auth/callback/github`
-6. Click **Register application**.
-7. Copy your **Client ID** and generate a new **Client Secret**.
+*   **Authorized JavaScript origins:**
+    - [ ] `https://www.tokensense-ai.com` (Add this)
+    - [ ] `http://localhost:3000` (Optional: keep for testing)
+*   **Authorized redirect URIs:**
+    - [ ] `https://www.tokensense-ai.com/api/auth/callback/google` (Add this)
+    - [ ] `http://localhost:3000/api/auth/callback/google` (Optional: keep for testing)
 
-## 3. Generate a NextAuth Secret
-For security, you need a long random string for `NEXTAUTH_SECRET`. You can generate one by running this in your terminal:
-```bash
-openssl rand -base64 32
-```
-*Note: Save this safely; do not share it.*
+## 2. GitHub Developer Settings Checklist
+Go to your [GitHub OAuth App settings](https://github.com/settings/developers).
 
-## 4. Configure Production Environment Variables
-On your hosting provider (e.g., Netlify or Vercel), add the following environment variables:
+*   **Homepage URL:**
+    - [ ] Change to `https://www.tokensense-ai.com`
+*   **Authorization callback URL:**
+    - [ ] Change to `https://www.tokensense-ai.com/api/auth/callback/github`
+    - [ ] (If you want to keep testing locally, you may need a separate "Dev" OAuth App for `localhost:3000`)
 
-| Variable | Value |
-| :--- | :--- |
-| `NEXTAUTH_URL` | `https://www.tokensense-ai.com` |
-| `NEXTAUTH_SECRET` | *(The string you generated in step 3)* |
-| `GOOGLE_CLIENT_ID` | *(From Google Cloud Console)* |
-| `GOOGLE_CLIENT_SECRET` | *(From Google Cloud Console)* |
-| `GITHUB_ID` | *(From GitHub Developer Settings)* |
-| `GITHUB_SECRET` | *(From GitHub Developer Settings)* |
+## 3. Netlify Environment Variables Checklist
+Go to your [Netlify Site Configuration](https://app.netlify.com).
 
-### Netlify Specific Steps:
-1. Log in to your [Netlify Dashboard](https://app.netlify.com).
-2. Select your project: **tokensense-ai**.
-3. Go to **Site configuration** > **Environment variables**.
-4. Click **Add a variable** > **Add a single variable**.
-5. Enter the Key (e.g., `GITHUB_ID`) and the Value.
-6. Repeat for all variables in the table above.
-7. Go to **Deploys** and click **Trigger deploy** > **Clear cache and deploy site** for the changes to take effect.
+*   [ ] **NEXTAUTH_URL**: Set to `https://www.tokensense-ai.com`
+*   [ ] **NEXTAUTH_SECRET**: Ensure this is a long random string.
+*   [ ] **GOOGLE_CLIENT_ID**: Your production ID.
+*   [ ] **GOOGLE_CLIENT_SECRET**: Your production secret.
+*   [ ] **GITHUB_ID**: Your production ID.
+*   [ ] **GITHUB_SECRET**: Your production secret.
 
-## 5. Implementation Steps in Code
-1. Install NextAuth: `npm install next-auth`
-2. Create the API route: `src/app/api/auth/[...nextauth]/route.ts`
-3. Wrap your application with the `<SessionProvider>` in `src/app/layout.tsx`.
-4. Use the `signIn()` and `signOut()` hooks in your login components.
+## 4. Verification Step
+1.  Push your changes to GitHub.
+2.  Wait for Netlify to finish the deploy.
+3.  Go to `https://www.tokensense-ai.com/login` and try both sign-in buttons.
 
-## 6. Deployment
-After setting the environment variables in your hosting dashboard:
-1. Push your code changes to GitHub.
-2. The site will automatically redeploy with the new auth capabilities.
+**Common Error:** If you see "Redirect URI Mismatch," it means the URI sent by the app (e.g., `https://www.tokensense-ai.com/api/auth/callback/google`) doesn't exactly match one of the URIs in your Google/GitHub console.
