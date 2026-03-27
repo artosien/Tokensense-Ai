@@ -25,9 +25,19 @@ export const metadata: Metadata = {
   keywords: "LLM token cost calculator, token cost estimator, GPT-4o pricing, Claude API cost, AI token counter, OpenAI token calculator, prompt token count, LLM API pricing tool",
   manifest: "/manifest.json",
   icons: {
-    icon: "/favicon.png",
+    icon: [
+      { url: "/favicon.png", sizes: "32x32" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
     shortcut: "/favicon.png",
-    apple: "/favicon.png",
+    apple: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+  },
+  other: {
+    "apple-mobile-web-app-title": "Tokensense-Ai",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
   },
   openGraph: {
     title: "Tokensense-Ai - Free LLM Token Cost Calculator",
