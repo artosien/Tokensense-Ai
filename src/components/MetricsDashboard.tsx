@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useTokenSenseStore } from "@/lib/store";
@@ -16,6 +16,8 @@ import { ResultActions } from "./ResultActions";
 import { CompareMode } from "./CompareMode";
 import { ModelPickerModal } from "./ModelPickerModal";
 import { CostBreakdownBar } from "./CostBreakdownBar";
+import RecentCalculations from "./RecentCalculations";
+import { historyService } from "@/lib/historyService";
 import { useShareableUrl } from "@/hooks/useShareableUrl";
 import { TooltipKey } from "@/lib/tooltips";
 import Link from "next/link";
@@ -30,6 +32,7 @@ export default function MetricsDashboard() {
         agentIterations,
         avgNewInputTokensPerTurn,
         fileTokenCount,
+        userPrompt,
         setSelectedModelId,
     } = useTokenSenseStore();
 
@@ -44,6 +47,24 @@ export default function MetricsDashboard() {
         () => calculateCost(totalInputTokens, expectedOutputTokens, model),
         [totalInputTokens, expectedOutputTokens, model]
     );
+
+    // Save to history when calculation changes (debounced)
+    useEffect(() => {
+        if (totalInputTokens > 0) {
+            const timer = setTimeout(() => {
+                historyService.save({
+                    modelId: selectedModelId,
+                    modelName: model.name,
+                    inputTokens: totalInputTokens,
+                    outputTokens: expectedOutputTokens,
+                    totalTokens: totalInputTokens + expectedOutputTokens,
+                    totalCost: singleCost.totalCost,
+                    promptSnippet: userPrompt.substring(0, 100)
+                });
+            }, 2000); 
+            return () => clearTimeout(timer);
+        }
+    }, [totalInputTokens, expectedOutputTokens, selectedModelId, singleCost.totalCost, model.name, userPrompt]);
 
     const totalCost = useMemo(() => {
         if (!agentLoopEnabled || agentIterations <= 1) return singleCost.totalCost;
@@ -95,7 +116,7 @@ export default function MetricsDashboard() {
             });
             await navigator.share({
               title: 'TokenSense AI Estimate',
-              text: `${model.name} - ${totalInputTokens.toLocaleString()} tokens → ${formatCost(totalCost)}`,
+              text: `${model.name} - ${totalInputTokens.toLocaleString()} tokens ? ${formatCost(totalCost)}`,
               url: url
             });
             triggerHaptic(30);
@@ -132,10 +153,10 @@ export default function MetricsDashboard() {
     return (
         <div className="space-y-5 pb-8 md:pb-0">
             {/* Hero Cost Display */}
-            <Card className="border-cyan-500/20 bg-gradient-to-b from-cyan-500/10 to-transparent backdrop-blur-md md:hidden">
+            <Card className="border-plasma-500/20 bg-gradient-to-b from-plasma-500/10 to-transparent backdrop-blur-md md:hidden">
               <CardContent className="pt-8 pb-6 text-center">
-                <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest block mb-2">Estimated Cost</span>
-                <div className="text-5xl font-bold font-mono text-cyan-400 tabular-nums tracking-tighter mb-2">
+                <span className="text-[10px] font-bold text-plasma-400 uppercase tracking-widest block mb-2">Estimated Cost</span>
+                <div className="text-5xl font-bold font-mono text-plasma-400 tabular-nums tracking-tighter mb-2">
                   {formatCost(totalCost)}
                 </div>
                 <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground/60 font-mono">
@@ -155,7 +176,7 @@ export default function MetricsDashboard() {
                             variant="ghost"
                             size="sm"
                             onClick={() => { triggerHaptic(15); setCompareMode(true); }}
-                            className="h-9 md:h-7 text-xs gap-1.5 text-muted-foreground hover:text-cyan-400 hover:bg-cyan-500/10 border border-border/40 md:border-transparent hover:border-cyan-500/30 transition-all px-3"
+                            className="h-9 md:h-7 text-xs gap-1.5 text-muted-foreground hover:text-plasma-400 hover:bg-plasma-500/10 border border-border/40 md:border-transparent hover:border-plasma-500/30 transition-all px-3"
                         >
                             <Layers className="w-3.5 h-3.5" />
                             Compare
@@ -240,28 +261,28 @@ export default function MetricsDashboard() {
                     tooltipKey="inputTokens"
                     value={formatTokens(totalInputTokens)}
                     sublabel={`Prompt: ${formatTokens(inputTokenCount)} | Attach: ${formatTokens(fileTokenCount)}`}
-                    icon="📥"
+                    icon="??"
                 />
                 <MetricCard
                     label="Output Tokens"
                     tooltipKey="outputTokens"
                     value={formatTokens(expectedOutputTokens)}
                     sublabel={`${formatCost(singleCost.outputCost)}`}
-                    icon="📤"
+                    icon="??"
                 />
                 <MetricCard
                     label="Total Tokens"
                     tooltipKey="totalTokens"
                     value={formatTokens(totalInputTokens + expectedOutputTokens)}
                     sublabel="per call"
-                    icon="📊"
+                    icon="??"
                 />
                 <MetricCard
                     label="Total Cost"
                     tooltipKey="totalCost"
                     value={formatCost(singleCost.totalCost)}
                     sublabel="single call"
-                    icon="💰"
+                    icon="??"
                     highlight={true}
                     showDisclaimer={true}
                 />
@@ -281,7 +302,7 @@ export default function MetricsDashboard() {
                             "border transition-all duration-200",
                             shareCopied
                                 ? "border-green-500/50 bg-green-500/10 text-green-400"
-                                : "border-cyan-500/30 bg-cyan-500/10 text-cyan-400 hover:text-cyan-300 hover:border-cyan-500/50 hover:bg-cyan-500/20"
+                                : "border-plasma-500/30 bg-plasma-500/10 text-plasma-400 hover:text-cyan-300 hover:border-plasma-500/50 hover:bg-plasma-500/20"
                         )}
                     >
                         {shareCopied ? (
@@ -344,14 +365,17 @@ export default function MetricsDashboard() {
                           <Separator className="opacity-30" />
                           <div className="flex justify-between items-center">
                               <span>Prices last updated</span>
-                              <Link href="/changelog" className="text-cyan-500/70 hover:text-cyan-400 font-mono transition-colors underline underline-offset-2">
-                                  March 2026 ↗
+                              <Link href="/changelog" className="text-plasma-500/70 hover:text-plasma-400 font-mono transition-colors underline underline-offset-2">
+                                  March 2026 ?
                               </Link>
                           </div>
                       </div>
                   </CardContent>
               </Card>
             </div>
+
+            {/* Recent History */}
+            <RecentCalculations />
         </div>
     );
 }
@@ -376,7 +400,7 @@ function MetricCard({
     return (
         <Card className={cn(
           "border-border/40 bg-card/50 backdrop-blur-sm transition-all duration-300 rounded-2xl",
-          highlight ? "ring-1 ring-cyan-500/30 bg-cyan-500/5" : ""
+          highlight ? "ring-1 ring-plasma-500/30 bg-plasma-500/5" : ""
         )}>
             <CardContent className="pt-5 pb-4 px-4">
                 <div className="flex items-start justify-between mb-2">
@@ -388,7 +412,7 @@ function MetricCard({
                 </div>
                 <div className={cn(
                   "text-xl md:text-lg font-bold font-mono tabular-nums tracking-tight transition-all duration-200",
-                  highlight ? "text-cyan-400" : "text-foreground"
+                  highlight ? "text-plasma-400" : "text-foreground"
                 )}>
                     {value}
                 </div>

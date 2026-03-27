@@ -80,7 +80,7 @@ const CHANGELOG: ChangeEntry[] = [
 ];
 
 const TYPE_STYLES: Record<string, { dot: string; label: string; text: string }> = {
-  add: { dot: "bg-cyan-400", label: "text-cyan-400", text: "text-slate-300" },
+  add: { dot: "bg-plasma-400", label: "text-plasma-400", text: "text-slate-300" },
   update: { dot: "bg-indigo-400", label: "text-indigo-400", text: "text-slate-300" },
   correct: { dot: "bg-amber-400", label: "text-amber-400", text: "text-amber-200/80" },
   remove: { dot: "bg-red-400", label: "text-red-400", text: "text-red-200/80" },
@@ -140,8 +140,8 @@ export default function ChangelogPage() {
       <main className="mx-auto max-w-3xl px-4 sm:px-6 py-12 space-y-10">
         {/* Page header */}
         <div className="space-y-3">
-          <div className="flex items-center gap-2 text-xs font-mono text-cyan-400/70">
-            <Link href="/" className="hover:text-cyan-400 transition-colors">
+          <div className="flex items-center gap-2 text-xs font-mono text-plasma-400/70">
+            <Link href="/" className="hover:text-plasma-400 transition-colors">
               ← Back to Calculator
             </Link>
           </div>
@@ -153,7 +153,7 @@ export default function ChangelogPage() {
           </p>
           <div className="flex items-center gap-4 text-xs font-mono text-muted-foreground/60 pt-1">
             <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 inline-block" />
+              <span className="w-2 h-2 rounded-full bg-plasma-400 inline-block" />
               NEW addition
             </span>
             <span className="flex items-center gap-1.5">
@@ -173,11 +173,11 @@ export default function ChangelogPage() {
             <div key={gi} className="relative">
               {/* Date marker */}
               <div className="absolute -left-[25px] top-0 flex items-center">
-                <div className="w-4 h-4 rounded-full bg-slate-800 border-2 border-cyan-500/50" />
+                <div className="w-4 h-4 rounded-full bg-slate-800 border-2 border-plasma-500/50" />
               </div>
 
               <div className="pl-6 space-y-3">
-                <div className="text-sm font-mono font-bold text-cyan-400/80 tracking-widest uppercase">
+                <div className="text-sm font-mono font-bold text-plasma-400/80 tracking-widest uppercase">
                   {group.date}
                 </div>
 
@@ -188,7 +188,7 @@ export default function ChangelogPage() {
                       <div key={ei} className="flex items-start gap-3 px-4 py-3">
                         <span
                           className={`mt-0.5 shrink-0 text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border ${
-                            entry.type === "add" ? "text-cyan-400 bg-cyan-500/10 border-cyan-500/30" :
+                            entry.type === "add" ? "text-plasma-400 bg-plasma-500/10 border-plasma-500/30" :
                             entry.type === "update" ? "text-indigo-400 bg-indigo-500/10 border-indigo-500/30" :
                             entry.type === "correct" ? "text-amber-400 bg-amber-500/10 border-amber-500/30" :
                             "text-red-400 bg-red-500/10 border-red-500/30"
@@ -219,7 +219,7 @@ export default function ChangelogPage() {
           </p>
           <p className="text-xs font-mono text-muted-foreground/50">
             {" "}Want to report a pricing error?{" "}
-            <Link href="/contact" className="text-cyan-400/70 hover:text-cyan-400 underline underline-offset-2">
+            <Link href="/contact" className="text-plasma-400/70 hover:text-plasma-400 underline underline-offset-2">
               Contact us
             </Link>
             .
@@ -229,3 +229,4 @@ export default function ChangelogPage() {
     </div>
   );
 }
+

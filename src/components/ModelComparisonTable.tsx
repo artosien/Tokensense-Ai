@@ -151,7 +151,7 @@ function TierBadge({ tier }: { tier: "intelligence" | "speed" }) {
             </span>
         );
     return (
-        <span className="inline-flex items-center gap-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/30 px-1.5 py-0.5 text-[10px] font-semibold text-cyan-400 whitespace-nowrap">
+        <span className="inline-flex items-center gap-0.5 rounded-full bg-plasma-500/15 border border-plasma-500/30 px-1.5 py-0.5 text-[10px] font-semibold text-plasma-400 whitespace-nowrap">
             <Zap className="w-2.5 h-2.5" />
             Speed
         </span>
@@ -189,15 +189,15 @@ function SortHeader({
     return (
         <button
             onClick={onClick}
-            className="flex items-center gap-1.5 font-semibold text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer select-none py-2"
+            className="flex items-center gap-1.5 font-semibold text-slate-300 hover:text-plasma-400 transition-colors cursor-pointer select-none py-2"
             aria-label={`Sort by ${label}`}
         >
             {label}
             {isActive ? (
                 currentDir === "asc" ? (
-                    <ChevronUp className="w-4 h-4 text-cyan-400" />
+                    <ChevronUp className="w-4 h-4 text-plasma-400" />
                 ) : (
-                    <ChevronDown className="w-4 h-4 text-cyan-400" />
+                    <ChevronDown className="w-4 h-4 text-plasma-400" />
                 )
             ) : (
                 <ChevronsUpDown className="w-4 h-4 text-slate-600" />
@@ -215,13 +215,13 @@ function CostTooltip({ inputRate, outputRate }: { inputRate: number; outputRate:
             <button
                 onMouseEnter={() => setVisible(true)}
                 onMouseLeave={() => setVisible(false)}
-                className="text-slate-500 hover:text-cyan-400 transition-colors cursor-help ml-1"
+                className="text-slate-500 hover:text-plasma-400 transition-colors cursor-help ml-1"
                 aria-label="Cost estimate"
             >
                 ⓘ
             </button>
             {visible && (
-                <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 rounded bg-slate-900 border border-cyan-400/30 text-xs font-mono text-slate-200 whitespace-nowrap shadow-xl pointer-events-none">
+                <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 rounded bg-slate-900 border border-plasma-400/30 text-xs font-mono text-slate-200 whitespace-nowrap shadow-xl pointer-events-none">
                     {estimate}
                 </div>
             )}
@@ -235,7 +235,7 @@ function ContextBar({ value, max }: { value: number; max: number }) {
         <div className="relative w-full flex items-center gap-2">
             <div className="flex-1 h-5 bg-white/5 rounded-md overflow-hidden border border-white/10">
                 <div
-                    className="h-full bg-cyan-400/30 transition-all duration-300"
+                    className="h-full bg-plasma-400/30 transition-all duration-300"
                     style={{ width: `${percentage}%` }}
                 />
             </div>
@@ -857,7 +857,7 @@ export default function ModelComparisonTable() {
                                                             <span className="flex items-center gap-2">
                                                                 {m.name}
                                                                 {t === "speed" && (
-                                                                    <Zap className="w-3 h-3 text-cyan-400 inline" />
+                                                                    <Zap className="w-3 h-3 text-plasma-400 inline" />
                                                                 )}
                                                                 {t === "intelligence" && (
                                                                     <Brain className="w-3 h-3 text-purple-400 inline" />
@@ -1332,3 +1332,4 @@ export default function ModelComparisonTable() {
         </div>
     );
 }
+

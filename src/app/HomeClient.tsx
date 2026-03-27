@@ -29,11 +29,13 @@ const MetricsDashboard = dynamic(() => import("@/components/MetricsDashboard"), 
 });
 const AgentLoopSimulator = dynamic(() => import("@/components/AgentLoopSimulator"), { ssr: false });
 const FileContextUploader = dynamic(() => import("@/components/FileContextUploader"), { ssr: false });
+const BatchAnalysisTool = dynamic(() => import("@/components/BatchAnalysisTool"), { ssr: false });
 const BugReportForm = dynamic(() => import("@/components/BugReportForm"), { ssr: false });
 const PromptCostComparisonTable = dynamic(() => import("@/components/PromptCostComparisonTable"), { 
   ssr: false,
   loading: () => <div className="h-[400px] mt-8 animate-pulse bg-card/50 rounded-2xl border border-border/40" />
 });
+const ModelComparisonSlider = dynamic(() => import("@/components/ModelComparisonSlider"), { ssr: false });
 
 export default function HomeClient() {
   const [mounted, setMounted] = useState(false);
@@ -96,7 +98,7 @@ export default function HomeClient() {
             <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black tracking-tight leading-[1.1] text-foreground">
               Calculate your AI <br className="hidden lg:block" />
               prompt costs{" "}
-              <span className="bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-plasma-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
                 instantly.
               </span>
             </h1>
@@ -144,7 +146,7 @@ export default function HomeClient() {
 
           {/* Hero Visual - Dashboard Preview Mini */}
           <div className="hidden lg:block w-full max-w-md animate-in fade-in slide-in-from-right-8 duration-1000">
-            <div className="relative p-1 rounded-3xl bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-cyan-500/20 border border-white/10 shadow-2xl">
+            <div className="relative p-1 rounded-3xl bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-plasma-500/20 border border-white/10 shadow-2xl">
               <div className="rounded-[22px] overflow-hidden bg-background/40 backdrop-blur-xl border border-white/5">
                 <div className="h-8 bg-muted/30 flex items-center px-4 gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-red-500/20" />
@@ -159,7 +161,7 @@ export default function HomeClient() {
                     <div className="h-3 w-4/6 bg-muted/40 rounded-full" />
                   </div>
                   <div className="pt-4 grid grid-cols-2 gap-4">
-                    <div className="h-16 bg-cyan-500/10 rounded-xl border border-cyan-500/20" />
+                    <div className="h-16 bg-plasma-500/10 rounded-xl border border-plasma-500/20" />
                     <div className="h-16 bg-indigo-500/10 rounded-xl border border-indigo-500/20" />
                   </div>
                 </div>
@@ -522,13 +524,13 @@ export default function HomeClient() {
             onClick={() => setActiveTab("calculate")}
             className={cn(
               "flex flex-col items-center justify-center w-full h-full gap-1 transition-colors relative",
-              activeTab === "calculate" ? "text-cyan-400" : "text-muted-foreground"
+              activeTab === "calculate" ? "text-plasma-400" : "text-muted-foreground"
             )}
           >
             <Calculator className="w-5 h-5" />
             <span className="text-[10px] font-semibold uppercase tracking-wider">Calculate</span>
             {activeTab === "calculate" && (
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-cyan-400 rounded-t-full shadow-[0_-2px_8px_rgba(34,211,238,0.4)]" />
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-plasma-400 rounded-t-full shadow-[0_-2px_8px_rgba(34,211,238,0.4)]" />
             )}
           </button>
           
@@ -536,13 +538,13 @@ export default function HomeClient() {
             onClick={() => setActiveTab("results")}
             className={cn(
               "flex flex-col items-center justify-center w-full h-full gap-1 transition-colors relative",
-              activeTab === "results" ? "text-cyan-400" : "text-muted-foreground"
+              activeTab === "results" ? "text-plasma-400" : "text-muted-foreground"
             )}
           >
             <LayoutDashboard className="w-5 h-5" />
             <span className="text-[10px] font-semibold uppercase tracking-wider">Results</span>
             {activeTab === "results" && (
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-cyan-400 rounded-t-full shadow-[0_-2px_8px_rgba(34,211,238,0.4)]" />
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-plasma-400 rounded-t-full shadow-[0_-2px_8px_rgba(34,211,238,0.4)]" />
             )}
           </button>
         </div>
@@ -550,3 +552,4 @@ export default function HomeClient() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useRef, useCallback, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
@@ -282,7 +282,7 @@ export default function PromptEditor() {
                                           "w-12 h-12 md:w-11 md:h-11 rounded-full transition-all duration-200",
                                           isDictatingUser
                                             ? "bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:text-red-600 ring-2 ring-red-500/40 animate-pulse"
-                                            : "text-muted-foreground hover:text-cyan-400 hover:bg-cyan-500/10 border border-cyan-500/30 hover:border-cyan-400 shadow-sm bg-card"
+                                            : "text-muted-foreground hover:text-plasma-400 hover:bg-plasma-500/10 border border-plasma-500/30 hover:border-plasma-400 shadow-sm bg-card"
                                         )}
                                         onClick={() => toggleDictation("user")}
                                         aria-label="Use voice to dictate your prompt"
@@ -302,10 +302,10 @@ export default function PromptEditor() {
             {/* System Prompt Toggle */}
             <button
                 onClick={() => setShowSystemPrompt(prev => !prev)}
-                className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-2 mt-1 min-h-[44px] px-1 font-medium"
+                className="text-sm text-plasma-400 hover:text-cyan-300 transition-colors flex items-center gap-2 mt-1 min-h-[44px] px-1 font-medium"
                 aria-expanded={showSystemPrompt}
             >
-                <div className="w-5 h-5 flex items-center justify-center rounded-full bg-cyan-500/10 border border-cyan-500/20">
+                <div className="w-5 h-5 flex items-center justify-center rounded-full bg-plasma-500/10 border border-plasma-500/20">
                   {showSystemPrompt ? '-' : '+'}
                 </div>
                 {showSystemPrompt ? 'Hide System Prompt' : 'Add System Prompt (optional)'}
@@ -349,7 +349,7 @@ export default function PromptEditor() {
                                               "w-12 h-12 md:w-11 md:h-11 rounded-full transition-all duration-200",
                                               isDictatingSystem
                                                 ? "bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:text-red-600 ring-2 ring-red-500/40 animate-pulse"
-                                                : "text-muted-foreground hover:text-cyan-400 hover:bg-cyan-500/10 border border-cyan-500/30 hover:border-cyan-400 shadow-sm bg-card"
+                                                : "text-muted-foreground hover:text-plasma-400 hover:bg-plasma-500/10 border border-plasma-500/30 hover:border-plasma-400 shadow-sm bg-card"
                                             )}
                                             onClick={() => toggleDictation("system")}
                                             aria-label="Use voice to dictate your prompt"
@@ -397,7 +397,7 @@ export default function PromptEditor() {
                             value={expectedOutputTokens}
                             onBlur={() => { if (window.innerWidth < 768) handleCalculateMobile(); }}
                             onChange={(e) => setExpectedOutputTokens(Math.max(0, parseInt(e.target.value) || 0))}
-                            className="w-24 h-11 md:h-8 md:w-20 rounded-lg border border-border/50 bg-background/50 px-3 py-1 text-right font-mono text-base md:text-sm focus:ring-1 ring-cyan-500/30 focus:border-cyan-500/50 outline-none"
+                            className="w-24 h-11 md:h-8 md:w-20 rounded-lg border border-border/50 bg-background/50 px-3 py-1 text-right font-mono text-base md:text-sm focus:ring-1 ring-plasma-500/30 focus:border-plasma-500/50 outline-none"
                         />
                         <span className="text-xs font-semibold text-muted-foreground uppercase">tokens</span>
                     </div>
@@ -425,7 +425,7 @@ export default function PromptEditor() {
             <div className="md:hidden pt-4 pb-2">
               <Button 
                 onClick={handleCalculateMobile}
-                className="w-full h-14 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-lg shadow-lg shadow-cyan-500/20 gap-2"
+                className="w-full h-14 rounded-2xl bg-plasma-500 hover:bg-plasma-400 text-slate-950 font-bold text-lg shadow-lg shadow-plasma-500/20 gap-2"
               >
                 <Zap className="w-5 h-5 fill-slate-950" />
                 Calculate & View Results

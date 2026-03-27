@@ -35,8 +35,8 @@ export function ModelPills({
               transition-all duration-150 whitespace-nowrap
               ${
                 selected === model.id
-                  ? "bg-cyan-400 text-navy-950 border-cyan-400 shadow-lg shadow-cyan-400/20"
-                  : "bg-transparent text-slate-400 border-slate-700 hover:border-cyan-400/50 hover:text-cyan-300"
+                  ? "bg-plasma-400 text-navy-950 border-plasma-400 shadow-lg shadow-plasma-400/20"
+                  : "bg-transparent text-slate-400 border-slate-700 hover:border-plasma-400/50 hover:text-cyan-300"
               }
             `}
           >
@@ -65,8 +65,8 @@ export function ModelPills({
                 transition-all duration-150 whitespace-nowrap
                 ${
                   selected === model.id
-                    ? "bg-cyan-400 text-navy-950 border-cyan-400 shadow-lg shadow-cyan-400/20"
-                    : "bg-transparent text-slate-400 border-slate-700 hover:border-cyan-400/50 hover:text-cyan-300"
+                    ? "bg-plasma-400 text-navy-950 border-plasma-400 shadow-lg shadow-plasma-400/20"
+                    : "bg-transparent text-slate-400 border-slate-700 hover:border-plasma-400/50 hover:text-cyan-300"
                 }
               `}
             >
@@ -78,3 +78,4 @@ export function ModelPills({
     </div>
   );
 }
+

@@ -128,7 +128,7 @@ export default function WorkflowSimulatorPage() {
                             {/* n8n */}
                             <div className="bg-card border border-border/40 rounded-2xl p-6 space-y-4">
                                 <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full bg-cyan-500"></div>
+                                    <div className="w-3 h-3 rounded-full bg-plasma-500"></div>
                                     n8n
                                 </h3>
                                 <p className="text-sm text-muted-foreground leading-relaxed">
@@ -228,3 +228,4 @@ export default function WorkflowSimulatorPage() {
         </div>
     );
 }
+

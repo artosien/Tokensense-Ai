@@ -188,7 +188,7 @@ export default function FAQPage() {
                                 How does Tokensense-Ai count tokens without sending my data to a server?
                             </AccordionTrigger>
                             <AccordionContent className="text-muted-foreground leading-relaxed">
-                                Tokensense-Ai uses <a href="https://github.com/openai/tiktoken" className="text-cyan-400 underline hover:text-cyan-300">tiktoken</a>, OpenAI&apos;s open-source tokenizer library, compiled to WebAssembly and running entirely in your browser. Your text is tokenized locally — nothing is transmitted. This means counts are accurate for OpenAI models, and approximate for other providers that use similar BPE tokenization schemes.
+                                Tokensense-Ai uses <a href="https://github.com/openai/tiktoken" className="text-plasma-400 underline hover:text-cyan-300">tiktoken</a>, OpenAI&apos;s open-source tokenizer library, compiled to WebAssembly and running entirely in your browser. Your text is tokenized locally — nothing is transmitted. This means counts are accurate for OpenAI models, and approximate for other providers that use similar BPE tokenization schemes.
                             </AccordionContent>
                         </AccordionItem>
 
@@ -329,3 +329,4 @@ export default function FAQPage() {
         </div>
     );
 }
+

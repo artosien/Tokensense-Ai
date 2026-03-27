@@ -132,7 +132,7 @@ function Slider({ label, value, min, max, step = 1, onChange, unit = "" }: Slide
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <label className="text-xs font-semibold text-slate-300 uppercase">{label}</label>
-        <span className="text-sm font-bold text-cyan-400 font-mono">
+        <span className="text-sm font-bold text-plasma-400 font-mono">
           {fmtK(value)} {unit}
         </span>
       </div>
@@ -163,12 +163,12 @@ interface LineItemProps {
 
 function LineItem({ label, value, sublabel, highlight }: LineItemProps) {
   return (
-    <div className={`flex items-center justify-between py-2 px-3 rounded-lg ${highlight ? "bg-cyan-500/10 border border-cyan-500/30" : ""}`}>
+    <div className={`flex items-center justify-between py-2 px-3 rounded-lg ${highlight ? "bg-plasma-500/10 border border-plasma-500/30" : ""}`}>
       <div>
         <div className="text-xs font-medium text-slate-300">{label}</div>
         {sublabel && <div className="text-[10px] text-slate-500 mt-0.5">{sublabel}</div>}
       </div>
-      <div className={`font-mono font-bold ${highlight ? "text-cyan-400" : "text-slate-200"}`}>
+      <div className={`font-mono font-bold ${highlight ? "text-plasma-400" : "text-slate-200"}`}>
         {value}
       </div>
     </div>
@@ -605,3 +605,4 @@ Calculated at: tokensense-ai.com/workflow`;
     </div>
   );
 }
+

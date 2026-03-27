@@ -46,7 +46,7 @@ export function CostBreakdownBar({ inputCost, outputCost, cacheSavings = 0 }: Co
             className="h-full relative group transition-all duration-700 ease-out"
             style={{ width: mounted ? `${inputPct}%` : "0%" }}
           >
-            <div className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400" />
+            <div className="h-full bg-gradient-to-r from-plasma-500 to-plasma-400" />
             {/* Hover label */}
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
               <span className="text-[9px] font-mono font-bold text-navy-950 text-[#0d1117] whitespace-nowrap px-1">
@@ -74,7 +74,7 @@ export function CostBreakdownBar({ inputCost, outputCost, cacheSavings = 0 }: Co
       {/* Legend */}
       <div className="flex items-center gap-3 text-[10px] font-mono text-muted-foreground/70">
         <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-sm bg-cyan-400 inline-block" />
+          <span className="w-2 h-2 rounded-sm bg-plasma-400 inline-block" />
           Input
         </span>
         <span className="flex items-center gap-1">
@@ -104,3 +104,4 @@ export function CostBreakdownBar({ inputCost, outputCost, cacheSavings = 0 }: Co
     </div>
   );
 }
+

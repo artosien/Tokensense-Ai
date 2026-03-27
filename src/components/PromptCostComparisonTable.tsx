@@ -107,13 +107,13 @@ export default function PromptCostComparisonTable({
                 <tr
                   key={row.id}
                   className={`border-b border-border/20 transition-colors hover:bg-muted/30 ${
-                    isCheapest ? "bg-cyan-500/5" : ""
+                    isCheapest ? "bg-plasma-500/5" : ""
                   }`}
                 >
                   <td className="px-5 py-3 font-medium">
                     <div className="flex items-center gap-2">
                       {isCheapest && (
-                        <span className="inline-flex items-center gap-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/30 px-1.5 py-0.5 text-[10px] font-semibold text-cyan-400 whitespace-nowrap">
+                        <span className="inline-flex items-center gap-0.5 rounded-full bg-plasma-500/15 border border-plasma-500/30 px-1.5 py-0.5 text-[10px] font-semibold text-plasma-400 whitespace-nowrap">
                           <Trophy className="w-2.5 h-2.5" />
                           Cheapest
                         </span>
@@ -129,7 +129,7 @@ export default function PromptCostComparisonTable({
                     {formatTokens(row.outputTokens)}
                   </td>
                   <td className={`px-5 py-3 text-right font-mono tabular-nums font-semibold ${
-                    isCheapest ? "text-cyan-400" : ""
+                    isCheapest ? "text-plasma-400" : ""
                   }`}>
                     {formatCost(row.totalCost)}
                   </td>
@@ -147,19 +147,19 @@ export default function PromptCostComparisonTable({
           return (
             <div
               key={row.id}
-              className={`px-4 py-3 ${isCheapest ? "border-l-2 border-l-cyan-400 bg-cyan-500/5" : ""}`}
+              className={`px-4 py-3 ${isCheapest ? "border-l-2 border-l-plasma-400 bg-plasma-500/5" : ""}`}
             >
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-sm">{row.name}</span>
                   {isCheapest && (
-                    <span className="inline-flex items-center gap-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/30 px-1.5 py-0.5 text-[10px] font-semibold text-cyan-400">
+                    <span className="inline-flex items-center gap-0.5 rounded-full bg-plasma-500/15 border border-plasma-500/30 px-1.5 py-0.5 text-[10px] font-semibold text-plasma-400">
                       <Trophy className="w-2.5 h-2.5" />
                       Cheapest
                     </span>
                   )}
                 </div>
-                <span className={`font-mono text-sm font-semibold ${isCheapest ? "text-cyan-400" : ""}`}>
+                <span className={`font-mono text-sm font-semibold ${isCheapest ? "text-plasma-400" : ""}`}>
                   {formatCost(row.totalCost)}
                 </span>
               </div>

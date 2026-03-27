@@ -21,7 +21,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/"
-                  className="text-gray-400 hover:text-cyan-400 transition text-sm"
+                  className="text-gray-400 hover:text-plasma-400 transition text-sm"
                 >
                   Home
                 </Link>
@@ -29,7 +29,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/about"
-                  className="text-gray-400 hover:text-cyan-400 transition text-sm"
+                  className="text-gray-400 hover:text-plasma-400 transition text-sm"
                 >
                   About
                 </Link>
@@ -37,7 +37,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/contact"
-                  className="text-gray-400 hover:text-cyan-400 transition text-sm"
+                  className="text-gray-400 hover:text-plasma-400 transition text-sm"
                 >
                   Contact Us
                 </Link>
@@ -45,7 +45,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/changelog"
-                  className="text-gray-400 hover:text-cyan-400 transition text-sm"
+                  className="text-gray-400 hover:text-plasma-400 transition text-sm"
                 >
                   Changelog
                 </Link>
@@ -60,7 +60,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/privacy"
-                  className="text-gray-400 hover:text-cyan-400 transition text-sm"
+                  className="text-gray-400 hover:text-plasma-400 transition text-sm"
                 >
                   Privacy Policy
                 </Link>
@@ -68,7 +68,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/terms"
-                  className="text-gray-400 hover:text-cyan-400 transition text-sm"
+                  className="text-gray-400 hover:text-plasma-400 transition text-sm"
                 >
                   Terms of Service
                 </Link>
@@ -85,7 +85,7 @@ export default function Footer() {
                   href="https://github.com/artosien"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-cyan-400 transition text-sm"
+                  className="text-gray-400 hover:text-plasma-400 transition text-sm"
                 >
                   GitHub
                 </a>
@@ -137,4 +137,5 @@ export default function Footer() {
     </footer>
   );
 }
+
 

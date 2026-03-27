@@ -49,7 +49,7 @@ export function TermTooltip({
           onFocus={show}
           onBlur={hide}
           onClick={toggle}
-          className="w-4 h-4 rounded-full border border-cyan-500/40 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-400 transition-all duration-150 flex items-center justify-center text-[9px] font-bold cursor-help shrink-0"
+          className="w-4 h-4 rounded-full border border-plasma-500/40 bg-plasma-500/10 text-plasma-400 hover:bg-plasma-500/20 hover:border-plasma-400 transition-all duration-150 flex items-center justify-center text-[9px] font-bold cursor-help shrink-0"
           aria-label={`What is ${tooltip.term}?`}
         >
           ?
@@ -67,7 +67,7 @@ export function TermTooltip({
         onFocus={show}
         onBlur={hide}
         onClick={toggle}
-        className="border-b border-dashed border-cyan-500/50 cursor-help hover:border-cyan-400 transition-colors duration-150"
+        className="border-b border-dashed border-plasma-500/50 cursor-help hover:border-plasma-400 transition-colors duration-150"
         tabIndex={0}
         role="button"
         aria-label={`What is ${tooltip.term}?`}
@@ -94,7 +94,7 @@ function TooltipBubble({
       className="
         absolute z-[9999] bottom-full left-1/2 -translate-x-1/2 mb-2
         w-56 px-3 py-2.5 rounded-md
-        bg-[#0d1117] border border-cyan-500/50
+        bg-[#0d1117] border border-plasma-500/50
         text-xs font-mono text-slate-200 leading-relaxed
         shadow-[0_0_20px_rgba(6,182,212,0.15)]
         pointer-events-none
@@ -116,3 +116,4 @@ function TooltipBubble({
     </span>
   );
 }
+

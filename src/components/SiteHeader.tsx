@@ -2,9 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Bot, Menu, X, Sun, Moon, ChevronDown, Github } from "lucide-react";
+import { Bot, Menu, X, Sun, Moon, ChevronDown, Github, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/ThemeProvider";
+import { useSession, signIn, signOut } from "next-auth/react";
+import { BioUpdateModal } from "@/components/BioUpdateModal";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -18,6 +20,8 @@ export default function SiteHeader() {
     const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
     const { theme, toggleTheme } = useTheme();
+    const { data: session, status } = useSession();
+    const [isBioModalOpen, setIsBioModalOpen] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -42,6 +46,7 @@ export default function SiteHeader() {
     };
 
     return (
+    <>
         <header className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="flex h-14 items-center justify-between">
@@ -94,7 +99,7 @@ export default function SiteHeader() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild className="rounded-lg cursor-pointer focus:bg-indigo-500/10 focus:text-indigo-400 transition-colors">
                                     <Link href="/comparison" className="flex items-center gap-2 py-2">
-                                        <div className="w-8 h-8 rounded-md bg-cyan-500/10 flex items-center justify-center">
+                                        <div className="w-8 h-8 rounded-md bg-plasma-500/10 flex items-center justify-center">
                                             <ChevronDown className="w-4 h-4" />
                                         </div>
                                         <div className="flex flex-col">
@@ -130,6 +135,80 @@ export default function SiteHeader() {
                         <Button variant="ghost" className="text-muted-foreground hover:text-indigo-400 border border-transparent hover:border-indigo-500/30 hover:bg-indigo-500/10 transition-all font-medium" asChild>
                             <Link href="/faq">FAQ</Link>
                         </Button>
+
+                        <div className="w-px h-6 bg-border/40 mx-2" />
+
+                        {status === "authenticated" ? (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="relative h-9 w-9 rounded-full border border-indigo-500/30 hover:border-indigo-500/60 p-0 overflow-hidden bg-indigo-500/10 focus-visible:ring-1 focus-visible:ring-indigo-500">
+                                        {session.user?.image ? (
+                                            <img 
+                                                src={session.user.image} 
+                                                alt={session.user.name || "User"} 
+                                                className="h-full w-full object-cover"
+                                            />
+                                        ) : (
+                                            <User className="h-5 w-5 text-indigo-400" />
+                                        )}
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-64 p-2 space-y-1 bg-card/95 backdrop-blur-xl border-border/40 shadow-2xl">
+                                    <div className="flex flex-col px-3 py-2 mb-1">
+                                        <span className="text-sm font-bold truncate text-foreground">{session.user?.name}</span>
+                                        <span className="text-[10px] text-muted-foreground truncate font-medium">{session.user?.email}</span>
+                                    </div>
+                                    <div className="h-px bg-border/40 my-1" />
+                                    <DropdownMenuItem asChild className="rounded-lg cursor-pointer focus:bg-indigo-500/10 focus:text-indigo-400 transition-colors py-2.5">
+                                        <Link href="/account" className="flex items-center gap-2">
+                                            <div className="w-8 h-8 rounded-md bg-indigo-500/10 flex items-center justify-center">
+                                                <User className="w-4 h-4" />
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-xs font-semibold">Account Dashboard</span>
+                                                <span className="text-[9px] text-muted-foreground">Manage your profile</span>
+                                            </div>
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                        onClick={() => setIsBioModalOpen(true)}
+                                        className="rounded-lg cursor-pointer focus:bg-indigo-500/10 focus:text-indigo-400 transition-colors py-2.5"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 rounded-md bg-purple-500/10 flex items-center justify-center">
+                                                <User className="w-4 h-4" />
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-xs font-semibold">Update Bio</span>
+                                                <span className="text-[9px] text-muted-foreground">Add personal details</span>
+                                            </div>
+                                        </div>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => signOut()} className="rounded-lg cursor-pointer focus:bg-red-500/10 focus:text-red-400 transition-colors py-2.5">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 rounded-md bg-red-500/10 flex items-center justify-center">
+                                                <LogOut className="w-4 h-4" />
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-xs font-semibold">Sign Out</span>
+                                                <span className="text-[9px] text-muted-foreground">End your session</span>
+                                            </div>
+                                        </div>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        ) : (
+                            <Button 
+                                variant="ghost" 
+                                asChild
+                                className="text-muted-foreground hover:text-indigo-400 border border-transparent hover:border-indigo-500/30 hover:bg-indigo-500/10 transition-all font-medium gap-2 px-4"
+                            >
+                                <Link href="/login">
+                                    <User className="h-4 w-4" />
+                                    Login
+                                </Link>
+                            </Button>
+                        )}
 
                         <div className="w-px h-6 bg-border/40 mx-2" />
 
@@ -249,6 +328,27 @@ export default function SiteHeader() {
                     >
                         Blog
                     </Link>
+
+                    {status === "authenticated" ? (
+                        <Link
+                            href="/account"
+                            onClick={closeMenu}
+                            className="flex items-center py-3 px-4 rounded-md text-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors font-medium border border-transparent hover:border-indigo-500/20"
+                        >
+                            Account Dashboard
+                        </Link>
+                    ) : (
+                        <button
+                            onClick={() => {
+                                signIn("google");
+                                closeMenu();
+                            }}
+                            className="flex items-center py-3 px-4 rounded-md text-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors font-medium border border-transparent hover:border-indigo-500/20 w-full text-left"
+                        >
+                            Login with Google
+                        </button>
+                    )}
+
                     <div>
                         <button
                             type="button"
@@ -342,5 +442,14 @@ export default function SiteHeader() {
                 </nav>
             </div>
         </header>
+        {session?.user && (
+            <BioUpdateModal 
+                userId={(session.user as any).id || session.user.email || "default"}
+                isOpen={isBioModalOpen}
+                onClose={() => setIsBioModalOpen(false)}
+            />
+        )}
+    </>
     );
 }
+

@@ -59,7 +59,7 @@ export default function BreakevenCallout({
   }
 
   return (
-    <div className="rounded-lg border border-cyan-500/40 bg-cyan-500/10 p-6">
+    <div className="rounded-lg border border-plasma-500/40 bg-plasma-500/10 p-6">
       <div className="space-y-4">
         <div className="flex items-start gap-3">
           <div className="text-2xl">🎯</div>
@@ -86,3 +86,4 @@ export default function BreakevenCallout({
     </div>
   );
 }
+

@@ -83,7 +83,7 @@ export function CompareMode({ onClose }: CompareModeProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-cyan-400" />
+          <Layers className="w-4 h-4 text-plasma-400" />
           <span className="text-sm font-semibold text-foreground">Compare Mode</span>
           <span className="text-xs text-muted-foreground/60">
             ({selectedIds.length} models)
@@ -95,7 +95,7 @@ export function CompareMode({ onClose }: CompareModeProps) {
               variant="outline"
               size="sm"
               onClick={() => setShowPicker(!showPicker)}
-              className="h-7 text-xs gap-1 border-cyan-500/30 hover:bg-cyan-500/10 hover:text-cyan-400"
+              className="h-7 text-xs gap-1 border-plasma-500/30 hover:bg-plasma-500/10 hover:text-plasma-400"
             >
               <Plus className="w-3 h-3" />
               Add Model
@@ -122,7 +122,7 @@ export function CompareMode({ onClose }: CompareModeProps) {
             placeholder="Search models..."
             value={pickerSearch}
             onChange={(e) => setPickerSearch(e.target.value)}
-            className="w-full px-3 py-1.5 text-xs font-mono bg-background/50 border border-border/50 rounded-md focus:outline-none focus:border-cyan-500/50 text-foreground placeholder:text-muted-foreground/50"
+            className="w-full px-3 py-1.5 text-xs font-mono bg-background/50 border border-border/50 rounded-md focus:outline-none focus:border-plasma-500/50 text-foreground placeholder:text-muted-foreground/50"
           />
           <div className="max-h-40 overflow-y-auto space-y-0.5">
             {filteredModels.map((m) => (
@@ -204,7 +204,7 @@ export function CompareMode({ onClose }: CompareModeProps) {
               {/* Breakdown */}
               <div className="space-y-1 text-xs font-mono text-muted-foreground/70">
                 <div className="flex justify-between">
-                  <span className="text-cyan-400/70">Input</span>
+                  <span className="text-plasma-400/70">Input</span>
                   <span>{formatCost(cost.inputCost)}</span>
                 </div>
                 <div className="flex justify-between">
@@ -239,3 +239,4 @@ export function CompareMode({ onClose }: CompareModeProps) {
     </div>
   );
 }
+

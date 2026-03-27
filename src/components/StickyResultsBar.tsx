@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useTokenSenseStore } from "@/lib/store";
@@ -60,8 +60,8 @@ export function StickyResultsBar() {
     const text =
       `TokenSense AI Estimate\n` +
       `Model: ${model.name}\n` +
-      `Input: ${totalInputTokens.toLocaleString()} tokens → ${formatCost(cost.inputCost)}\n` +
-      `Output: ${expectedOutputTokens.toLocaleString()} tokens → ${formatCost(cost.outputCost)}\n` +
+      `Input: ${totalInputTokens.toLocaleString()} tokens ? ${formatCost(cost.inputCost)}\n` +
+      `Output: ${expectedOutputTokens.toLocaleString()} tokens ? ${formatCost(cost.outputCost)}\n` +
       `Total: ${formatCost(cost.totalCost)}\n` +
       `tokensense-ai.com`;
 
@@ -87,11 +87,11 @@ export function StickyResultsBar() {
         (visible && (activeTab !== "results")) ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
       )}
     >
-      <div className="bg-[#080e1a]/95 backdrop-blur-md border-b border-cyan-500/30 shadow-[0_4px_20px_rgba(6,182,212,0.12)]">
+      <div className="bg-[#040c0e]/95 backdrop-blur-md border-b border-plasma-500/30 shadow-[0_4px_20px_rgba(0,229,255,0.12)]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-11 md:h-10 gap-4">
             <div className="flex items-center gap-1 overflow-x-auto hide-scrollbar flex-1">
-              <span className="text-xs font-mono font-bold text-cyan-400 shrink-0">
+              <span className="text-xs font-mono font-bold text-plasma-400 shrink-0">
                 {formatCost(cost.totalCost)}
               </span>
               <span className="text-slate-600 mx-1 shrink-0">-</span>
@@ -107,8 +107,8 @@ export function StickyResultsBar() {
                 {model.name}
               </span>
               
-              <span className="text-[9px] font-bold text-cyan-500/50 uppercase tracking-tighter ml-auto md:hidden">
-                {"Tap for details →"}
+              <span className="text-[9px] font-bold text-plasma-500/50 uppercase tracking-tighter ml-auto md:hidden">
+                {"Tap for details ?"}
               </span>
             </div>
 
@@ -121,7 +121,7 @@ export function StickyResultsBar() {
                 "border transition-all duration-200",
                 copied
                   ? "border-green-500/50 bg-green-500/10 text-green-400"
-                  : "border-cyan-500/30 bg-cyan-500/8 text-cyan-400/70 hover:text-cyan-400 hover:border-cyan-400/60 hover:bg-cyan-500/15"
+                  : "border-plasma-500/30 bg-plasma-500/8 text-plasma-400/70 hover:text-plasma-400 hover:border-plasma-400/60 hover:bg-plasma-500/15"
               )}
             >
               {copied ? (

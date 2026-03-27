@@ -120,8 +120,8 @@ export function ModelPickerModal({ selectedModelId, onChange }: ModelPickerModal
           "w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-all duration-150 min-h-[44px]",
           providerStyle?.border ?? "border-border/50",
           providerStyle?.bg ?? "bg-card/50",
-          "hover:border-cyan-500/40 hover:bg-cyan-500/5",
-          open && "ring-2 ring-cyan-500/20 border-cyan-500/40"
+          "hover:border-plasma-500/40 hover:bg-plasma-500/5",
+          open && "ring-2 ring-plasma-500/20 border-plasma-500/40"
         )}
       >
         <div className="flex items-center gap-2 min-w-0">
@@ -177,18 +177,18 @@ export function ModelPickerModal({ selectedModelId, onChange }: ModelPickerModal
                           onClick={() => handleSelect(model.id)}
                           className={cn(
                             "w-full flex items-center justify-between gap-3 px-2 rounded-lg text-left transition-all duration-100 min-h-[44px] py-2",
-                            isSelected ? "bg-cyan-500/10 border border-cyan-500/20" : "border border-transparent hover:bg-slate-800/40"
+                            isSelected ? "bg-plasma-500/10 border border-plasma-500/20" : "border border-transparent hover:bg-slate-800/40"
                           )}
                         >
                           <div className="flex flex-col min-w-0">
-                            <span className={cn("text-xs font-medium truncate", isSelected ? "text-cyan-400" : "text-foreground")}>
+                            <span className={cn("text-xs font-medium truncate", isSelected ? "text-plasma-400" : "text-foreground")}>
                               {model.name}
                             </span>
                             <span className="text-[9px] text-muted-foreground/50 font-mono">
                               ${model.inputPricePer1M}/${model.outputPricePer1M}
                             </span>
                           </div>
-                          {isSelected && <span className="text-cyan-400 text-[10px] shrink-0 font-bold">✓</span>}
+                          {isSelected && <span className="text-plasma-400 text-[10px] shrink-0 font-bold">✓</span>}
                         </button>
                       );
                     })}
@@ -205,3 +205,4 @@ export function ModelPickerModal({ selectedModelId, onChange }: ModelPickerModal
     </div>
   );
 }
+

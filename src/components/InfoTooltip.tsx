@@ -12,7 +12,7 @@ export function InfoTooltip({ text }: { text: string }) {
         onMouseLeave={() => setVisible(false)}
         onFocus={() => setVisible(true)}
         onBlur={() => setVisible(false)}
-        className="text-slate-500 hover:text-cyan-400 text-xs leading-none transition-colors cursor-help"
+        className="text-slate-500 hover:text-plasma-400 text-xs leading-none transition-colors cursor-help"
         aria-label="More info"
       >
         ⓘ
@@ -33,3 +33,4 @@ export function InfoTooltip({ text }: { text: string }) {
     </span>
   );
 }
+

@@ -5,7 +5,8 @@ import { models, getModelById } from "@/lib/models";
 import { calculateCost } from "@/lib/costEngine";
 import { TermTooltip } from "./TermTooltip";
 import { ModelPickerModal } from "./ModelPickerModal";
-import { ChevronDown, Calculator } from "lucide-react";
+import { ChevronDown, Calculator, AlertTriangle, TrendingUp } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 
 const PROVIDER_COLORS: Record<string, string> = {
   OpenAI: "text-emerald-400",
@@ -33,6 +34,8 @@ export function BudgetCalculator() {
   const [inputTokens, setInputTokens] = useState(500);
   const [outputTokens, setOutputTokens] = useState(300);
   const [selectedModelId, setSelectedModelId] = useState("gpt-5-mini");
+  const [dailyVolume, setDailyVolume] = useState(100);
+  const [alertThreshold, setAlertThreshold] = useState(100);
 
   const model = getModelById(selectedModelId) ?? models[0];
   const cost = useMemo(
@@ -43,6 +46,9 @@ export function BudgetCalculator() {
   const requestsPerMonth = cost.totalCost > 0 ? Math.floor(budget / cost.totalCost) : 0;
   const requestsPerDay = Math.floor(requestsPerMonth / 30);
   const usedBudgetPct = Math.min((cost.totalCost * requestsPerMonth) / budget, 1) * 100;
+
+  const projectedMonthlySpend = cost.totalCost * dailyVolume * 30;
+  const isOverBudget = projectedMonthlySpend > alertThreshold;
 
   // Alternatives: top 5 cheapest models by total cost for this token profile
   const alternatives = useMemo(() => {
@@ -61,7 +67,7 @@ export function BudgetCalculator() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-2">
-        <Calculator className="w-4 h-4 text-cyan-400" />
+        <Calculator className="w-4 h-4 text-plasma-400" />
         <span className="text-sm font-semibold text-foreground">Budget Mode</span>
         <span className="text-xs text-muted-foreground/60">— How many API calls can I afford?</span>
       </div>
@@ -80,7 +86,7 @@ export function BudgetCalculator() {
               value={budget}
               min={1}
               onChange={(e) => setBudget(Math.max(1, Number(e.target.value)))}
-              className="flex-1 bg-background/50 border border-border/50 rounded-md px-3 py-2 font-mono text-sm focus:outline-none focus:border-cyan-500/50"
+              className="flex-1 bg-background/50 border border-border/50 rounded-md px-3 py-2 font-mono text-sm focus:outline-none focus:border-plasma-500/50"
             />
           </div>
           <div className="flex gap-1.5 flex-wrap">
@@ -90,8 +96,8 @@ export function BudgetCalculator() {
                 onClick={() => setBudget(b)}
                 className={`px-2 py-0.5 rounded text-[10px] font-mono border transition-colors ${
                   budget === b
-                    ? "border-cyan-500/50 bg-cyan-500/15 text-cyan-400"
-                    : "border-border/40 text-muted-foreground/60 hover:border-cyan-500/30 hover:text-cyan-400/70"
+                    ? "border-plasma-500/50 bg-plasma-500/15 text-plasma-400"
+                    : "border-border/40 text-muted-foreground/60 hover:border-plasma-500/30 hover:text-plasma-400/70"
                 }`}
               >
                 ${b}
@@ -114,7 +120,7 @@ export function BudgetCalculator() {
                 value={inputTokens}
                 min={1}
                 onChange={(e) => setInputTokens(Math.max(1, Number(e.target.value)))}
-                className="w-full bg-background/50 border border-border/50 rounded-md px-2 py-2 font-mono text-sm focus:outline-none focus:border-cyan-500/50"
+                className="w-full bg-background/50 border border-border/50 rounded-md px-2 py-2 font-mono text-sm focus:outline-none focus:border-plasma-500/50"
               />
             </div>
             <div>
@@ -124,7 +130,7 @@ export function BudgetCalculator() {
                 value={outputTokens}
                 min={0}
                 onChange={(e) => setOutputTokens(Math.max(0, Number(e.target.value)))}
-                className="w-full bg-background/50 border border-border/50 rounded-md px-2 py-2 font-mono text-sm focus:outline-none focus:border-cyan-500/50"
+                className="w-full bg-background/50 border border-border/50 rounded-md px-2 py-2 font-mono text-sm focus:outline-none focus:border-plasma-500/50"
               />
             </div>
           </div>
@@ -141,7 +147,68 @@ export function BudgetCalculator() {
 
       {/* Results */}
       {cost.totalCost > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-6">
+          {/* Monthly Projection Card */}
+          <div className={`p-5 rounded-2xl border transition-all duration-500 ${isOverBudget ? "bg-red-500/10 border-red-500/40" : "bg-indigo-500/5 border-indigo-500/20"}`}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <TrendingUp className={`w-4 h-4 ${isOverBudget ? "text-red-400" : "text-indigo-400"}`} />
+                <span className="text-sm font-bold uppercase tracking-wider">Monthly Projection</span>
+              </div>
+              {isOverBudget && (
+                <div className="flex items-center gap-1.5 px-2 py-1 bg-red-500/20 rounded-md text-[10px] font-bold text-red-400 uppercase tracking-tighter">
+                  <AlertTriangle className="w-3 h-3" />
+                  Threshold Hit
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <div className="flex items-baseline justify-between">
+                <div className={`text-3xl font-black font-mono ${isOverBudget ? "text-red-400" : "text-indigo-400"}`}>
+                  ${projectedMonthlySpend.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  at {dailyVolume.toLocaleString()} req/day
+                </div>
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <span>Adjust daily volume</span>
+                  <span>{dailyVolume} req/day</span>
+                </div>
+                <Slider 
+                  defaultValue={[dailyVolume]} 
+                  max={5000} 
+                  step={10} 
+                  onValueChange={([v]) => setDailyVolume(v)} 
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mt-2">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase">Alert Threshold</label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">$</span>
+                    <input 
+                      type="number" 
+                      value={alertThreshold} 
+                      onChange={(e) => setAlertThreshold(Number(e.target.value))}
+                      className="w-full bg-background/50 border border-border/40 rounded px-2 py-1 text-xs font-mono"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase">Model Cost</label>
+                  <div className="text-xs font-mono font-bold text-foreground py-1">
+                    {fmtCost(cost.totalCost)}/req
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Main stats */}
           <div className="grid grid-cols-3 gap-3">
             {[
@@ -170,7 +237,7 @@ export function BudgetCalculator() {
                 </div>
                 <div
                   className={`text-lg font-bold font-mono tabular-nums ${
-                    stat.accent ? "text-cyan-400" : "text-foreground"
+                    stat.accent ? "text-plasma-400" : "text-foreground"
                   }`}
                 >
                   {stat.value}
@@ -189,7 +256,7 @@ export function BudgetCalculator() {
             </div>
             <div className="h-4 rounded-full bg-slate-800/60 border border-slate-700/40 overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 transition-all duration-700 ease-out rounded-full"
+                className="h-full bg-gradient-to-r from-plasma-500 to-plasma-400 transition-all duration-700 ease-out rounded-full"
                 style={{ width: `${usedBudgetPct}%` }}
               />
             </div>
@@ -260,3 +327,4 @@ export function BudgetCalculator() {
     </div>
   );
 }
+

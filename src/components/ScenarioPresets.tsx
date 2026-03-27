@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useTokenSenseStore } from "@/lib/store";
@@ -16,7 +16,7 @@ interface Preset {
 const PRESETS: Preset[] = [
   {
     label: "Chatbot Turn",
-    icon: "💬",
+    icon: "??",
     inputTokens: 500,
     outputTokens: 300,
     modelId: "gpt-5-mini",
@@ -24,7 +24,7 @@ const PRESETS: Preset[] = [
   },
   {
     label: "Doc Summary",
-    icon: "📄",
+    icon: "??",
     inputTokens: 4000,
     outputTokens: 500,
     modelId: "claude-4.5-haiku",
@@ -32,7 +32,7 @@ const PRESETS: Preset[] = [
   },
   {
     label: "RAG Chunk",
-    icon: "🔍",
+    icon: "??",
     inputTokens: 1500,
     outputTokens: 400,
     modelId: "gpt-5-mini",
@@ -40,7 +40,7 @@ const PRESETS: Preset[] = [
   },
   {
     label: "Code Review",
-    icon: "💻",
+    icon: "??",
     inputTokens: 2000,
     outputTokens: 800,
     modelId: "claude-4.6-sonnet",
@@ -48,7 +48,7 @@ const PRESETS: Preset[] = [
   },
   {
     label: "Email Draft",
-    icon: "📧",
+    icon: "??",
     inputTokens: 300,
     outputTokens: 250,
     modelId: "gpt-5-mini",
@@ -56,7 +56,7 @@ const PRESETS: Preset[] = [
   },
   {
     label: "Long Report",
-    icon: "📊",
+    icon: "??",
     inputTokens: 8000,
     outputTokens: 2000,
     modelId: "gemini-3.1-pro",
@@ -64,7 +64,7 @@ const PRESETS: Preset[] = [
   },
   {
     label: "Translation",
-    icon: "🌐",
+    icon: "??",
     inputTokens: 1000,
     outputTokens: 1000,
     modelId: "gpt-5-mini",
@@ -72,7 +72,7 @@ const PRESETS: Preset[] = [
   },
   {
     label: "Agent Loop",
-    icon: "🔄",
+    icon: "??",
     inputTokens: 3000,
     outputTokens: 1200,
     modelId: "claude-4.6-sonnet",
@@ -143,14 +143,14 @@ export function ScenarioPresets() {
                 className={cn(
                   "relative inline-flex items-center gap-2 px-4 py-2.5 md:px-3 md:py-1.5 rounded-full text-xs font-medium border transition-all duration-200 whitespace-nowrap min-h-[44px] md:min-h-0",
                   isActive
-                    ? "border-cyan-400 bg-cyan-500/15 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.2)]"      
-                    : "border-border/50 bg-card/50 text-muted-foreground hover:border-cyan-500/60 hover:bg-cyan-500/8 hover:text-cyan-400"
+                    ? "border-plasma-400 bg-plasma-500/15 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.2)]"      
+                    : "border-border/50 bg-card/50 text-muted-foreground hover:border-plasma-500/60 hover:bg-plasma-500/8 hover:text-plasma-400"
                 )}
               >
                 <span className="text-sm leading-none">{preset.icon}</span>
                 <span>{preset.label}</span>
                 {isActive && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-plasma-400 animate-pulse" />
                 )}
               </button>
             );
@@ -159,7 +159,7 @@ export function ScenarioPresets() {
       </div>
 
       {activePreset && (
-        <p className="text-[10px] text-cyan-500/70 font-mono animate-in fade-in duration-300">
+        <p className="text-[10px] text-plasma-500/70 font-mono animate-in fade-in duration-300">
           Preset applied
         </p>
       )}

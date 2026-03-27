@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import LoadingScreen from "@/components/LoadingScreen";
 import ThemeProvider from "@/components/ThemeProvider";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import { AuthProvider } from "@/components/AuthProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -70,13 +71,15 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} font-sans antialiased`}>
-        <ThemeProvider>
-          <LoadingScreen />
-          <PWAInstallPrompt />
-          {children}
-          <Footer />
-          <BackToTop />
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <LoadingScreen />
+            <PWAInstallPrompt />
+            {children}
+            <Footer />
+            <BackToTop />
+          </ThemeProvider>
+        </AuthProvider>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

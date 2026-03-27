@@ -12,12 +12,13 @@ export default function HeroBadges() {
       {badges.map((badge) => (
         <div
           key={badge.label}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-cyan-500/40 bg-cyan-500/10 hover:bg-cyan-500/20 hover:border-cyan-500/60 transition-all duration-200"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-plasma-500/40 bg-plasma-500/10 hover:bg-plasma-500/20 hover:border-plasma-500/60 transition-all duration-200"
         >
           <span className="text-sm">{badge.icon}</span>
-          <span className="text-sm font-semibold text-cyan-400">{badge.label}</span>
+          <span className="text-sm font-semibold text-plasma-400">{badge.label}</span>
         </div>
       ))}
     </div>
   );
 }
+

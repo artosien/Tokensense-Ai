@@ -124,11 +124,11 @@ export default function PlatformComparisonTable({ data, executions }: PlatformCo
 
       {/* Insight Callout */}
       {bestValuePlatform && (
-        <div className="rounded-lg border border-cyan-500/40 bg-cyan-500/10 p-4">
+        <div className="rounded-lg border border-plasma-500/40 bg-plasma-500/10 p-4">
           <div className="flex items-start gap-3">
             <div className="text-2xl mt-1">💡</div>
             <div className="space-y-1">
-              <p className="text-sm font-semibold text-cyan-400">Smart Insight</p>
+              <p className="text-sm font-semibold text-plasma-400">Smart Insight</p>
               <p className="text-sm text-muted-foreground">
                 At {executions.toLocaleString()} executions/month, <span className="font-semibold text-foreground">{bestValuePlatform.platform}</span> is your most cost-effective option, saving you <span className="font-semibold text-green-400">${(Math.max(...data.map(d => d.monthlyCost)) - bestValuePlatform.monthlyCost).toFixed(2)}/month</span> compared to the next platform.
               </p>
@@ -139,3 +139,4 @@ export default function PlatformComparisonTable({ data, executions }: PlatformCo
     </div>
   );
 }
+

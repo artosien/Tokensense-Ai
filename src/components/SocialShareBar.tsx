@@ -89,7 +89,7 @@ export default function SocialShareBar({ variant }: SocialShareBarProps) {
   };
 
   const buttonBase =
-    "inline-flex items-center justify-center rounded-full transition-all duration-200 text-muted-foreground hover:text-cyan-400";
+    "inline-flex items-center justify-center rounded-full transition-all duration-200 text-muted-foreground hover:text-plasma-400";
   const buttonSize = variant === "top" ? "w-8 h-8" : "w-9 h-9";
   const iconSize = variant === "top" ? "w-4 h-4" : "w-[18px] h-[18px]";
 
@@ -144,7 +144,7 @@ export default function SocialShareBar({ variant }: SocialShareBarProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`${buttonBase} ${buttonSize} ${
-                    btn.color || "hover:bg-cyan-500/10"
+                    btn.color || "hover:bg-plasma-500/10"
                   }`}
                   aria-label={btn.label}
                 >
@@ -162,7 +162,7 @@ export default function SocialShareBar({ variant }: SocialShareBarProps) {
             <TooltipTrigger asChild>
               <button
                 onClick={handleCopyLink}
-                className={`${buttonBase} ${buttonSize} hover:bg-cyan-500/10 ${
+                className={`${buttonBase} ${buttonSize} hover:bg-plasma-500/10 ${
                   copied ? "text-green-400" : ""
                 }`}
                 aria-label="Copy link"
@@ -183,3 +183,4 @@ export default function SocialShareBar({ variant }: SocialShareBarProps) {
     </TooltipProvider>
   );
 }
+
