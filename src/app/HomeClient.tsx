@@ -27,6 +27,7 @@ const MetricsDashboard = dynamic(() => import("@/components/MetricsDashboard"), 
   ssr: false,
   loading: () => <div className="h-[600px] animate-pulse bg-card/50 rounded-2xl border border-border/40" />
 });
+const ConversationSimulator = dynamic(() => import("@/components/ConversationSimulator"), { ssr: false });
 const AgentLoopSimulator = dynamic(() => import("@/components/AgentLoopSimulator"), { ssr: false });
 const FileContextUploader = dynamic(() => import("@/components/FileContextUploader"), { ssr: false });
 const BatchAnalysisTool = dynamic(() => import("@/components/BatchAnalysisTool"), { ssr: false });
@@ -192,7 +193,10 @@ export default function HomeClient() {
             {/* Results Tab Pane */}
             <div className="w-1/2 px-1">
               {hasPromptContent ? (
-                <MetricsDashboard />
+                <div className="space-y-6">
+                  <MetricsDashboard />
+                  <ConversationSimulator />
+                </div>
               ) : (
                 <div className="rounded-2xl border border-border/40 bg-card/50 backdrop-blur-sm p-8 text-center h-full flex flex-col items-center justify-center min-h-[400px]">
                   <div className="text-3xl mb-3">📊</div>
@@ -220,7 +224,10 @@ export default function HomeClient() {
             <div className="w-full lg:w-[40%]">
               <div className="lg:sticky lg:top-[72px]">
                 {hasPromptContent ? (
-                  <MetricsDashboard />
+                  <div className="space-y-6">
+                    <MetricsDashboard />
+                    <ConversationSimulator />
+                  </div>
                 ) : (
                   <div className="rounded-2xl border border-border/40 bg-card/50 backdrop-blur-sm p-8 text-center min-h-[300px] flex flex-col items-center justify-center">
                     <div className="text-3xl mb-3">📊</div>
