@@ -1,105 +1,30 @@
 "use client";
 
-import React, { useState, useCallback, useMemo, useId, useEffect } from "react";
-import { Plus, Trash2, Zap, Brain, Trophy, TrendingDown, Copy, Check, ChevronUp, ChevronDown, ChevronsUpDown, Clock, Search, Filter, Sparkles, Calculator, ArrowRight, MousePointer2, MessageSquareText, Layers } from "lucide-react";
+import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import { 
+    Trash2, Zap, Brain, Trophy, TrendingDown, Copy, Check, 
+    ChevronUp, ChevronDown, ChevronsUpDown, Clock, Search, 
+    Filter, Sparkles, Calculator, ArrowRight, MousePointer2, 
+    MessageSquareText, Layers, Key, History, BarChart3
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { countTokensSync } from "@/lib/tokenizer";
+import { models, ModelConfig, getModelById } from "@/lib/models";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
-// ─── 2026 Pricing Data with Context Windows ────────────────────────────────────
-
-export const PRICING_DATA = {
-    last_updated: "March 24, 2026",
-    providers: [
-        {
-            name: "OpenAI",
-            models: [
-                { name: "GPT-5.2 Pro", input_1m: 21.0, output_1m: 168.0, maxContext: 128000, tier: "Frontier" },
-                { name: "GPT-5.2 (Flagship)", input_1m: 1.75, output_1m: 14.0, maxContext: 128000, tier: "Frontier" },
-                { name: "GPT-5 Mini", input_1m: 0.25, output_1m: 2.0, maxContext: 128000, tier: "Balanced" },
-                { name: "GPT-5 Nano", input_1m: 0.05, output_1m: 0.4, maxContext: 128000, tier: "Efficient" },
-            ],
-        },
-        {
-            name: "Anthropic",
-            models: [
-                { name: "Claude 4.6 Opus", input_1m: 5.0, output_1m: 25.0, maxContext: 200000, tier: "Frontier" },
-                { name: "Claude 4.6 Sonnet", input_1m: 3.0, output_1m: 15.0, maxContext: 200000, tier: "Balanced" },
-                { name: "Claude 4.5 Haiku", input_1m: 1.0, output_1m: 5.0, maxContext: 200000, tier: "Efficient" },
-            ],
-        },
-        {
-            name: "Google",
-            models: [
-                { name: "Gemini 3.1 Pro", input_1m: 2.0, output_1m: 12.0, maxContext: 2000000, tier: "Frontier" },
-                { name: "Gemini 3.1 Flash", input_1m: 0.25, output_1m: 1.5, maxContext: 1000000, tier: "Balanced" },
-                { name: "Gemini 3.1 Flash-Lite", input_1m: 0.125, output_1m: 0.75, maxContext: 1000000, tier: "Efficient" },
-            ],
-        },
-        {
-            name: "DeepSeek",
-            models: [{ name: "DeepSeek V3.2", input_1m: 0.28, output_1m: 0.42, maxContext: 128000, tier: "Balanced" }],
-        },
-        {
-            name: "xAI",
-            models: [
-                { name: "Grok 4", input_1m: 3.0, output_1m: 15.0, maxContext: 128000, tier: "Frontier" },
-                { name: "Grok 4 Fast", input_1m: 0.2, output_1m: 0.5, maxContext: 128000, tier: "Balanced" },
-            ],
-        },
-    ],
-} as const;
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface ModelRow {
-    id: string;
-    provider: string;
-    model: string;
-}
-
-type TokenPreset = "1K" | "10K" | "100K" | "1M" | "custom" | "prompt";
-type SortColumn = "model" | "provider" | "input" | "output" | "context" | "tier" | null;
-type SortDirection = "asc" | "desc" | null;
-type ModelTier = "Frontier" | "Balanced" | "Efficient";
-
-const PRESET_VALUES: Record<Exclude<TokenPreset, "custom" | "prompt">, number> = {
-    "1K": 1_000,
-    "10K": 10_000,
-    "100K": 100_000,
-    "1M": 1_000_000,
-};
+type SortMode = "total" | "input" | "output";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function getModelTier(modelName: string): "intelligence" | "speed" | null {
-    const n = modelName.toLowerCase();
-    if (
-        n.includes("pro") ||
-        n.includes("opus") ||
-        n.includes("flagship") ||
-        n.includes("ultra")
-    )
-        return "intelligence";
-    if (
-        n.includes("flash") ||
-        n.includes("mini") ||
-        n.includes("fast") ||
-        n.includes("lite") ||
-        n.includes("haiku")
-    )
-        return "speed";
-    return null;
-}
-
 function formatCost(cost: number): string {
     if (cost === 0) return "$0.00";
-    if (cost < 0.00001) return `$${cost.toExponential(2)}`;
-    if (cost < 0.01) return `$${cost.toFixed(6)}`;
+    if (cost < 0.0001) return `$${cost.toFixed(6)}`;
+    if (cost < 0.01) return `$${cost.toFixed(5)}`;
     if (cost < 1) return `$${cost.toFixed(4)}`;
     return `$${cost.toFixed(2)}`;
 }
@@ -110,1226 +35,289 @@ function formatContext(ctx: number): string {
     return ctx.toString();
 }
 
-function calcCosts(
-    inputTokens: number,
-    outputTokens: number,
-    inputRate: number,
-    outputRate: number
-) {
-    const inputCost = (inputTokens / 1_000_000) * inputRate;
-    const outputCost = (outputTokens / 1_000_000) * outputRate;
-    return { inputCost, outputCost, total: inputCost + outputCost };
+function getBarColor(ratio: number): string {
+    if (ratio < 0.15) return "#00e5ff"; // plasma cyan
+    if (ratio < 0.35) return "#14b8a6"; // teal
+    if (ratio < 0.6) return "#64748b";  // slate
+    if (ratio < 0.85) return "#a855f7"; // purple
+    return "#6b21a8"; // dark purple
 }
 
-function getHeatmapColor(value: number, min: number, max: number): string {
-    if (min === max) return "transparent";
-    const ratio = (value - min) / (max - min);
-    if (ratio <= 0.33) return "rgba(34, 197, 94, 0.15)"; // Green for low (cheap)
-    if (ratio >= 0.67) return "rgba(239, 68, 68, 0.15)"; // Red for high (expensive)
-    return "transparent";
-}
+// ─── Animated Cost Bar ────────────────────────────────────────────────────────
 
-function getRealCostEstimate(inputRate: number, outputRate: number): string {
-    // Sample: 500 input + 300 output tokens
-    const cost = (500 / 1_000_000) * inputRate + (300 / 1_000_000) * outputRate;
-    return `~${formatCost(cost)} per 1,000 avg. queries`;
-}
+function AnimatedCostBar({ ratio }: { ratio: number }) {
+    const [scale, setScale] = useState(0);
+    const color = getBarColor(ratio);
 
-let rowCounter = 0;
-function makeRow(provider = "", model = ""): ModelRow {
-    return { id: `row-${++rowCounter}`, provider, model };
-}
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function TierBadge({ tier }: { tier: "intelligence" | "speed" }) {
-    if (tier === "intelligence")
-        return (
-            <span className="inline-flex items-center gap-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 px-1.5 py-0.5 text-[10px] font-semibold text-purple-400 whitespace-nowrap">
-                <Brain className="w-2.5 h-2.5" />
-                Intelligence
-            </span>
-        );
-    return (
-        <span className="inline-flex items-center gap-0.5 rounded-full bg-plasma-500/15 border border-plasma-500/30 px-1.5 py-0.5 text-[10px] font-semibold text-plasma-400 whitespace-nowrap">
-            <Zap className="w-2.5 h-2.5" />
-            Speed
-        </span>
-    );
-}
-
-function CapabilityTierBadge({ tier }: { tier: ModelTier }) {
-    const styles = {
-        Frontier: "bg-red-500/20 border-red-500/40 text-red-400",
-        Balanced: "bg-amber-500/20 border-amber-500/40 text-amber-400",
-        Efficient: "bg-emerald-500/20 border-emerald-500/40 text-emerald-400",
-    };
-    return (
-        <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${styles[tier]}`}>
-            <Layers className="w-2.5 h-2.5" />
-            {tier}
-        </span>
-    );
-}
-
-function SortHeader({
-    label,
-    column,
-    currentSort,
-    currentDir,
-    onClick,
-}: {
-    label: string;
-    column: SortColumn;
-    currentSort: SortColumn;
-    currentDir: SortDirection;
-    onClick: () => void;
-}) {
-    const isActive = currentSort === column;
-    return (
-        <button
-            onClick={onClick}
-            className="flex items-center gap-1.5 font-semibold text-slate-300 hover:text-plasma-400 transition-colors cursor-pointer select-none py-2"
-            aria-label={`Sort by ${label}`}
-        >
-            {label}
-            {isActive ? (
-                currentDir === "asc" ? (
-                    <ChevronUp className="w-4 h-4 text-plasma-400" />
-                ) : (
-                    <ChevronDown className="w-4 h-4 text-plasma-400" />
-                )
-            ) : (
-                <ChevronsUpDown className="w-4 h-4 text-slate-600" />
-            )}
-        </button>
-    );
-}
-
-function CostTooltip({ inputRate, outputRate }: { inputRate: number; outputRate: number }) {
-    const [visible, setVisible] = React.useState(false);
-    const estimate = getRealCostEstimate(inputRate, outputRate);
+    useEffect(() => {
+        const frame = requestAnimationFrame(() => {
+            setScale(ratio);
+        });
+        return () => cancelAnimationFrame(frame);
+    }, [ratio]);
 
     return (
-        <span className="relative inline-group">
-            <button
-                onMouseEnter={() => setVisible(true)}
-                onMouseLeave={() => setVisible(false)}
-                className="text-slate-500 hover:text-plasma-400 transition-colors cursor-help ml-1"
-                aria-label="Cost estimate"
-            >
-                ⓘ
-            </button>
-            {visible && (
-                <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 rounded bg-slate-900 border border-plasma-400/30 text-xs font-mono text-slate-200 whitespace-nowrap shadow-xl pointer-events-none">
-                    {estimate}
-                </div>
-            )}
-        </span>
-    );
-}
-
-function ContextBar({ value, max }: { value: number; max: number }) {
-    const percentage = Math.min((value / max) * 100, 100);
-    return (
-        <div className="relative w-full flex items-center gap-2">
-            <div className="flex-1 h-5 bg-white/5 rounded-md overflow-hidden border border-white/10">
-                <div
-                    className="h-full bg-plasma-400/30 transition-all duration-300"
-                    style={{ width: `${percentage}%` }}
-                />
-            </div>
-            <span className="text-xs font-mono text-slate-300 whitespace-nowrap w-12 text-right">
-                {formatContext(value)}
-            </span>
+        <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden mt-1">
+            <div 
+                className="h-full transition-all duration-1000 ease-out origin-left"
+                style={{ 
+                    width: `${scale * 100}%`,
+                    backgroundColor: color,
+                    boxShadow: ratio < 0.15 ? `0 0 10px ${color}44` : 'none'
+                }}
+            />
         </div>
-    );
-}
-
-function PresetButton({
-    label,
-    active,
-    onClick,
-}: {
-    label: string;
-    active: boolean;
-    onClick: () => void;
-}) {
-    return (
-        <button
-            onClick={onClick}
-            className={`px-2.5 py-1 rounded-md text-xs font-semibold border transition-all ${active
-                    ? "bg-indigo-600 border-indigo-500 text-white shadow-sm shadow-indigo-500/20"
-                    : "bg-white/5 border-white/10 text-slate-400 hover:border-indigo-500/50 hover:text-indigo-300"
-                }`}
-        >
-            {label}
-        </button>
     );
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function ModelComparisonTable() {
-    const uid = useId();
-
-    const [rows, setRows] = useState<ModelRow[]>([
-        makeRow("OpenAI", "GPT-5.2 (Flagship)"),
-        makeRow("Anthropic", "Claude 4.6 Sonnet"),
-    ]);
-
-    // Prompt mode state
-    const [promptText, setPromptText] = useState("");
-    const [promptTokens, setPromptTokens] = useState(0);
-    const [outputRatio, setOutputRatio] = useState(25); // 25% output tokens relative to input
-    const [isPromptMode, setIsPromptMode] = useState(false);
-
-    // Global token inputs
-    const [inputPreset, setInputPreset] = useState<TokenPreset>("10K");
-    const [outputPreset, setOutputPreset] = useState<TokenPreset>("1K");
-    const [customInput, setCustomInput] = useState<string>("10000");
-    const [customOutput, setCustomOutput] = useState<string>("1000");
-
-    // Sorting and filtering for pricing table
-    const [sortColumn, setSortColumn] = useState<SortColumn>(null);
-    const [sortDir, setSortDir] = useState<SortDirection>(null);
-    const [activeProviderFilter, setActiveProviderFilter] = useState<string>("All");
-    const [activeTierFilter, setActiveTierFilter] = useState<string>("All");
+    // Live token sliders state
+    const [inputTokens, setInputTokens] = useState(10000);
+    const [outputTokens, setOutputTokens] = useState(2000);
+    
+    // UI state
     const [searchQuery, setSearchQuery] = useState("");
-    const [activeHighlight, setActiveHighlight] = useState<string | null>(null);
+    const [sortMode, setSortMode] = useState<SortMode>("total");
+    const [activeProviderFilter, setActiveProviderFilter] = useState<string>("All");
     const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [showAPIIntegration, setShowAPIIntegration] = useState(false);
 
-    // Recommendation State
-    const [recStep, setRecStep] = useState(0);
-    const [recAnswers, setRecAnswers] = useState<Record<string, string>>({});
-    const [showRecResult, setShowRecResult] = useState(false);
+    // Prompt mode (optional override)
+    const [promptText, setPromptText] = useState("");
 
-    // Update tokens when prompt changes
     useEffect(() => {
         if (promptText.trim()) {
-            const count = countTokensSync(promptText);
-            setPromptTokens(count);
-            if (!isPromptMode) setIsPromptMode(true);
-        } else {
-            setPromptTokens(0);
+            setInputTokens(countTokensSync(promptText));
         }
-    }, [promptText, isPromptMode]);
+    }, [promptText]);
 
-    const inputTokens = useMemo(() => {
-        if (isPromptMode) return promptTokens;
-        if (inputPreset === "custom") return parseInt(customInput) || 0;
-        return PRESET_VALUES[inputPreset as Exclude<TokenPreset, "custom" | "prompt">];
-    }, [isPromptMode, promptTokens, inputPreset, customInput]);
-
-    const outputTokens = useMemo(() => {
-        if (isPromptMode) return Math.ceil(promptTokens * (outputRatio / 100));
-        if (outputPreset === "custom") return parseInt(customOutput) || 0;
-        return PRESET_VALUES[outputPreset as Exclude<TokenPreset, "custom" | "prompt">];
-    }, [isPromptMode, promptTokens, outputRatio, outputPreset, customOutput]);
-
-    // Row actions
-    const addRow = useCallback(() => setRows((r) => [...r, makeRow()]), []);
-    const removeRow = useCallback(
-        (id: string) => setRows((r) => r.filter((row) => row.id !== id)),
-        []
-    );
-    const updateRow = useCallback(
-        (id: string, patch: Partial<Omit<ModelRow, "id">>) => {
-            setRows((r) =>
-                r.map((row) => {
-                    if (row.id !== id) return row;
-                    const updated = { ...row, ...patch };
-                    // Reset model when provider changes
-                    if (patch.provider && patch.provider !== row.provider) {
-                        updated.model = "";
-                    }
-                    return updated;
-                })
-            );
-        },
-        []
-    );
-
-    // Common Use Case preset
-    const applyCommonPreset = () => {
-        setIsPromptMode(false);
-        setInputPreset("custom");
-        setOutputPreset("custom");
-        setCustomInput("500");
-        setCustomOutput("200");
-    };
-
-    // Compute costs per row
-    const rowCosts = useMemo(() => {
-        return rows.map((row) => {
-            const provider = PRICING_DATA.providers.find(
-                (p) => p.name === row.provider
-            );
-            const model = provider?.models.find((m) => m.name === row.model);
-            if (!model) return { inputCost: 0, outputCost: 0, total: 0, valid: false };
-            return {
-                ...calcCosts(inputTokens, outputTokens, model.input_1m, model.output_1m),
-                valid: true,
+    // Data calculation
+    const tableData = useMemo(() => {
+        let data = models.map((m) => {
+            const totalInputCost = (inputTokens / 1_000_000) * m.inputPricePer1M;
+            const totalOutputCost = (outputTokens / 1_000_000) * m.outputPricePer1M;
+            const totalCost = totalInputCost + totalOutputCost;
+            
+            return { 
+                ...m, 
+                totalInputCost,
+                totalOutputCost,
+                totalCost
             };
         });
-    }, [rows, inputTokens, outputTokens]);
 
-    // Find the cheapest valid row
-    const cheapestIdx = useMemo(() => {
-        let best = -1;
-        let bestTotal = Infinity;
-        rowCosts.forEach((c, i) => {
-            if (c.valid && c.total < bestTotal) {
-                bestTotal = c.total;
-                best = i;
-            }
-        });
-        return best;
-    }, [rowCosts]);
-
-    // Build filtered and sorted pricing table data
-    const pricingTableData = useMemo(() => {
-        let data = PRICING_DATA.providers.flatMap((prov) =>
-            prov.models.map((m) => ({ ...m, provider: prov.name, id: `${prov.name}-${m.name}` }))
-        );
-
-        // Filter by provider
         if (activeProviderFilter !== "All") {
             data = data.filter((item) => item.provider === activeProviderFilter);
         }
 
-        // Filter by tier
-        if (activeTierFilter !== "All") {
-            data = data.filter((item) => item.tier === activeTierFilter);
-        }
-
-        // Filter by search
         if (searchQuery) {
             const q = searchQuery.toLowerCase();
-            data = data.filter(
-                (item) =>
-                    item.name.toLowerCase().includes(q) ||
-                    item.provider.toLowerCase().includes(q)
-            );
+            data = data.filter(m => m.name.toLowerCase().includes(q) || m.provider.toLowerCase().includes(q));
         }
 
-        // Filter by highlights
-        if (activeHighlight) {
-            if (activeHighlight === "Cheapest") {
-                const minInput = Math.min(...data.map(m => m.input_1m));
-                data = data.filter(m => m.input_1m <= minInput * 1.5);
-            } else if (activeHighlight === "Fastest") {
-                data = data.filter(m => getModelTier(m.name) === "speed");
-            } else if (activeHighlight === "Intelligence") {
-                data = data.filter(m => getModelTier(m.name) === "intelligence");
-            } else if (activeHighlight === "Max Context") {
-                const maxCtx = Math.max(...data.map(m => m.maxContext || 0));
-                data = data.filter(m => (m.maxContext || 0) >= maxCtx * 0.8);
-            }
-        }
-
-        // Sort
-        if (sortColumn && sortDir) {
-            data.sort((a, b) => {
-                let aVal: any = a[sortColumn as keyof typeof a];
-                let bVal: any = b[sortColumn as keyof typeof b];
-
-                if (typeof aVal === "string") {
-                    aVal = aVal.toLowerCase();
-                    bVal = (bVal as string).toLowerCase();
-                }
-
-                const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
-                return sortDir === "asc" ? comparison : -comparison;
-            });
-        } else {
-            // Default: sort by tier (Frontier -> Balanced -> Efficient) then provider
-            const tierOrder = { Frontier: 0, Balanced: 1, Efficient: 2 };
-            data.sort((a, b) => {
-                const aTier = tierOrder[a.tier as ModelTier];
-                const bTier = tierOrder[b.tier as ModelTier];
-                if (aTier !== bTier) return aTier - bTier;
-                const provCmp = a.provider.localeCompare(b.provider);
-                if (provCmp !== 0) return provCmp;
-                return a.name.localeCompare(b.name);
-            });
-        }
+        // Sorting
+        data.sort((a, b) => {
+            if (sortMode === "total") return a.totalCost - b.totalCost;
+            if (sortMode === "input") return a.inputPricePer1M - b.inputPricePer1M;
+            return a.outputPricePer1M - b.outputPricePer1M;
+        });
 
         return data;
-    }, [activeProviderFilter, activeTierFilter, searchQuery, activeHighlight, sortColumn, sortDir]);
+    }, [inputTokens, outputTokens, activeProviderFilter, searchQuery, sortMode]);
 
-    // Calculate heat map values
-    const heatmapStats = useMemo(() => {
-        if (pricingTableData.length === 0) return { inputMin: 0, inputMax: 1, outputMin: 0, outputMax: 1, contextMax: 1 };
-        const inputs = pricingTableData.map((m) => m.input_1m);
-        const outputs = pricingTableData.map((m) => m.output_1m);
-        return {
-            inputMin: Math.min(...inputs),
-            inputMax: Math.max(...inputs),
-            outputMin: Math.min(...outputs),
-            outputMax: Math.max(...outputs),
-            contextMax: Math.max(...pricingTableData.map((m) => m.maxContext || 200000)),
-        };
-    }, [pricingTableData]);
+    const maxTotalCost = useMemo(() => Math.max(...tableData.map(m => m.totalCost)), [tableData]);
 
-    // Recommendation Logic
-    const recommendedModel = useMemo(() => {
-        if (!showRecResult) return null;
-        const { useCase, volume, budget } = recAnswers;
-        
-        let targetProvider = "";
-        let targetModel = "";
-
-        if (useCase === "Coding") {
-            if (budget === "High") {
-                targetProvider = "Anthropic";
-                targetModel = "Claude 4.6 Opus";
-            } else {
-                targetProvider = "DeepSeek";
-                targetModel = "DeepSeek V3.2";
-            }
-        } else if (useCase === "Creative") {
-            targetProvider = "Anthropic";
-            targetModel = "Claude 4.6 Sonnet";
-        } else { // General
-            if (volume === "High") {
-                targetProvider = "OpenAI";
-                targetModel = "GPT-5.2 (Flagship)";
-            } else {
-                targetProvider = "OpenAI";
-                targetModel = "GPT-5 Nano";
-            }
-        }
-
-        const provider = PRICING_DATA.providers.find(p => p.name === targetProvider);
-        const model = provider?.models.find(m => m.name === targetModel);
-        
-        return model ? { ...model, provider: targetProvider } : null;
-    }, [showRecResult, recAnswers]);
-
-    // Find best value in filtered set
-    const bestValueId = useMemo(() => {
-        let best = "";
-        let bestScore = Infinity;
-        pricingTableData.forEach((m) => {
-            const score = m.input_1m + m.output_1m * 4; // Weight output higher
-            if (score < bestScore) {
-                bestScore = score;
-                best = m.id;
-            }
-        });
-        return best;
-    }, [pricingTableData]);
-
-    const handleSort = (column: SortColumn) => {
-        if (sortColumn === column) {
-            if (sortDir === "asc") setSortDir("desc");
-            else setSortDir(null);
-            if (sortDir === null) setSortColumn(null);
-        } else {
-            setSortColumn(column);
-            setSortDir("asc");
-        }
-    };
-
-    const handleCopyRow = (model: (typeof pricingTableData)[number]) => {
-        const text = `Model: ${model.name} | Provider: ${model.provider} | Input: $${model.input_1m}/M | Output: $${model.output_1m}/M | Context: ${formatContext(model.maxContext || 200000)} | Tier: ${model.tier}`;
+    const handleCopyRow = (model: any) => {
+        const text = `${model.name} (${model.provider}): ${formatCost(model.totalCost)} total for ${inputTokens} in / ${outputTokens} out`;
         navigator.clipboard.writeText(text).then(() => {
             setCopiedId(model.id);
             setTimeout(() => setCopiedId(null), 2000);
         });
     };
 
-    const providerList = ["All", ...new Set(PRICING_DATA.providers.map((p) => p.name))];
-    const tierList = ["All", "Frontier", "Balanced", "Efficient"];
+    const providerList = ["All", ...new Set(models.map((p) => p.provider))];
 
     return (
-        <div className="space-y-12">
-            {/* ── Try With My Prompt Panel ── */}
-            <div className="space-y-4">
-                <div className="space-y-1 ml-1">
-                    <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-2">
-                        <MessageSquareText className="w-3 h-3" />
-                        Try With My Prompt
-                    </h3>
-                    <p className="text-sm text-slate-400">Paste your actual prompt to see exact costs across all models instantly.</p>
+        <div className="space-y-8 max-w-6xl mx-auto">
+            {/* ── Live Token Controls ── */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-[#040c0e]/50 backdrop-blur-xl border border-white/10 p-6 rounded-3xl shadow-2xl">
+                <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                        <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                            <MessageSquareText className="w-3 h-3 text-plasma-400" />
+                            Input Tokens (Workload)
+                        </label>
+                        <span className="text-sm font-mono font-bold text-plasma-400 bg-plasma-500/10 px-2 py-0.5 rounded">
+                            {inputTokens.toLocaleString()}
+                        </span>
+                    </div>
+                    <Slider 
+                        value={[inputTokens]} 
+                        onValueChange={([v]) => setInputTokens(v)}
+                        max={100000}
+                        min={100}
+                        step={100}
+                        className="py-4"
+                    />
+                    <div className="flex justify-between text-[8px] font-bold text-slate-600 uppercase tracking-tighter">
+                        <span>Short Prompt</span>
+                        <span>Large Context (100k)</span>
+                    </div>
                 </div>
-                <div className="rounded-2xl border border-indigo-500/20 bg-indigo-500/5 backdrop-blur-md p-5 shadow-xl space-y-4 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                        <Calculator className="w-16 h-16 text-indigo-400" />
-                    </div>
-                    
-                    <div className="relative">
-                        <Textarea 
-                            placeholder="Paste your prompt here... (e.g. Write a python script to parse JSON...)"
-                            className="bg-slate-900/50 border-white/10 min-h-[120px] focus-visible:ring-indigo-500 resize-none text-sm placeholder:text-slate-600"
-                            value={promptText}
-                            onChange={(e) => setPromptText(e.target.value)}
-                        />
-                        <div className="absolute bottom-3 right-3 flex items-center gap-4">
-                            <div className="flex flex-col items-end">
-                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Input Tokens</span>
-                                <span className="text-lg font-black text-indigo-400 font-mono leading-none">{promptTokens.toLocaleString()}</span>
-                            </div>
-                            <div className="h-8 w-px bg-white/10" />
-                            <div className="flex flex-col items-end">
-                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Est. Output</span>
-                                <span className="text-lg font-black text-purple-400 font-mono leading-none">{outputTokens.toLocaleString()}</span>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center pt-2">
-                        <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                                    Output Token Ratio
-                                    <span className="text-[10px] text-slate-500 lowercase font-medium">(Response length relative to prompt)</span>
-                                </label>
-                                <span className="text-sm font-black text-indigo-400 font-mono bg-indigo-500/10 px-2 py-0.5 rounded">{outputRatio}%</span>
-                            </div>
-                            <Slider 
-                                value={[outputRatio]} 
-                                onValueChange={(val) => {
-                                    setOutputRatio(val[0]);
-                                    if (!isPromptMode && promptText.trim()) setIsPromptMode(true);
-                                }}
-                                min={5}
-                                max={500}
-                                step={5}
-                                className="py-2"
-                            />
-                            <div className="flex justify-between text-[9px] font-bold text-slate-600 uppercase tracking-tighter">
-                                <span>Short Response (5%)</span>
-                                <span>Chain-of-Thought (500%)</span>
-                            </div>
-                        </div>
-                        <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-4">
-                            <div className="flex items-start gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center shrink-0">
-                                    <Sparkles className="w-4 h-4 text-indigo-400" />
-                                </div>
-                                <div className="space-y-1">
-                                    <p className="text-xs font-bold text-slate-200">Task-Driven Selection</p>
-                                    <p className="text-[11px] text-slate-400 leading-relaxed">By pasting your prompt, the entire table below now reflects the <strong>exact price per request</strong> for your specific task.</p>
-                                </div>
-                            </div>
-                        </div>
+                <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                        <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                            <Zap className="w-3 h-3 text-purple-400" />
+                            Expected Output
+                        </label>
+                        <span className="text-sm font-mono font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">
+                            {outputTokens.toLocaleString()}
+                        </span>
+                    </div>
+                    <Slider 
+                        value={[outputTokens]} 
+                        onValueChange={([v]) => setOutputTokens(v)}
+                        max={32000}
+                        min={10}
+                        step={50}
+                        className="py-4"
+                    />
+                    <div className="flex justify-between text-[8px] font-bold text-slate-600 uppercase tracking-tighter">
+                        <span>One Sentence</span>
+                        <span>Long Form (32k)</span>
                     </div>
                 </div>
             </div>
 
-            {/* ── Global Token Volume ── */}
-            <div className="space-y-4">
-                <div className="space-y-1 ml-1">
-                    <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-widest">Global Token Volume</h3>
-                    <p className="text-sm text-slate-400">Or use standard volumes to calculate monthly or batch pricing.</p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-5 shadow-xl space-y-5 relative">
-                    {isPromptMode && (
-                        <div className="absolute inset-0 z-10 bg-slate-900/80 backdrop-blur-[2px] rounded-2xl flex items-center justify-center p-6 text-center animate-in fade-in duration-300">
-                            <div className="space-y-4">
-                                <p className="text-sm font-medium text-slate-300">Global volume is currently overridden by your <strong>Prompt Analysis</strong>.</p>
-                                <Button 
-                                    size="sm" 
-                                    variant="outline" 
-                                    className="border-indigo-500/40 text-indigo-400 bg-indigo-500/5 hover:bg-indigo-500/10"
-                                    onClick={() => {
-                                        setIsPromptMode(false);
-                                        setPromptText("");
-                                    }}
-                                >
-                                    Reset to Global Volume
-                                </Button>
-                            </div>
-                        </div>
-                    )}
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                        <h2 className="text-sm font-semibold text-slate-100 tracking-wide uppercase">
-                            Bulk Estimator
-                        </h2>
+            {/* ── Sort & Filter Toolset ── */}
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+                <div className="flex gap-1.5 bg-white/5 p-1 rounded-xl border border-white/5">
+                    {[
+                        { id: "total", label: "Best Total" },
+                        { id: "input", label: "Lowest Input" },
+                        { id: "output", label: "Lowest Output" }
+                    ].map((mode) => (
                         <button
-                            onClick={applyCommonPreset}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-400 hover:bg-amber-500/20 hover:border-amber-400/50 transition-all"
+                            key={mode.id}
+                            onClick={() => setSortMode(mode.id as SortMode)}
+                            className={cn(
+                                "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all",
+                                sortMode === mode.id 
+                                    ? "bg-plasma-500 text-black shadow-[0_0_15px_rgba(0,229,255,0.3)]"
+                                    : "text-slate-500 hover:text-slate-300 hover:bg-white/5"
+                            )}
                         >
-                            <TrendingDown className="w-3.5 h-3.5" />
-                            Common Use Case
-                            <span className="hidden sm:inline text-amber-300/60">
-                                (500 in / 200 out)
-                            </span>
+                            {mode.label}
                         </button>
-                    </div>
+                    ))}
+                </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        {/* Input tokens */}
-                        <div className="space-y-2">
-                            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">
-                                Input Tokens
-                            </label>
-                            <div className="flex flex-wrap gap-1.5">
-                                {(["1K", "10K", "100K", "1M"] as const).map((p) => (
-                                    <PresetButton
-                                        key={p}
-                                        label={p}
-                                        active={inputPreset === p}
-                                        onClick={() => setInputPreset(p)}
-                                    />
-                                ))}
-                                <PresetButton
-                                    label="Custom"
-                                    active={inputPreset === "custom"}
-                                    onClick={() => setInputPreset("custom")}
-                                />
-                            </div>
-                            {inputPreset === "custom" && (
-                                <Input
-                                    type="number"
-                                    min="0"
-                                    value={customInput}
-                                    onChange={(e) => setCustomInput(e.target.value)}
-                                    placeholder="e.g. 50000"
-                                    className="bg-white/5 border-white/10 text-slate-100 h-8 text-sm focus-visible:ring-indigo-500"
-                                />
-                            )}
-                            <p className="text-xs text-slate-500">
-                                ={" "}
-                                <span className="text-slate-300 font-mono">
-                                    {inputTokens.toLocaleString()}
-                                </span>{" "}
-                                tokens
-                            </p>
-                        </div>
-
-                        {/* Output tokens */}
-                        <div className="space-y-2">
-                            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">
-                                Output Tokens
-                            </label>
-                            <div className="flex flex-wrap gap-1.5">
-                                {(["1K", "10K", "100K", "1M"] as const).map((p) => (
-                                    <PresetButton
-                                        key={p}
-                                        label={p}
-                                        active={outputPreset === p}
-                                        onClick={() => setOutputPreset(p)}
-                                    />
-                                ))}
-                                <PresetButton
-                                    label="Custom"
-                                    active={outputPreset === "custom"}
-                                    onClick={() => setOutputPreset("custom")}
-                                />
-                            </div>
-                            {outputPreset === "custom" && (
-                                <Input
-                                    type="number"
-                                    min="0"
-                                    value={customOutput}
-                                    onChange={(e) => setCustomOutput(e.target.value)}
-                                    placeholder="e.g. 2000"
-                                    className="bg-white/5 border-white/10 text-slate-100 h-8 text-sm focus-visible:ring-indigo-500"
-                                />
-                            )}
-                            <p className="text-xs text-slate-500">
-                                ={" "}
-                                <span className="text-slate-300 font-mono">
-                                    {outputTokens.toLocaleString()}
-                                </span>{" "}
-                                tokens
-                            </p>
-                        </div>
+                <div className="flex gap-3 w-full sm:w-auto">
+                    <div className="relative flex-1 sm:w-64">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+                        <Input 
+                            placeholder="Filter models..." 
+                            className="pl-9 h-9 text-xs bg-white/5 border-white/10 rounded-xl focus-visible:ring-plasma-500"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
                     </div>
+                    <Select value={activeProviderFilter} onValueChange={setActiveProviderFilter}>
+                        <SelectTrigger className="w-[120px] h-9 text-[10px] bg-white/5 border-white/10 rounded-xl">
+                            <SelectValue placeholder="Provider" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#040c0e] border-white/10">
+                            {providerList.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
                 </div>
             </div>
 
-            {/* ── Best Value Highlight ── */}
-            <div className="space-y-4">
-                <div className="space-y-1 ml-1">
-                    <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-widest">Best Value Highlight</h3>
-                    <p className="text-sm text-slate-400">Comparing your top models side-by-side.</p>
-                </div>
-                <div className="space-y-3">
-                    {rows.map((row, idx) => {
-                        const providerData = PRICING_DATA.providers.find(
-                            (p) => p.name === row.provider
-                        );
-                        const modelData = providerData?.models.find(
-                            (m) => m.name === row.model
-                        );
-                        const costs = rowCosts[idx];
-                        const isBest = idx === cheapestIdx && costs.valid;
-                        const tier = modelData ? getModelTier(modelData.name) : null;
-                        const capabilityTier = (modelData as any)?.tier as ModelTier | undefined;
+            {/* ── Main Comparison Table ── */}
+            <div className="bg-[#040c0e] border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="border-b border-white/5 bg-white/[0.02]">
+                                <th className="py-4 pl-6 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] w-12">#</th>
+                                <th className="py-4 px-4 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Model Architecture</th>
+                                <th className="py-4 px-4 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Input / 1M</th>
+                                <th className="py-4 px-4 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Output / 1M</th>
+                                <th className="py-4 px-4 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Total Cost</th>
+                                <th className="py-4 pr-6 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] w-10"></th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/[0.03]">
+                            {tableData.map((model, idx) => {
+                                const isCheapest = idx === 0 && sortMode === "total";
+                                const ratio = model.totalCost / maxTotalCost;
 
-                        return (
-                            <div
-                                key={row.id}
-                                className={`relative rounded-2xl border backdrop-blur-md p-5 transition-all duration-300 shadow-lg ${isBest
-                                        ? "border-green-500/50 bg-green-500/5 shadow-green-500/10"
-                                        : "border-white/10 bg-white/5"
-                                    }`}
-                            >
-                                {/* Best Value Badge */}
-                                {isBest && (
-                                    <div className="absolute -top-3 left-4 inline-flex items-center gap-1 rounded-full bg-green-500 px-2.5 py-0.5 text-[11px] font-bold text-black shadow-md shadow-green-500/30">
-                                        <Trophy className="w-3 h-3" />
-                                        Best Value
-                                    </div>
-                                )}
-
-                                {/* Row number + remove */}
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                                            Model {idx + 1}
-                                        </span>
-                                        {capabilityTier && <CapabilityTierBadge tier={capabilityTier} />}
-                                    </div>
-                                    {rows.length > 1 && (
-                                        <button
-                                            onClick={() => removeRow(row.id)}
-                                            className="p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all"
-                                            aria-label="Remove row"
-                                        >
-                                            <Trash2 className="w-3.5 h-3.5" />
-                                        </button>
-                                    )}
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    {/* Provider Select */}
-                                    <div className="space-y-1.5">
-                                        <label
-                                            htmlFor={`${uid}-provider-${row.id}`}
-                                            className="text-xs font-medium text-slate-400"
-                                        >
-                                            Provider
-                                        </label>
-                                        <Select
-                                            value={row.provider}
-                                            onValueChange={(v) => updateRow(row.id, { provider: v })}
-                                        >
-                                            <SelectTrigger
-                                                id={`${uid}-provider-${row.id}`}
-                                                className="bg-white/5 border-white/10 text-slate-100 hover:border-indigo-500/40 focus:ring-indigo-500 h-9"
-                                            >
-                                                <SelectValue placeholder="Select provider" />
-                                            </SelectTrigger>
-                                            <SelectContent className="bg-slate-900 border-white/10">
-                                                {PRICING_DATA.providers.map((p) => (
-                                                    <SelectItem key={p.name} value={p.name}>
-                                                        {p.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    {/* Model Select */}
-                                    <div className="space-y-1.5">
-                                        <label
-                                            htmlFor={`${uid}-model-${row.id}`}
-                                            className="text-xs font-medium text-slate-400"
-                                        >
-                                            Model{" "}
-                                            {tier && (
-                                                <span className="ml-1 align-middle">
-                                                    <TierBadge tier={tier} />
-                                                </span>
-                                            )}
-                                        </label>
-                                        <Select
-                                            value={row.model}
-                                            onValueChange={(v) => updateRow(row.id, { model: v })}
-                                            disabled={!row.provider}
-                                        >
-                                            <SelectTrigger
-                                                id={`${uid}-model-${row.id}`}
-                                                className="bg-white/5 border-white/10 text-slate-100 hover:border-indigo-500/40 focus:ring-indigo-500 h-9 disabled:opacity-40"
-                                            >
-                                                <SelectValue placeholder="Select model" />
-                                            </SelectTrigger>
-                                            <SelectContent className="bg-slate-900 border-white/10">
-                                                {providerData?.models.map((m) => {
-                                                    const t = getModelTier(m.name);
-                                                    return (
-                                                        <SelectItem key={m.name} value={m.name}>
-                                                            <span className="flex items-center gap-2">
-                                                                {m.name}
-                                                                {t === "speed" && (
-                                                                    <Zap className="w-3 h-3 text-plasma-400 inline" />
-                                                                )}
-                                                                {t === "intelligence" && (
-                                                                    <Brain className="w-3 h-3 text-purple-400 inline" />
-                                                                )}
-                                                            </span>
-                                                        </SelectItem>
-                                                    );
-                                                })}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    {/* Pricing info */}
-                                    {modelData && (
-                                        <div className="space-y-1.5">
-                                            <p className="text-xs font-medium text-slate-400">
-                                                Rates (per 1M tokens)
-                                            </p>
-                                            <div className="flex gap-3 text-xs text-slate-300 bg-white/5 rounded-lg px-3 py-2 border border-white/5">
-                                                <span>
-                                                    In:{" "}
-                                                    <span className="font-mono text-indigo-300">
-                                                        ${modelData.input_1m.toFixed(3)}
-                                                    </span>
-                                                </span>
-                                                <span className="text-slate-600">|</span>
-                                                <span>
-                                                    Out:{" "}
-                                                    <span className="font-mono text-indigo-300">
-                                                        ${modelData.output_1m.toFixed(3)}
-                                                    </span>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Cost output */}
-                                    <div className="space-y-1.5">
-                                        <p className="text-xs font-medium text-slate-400">
-                                            Estimated Cost
-                                        </p>
-                                        {costs.valid ? (
-                                            <div
-                                                className={`rounded-xl px-3 py-2 border space-y-0.5 ${isBest
-                                                        ? "bg-green-500/10 border-green-500/20"
-                                                        : "bg-white/5 border-white/5"
-                                                    }`}
-                                            >
-                                                <div className="flex justify-between text-xs text-slate-400">
-                                                    <span>Input</span>
-                                                    <span className="font-mono text-slate-300">
-                                                        {formatCost(costs.inputCost)}
-                                                    </span>
-                                                </div>
-                                                <div className="flex justify-between text-xs text-slate-400">
-                                                    <span>Output</span>
-                                                    <span className="font-mono text-slate-300">
-                                                        {formatCost(costs.outputCost)}
-                                                    </span>
-                                                </div>
-                                                <div
-                                                    className={`flex justify-between text-sm font-bold border-t mt-1 pt-1 ${isBest
-                                                            ? "border-green-500/20 text-green-400"
-                                                            : "border-white/10 text-slate-100"
-                                                        }`}
-                                                >
-                                                    <span>Total</span>
-                                                    <span className="font-mono">
-                                                        {formatCost(costs.total)}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div className="rounded-xl px-3 py-2 bg-white/5 border border-white/5 text-xs text-slate-500 italic">
-                                                Select a model to calculate
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-
-            {/* ── Add Row Button ── */}
-            <Button
-                variant="outline"
-                onClick={addRow}
-                className="w-full border-dashed border-white/20 bg-white/5 text-slate-400 hover:text-indigo-300 hover:border-indigo-500/40 hover:bg-indigo-500/5 transition-all h-11 text-sm font-medium"
-            >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Model for Comparison
-            </Button>
-
-            {/* ── AI Model Matchmaker ── */}
-            <div className="space-y-4">
-                <div className="space-y-1 ml-1">
-                    <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-widest">AI Model Matchmaker</h3>
-                    <p className="text-sm text-slate-400">Tell us your job, we&apos;ll find your best-fit models.</p>
-                </div>
-                <div className="rounded-2xl border border-indigo-500/30 bg-indigo-500/5 backdrop-blur-md p-6 shadow-xl relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <Sparkles className="w-12 h-12 text-indigo-400" />
-                    </div>
-                    
-                    {!showRecResult ? (
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-2 text-indigo-400">
-                                <Brain className="w-5 h-5" />
-                                <h3 className="font-bold text-lg">AI Model Matchmaker</h3>
-                            </div>
-                            
-                            {recStep === 0 && (
-                                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
-                                    <p className="text-slate-300">What is your primary use case?</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {["General", "Coding", "Creative"].map(v => (
-                                            <Button key={v} variant="outline" size="sm" onClick={() => { setRecAnswers({...recAnswers, useCase: v}); setRecStep(1); }} className="bg-white/5 border-white/10 hover:bg-indigo-500/20">{v}</Button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                            {recStep === 1 && (
-                                <div className="space-y-4 animate-in fade-in slide-in-from-left-2">
-                                    <p className="text-slate-300">What is your expected message volume?</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {["Low", "Medium", "High"].map(v => (
-                                            <Button key={v} variant="outline" size="sm" onClick={() => { setRecAnswers({...recAnswers, volume: v}); setRecStep(2); }} className="bg-white/5 border-white/10 hover:bg-indigo-500/20">{v}</Button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                            {recStep === 2 && (
-                                <div className="space-y-4 animate-in fade-in slide-in-from-left-2">
-                                    <p className="text-slate-300">Prioritize performance or cost?</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {["Cost-First", "High-Performance"].map(v => (
-                                            <Button key={v} variant="outline" size="sm" onClick={() => { setRecAnswers({...recAnswers, budget: v === "Cost-First" ? "Low" : "High"}); setShowRecResult(true); }} className="bg-white/5 border-white/10 hover:bg-indigo-500/20">{v}</Button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    ) : (
-                        <div className="flex flex-col md:flex-row items-center gap-6 animate-in zoom-in-95 duration-300">
-                            <div className="flex-1 space-y-2 text-center md:text-left">
-                                <div className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500 px-2.5 py-0.5 text-[11px] font-bold text-white mb-2 uppercase tracking-wider">
-                                    Recommended Match
-                                </div>
-                                <h4 className="text-2xl font-bold text-white">{recommendedModel?.name}</h4>
-                                <p className="text-slate-400 text-sm">Best for {recAnswers.useCase} with {recAnswers.volume} volume.</p>
-                            </div>
-                            <div className="flex flex-wrap gap-3">
-                                <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    onClick={() => { setRecStep(0); setShowRecResult(false); }}
-                                    className="bg-white/5 border-white/10"
-                                >
-                                    Start Over
-                                </Button>
-                                {recommendedModel && (
-                                    <Link href={`/?model=${encodeURIComponent(recommendedModel.name)}`}>
-                                        <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2">
-                                            Use in Calculator
-                                            <ArrowRight className="w-4 h-4" />
-                                        </Button>
-                                    </Link>
-                                )}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* ── Full Pricing Reference Table ── */}
-            <div className="space-y-4">
-                <div className="space-y-1 ml-1">
-                    <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-widest">Full Pricing Reference Table</h3>
-                    <p className="text-sm text-slate-400">Browse all models grouped by capability tier.</p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md overflow-hidden space-y-4 p-5">
-                    <div className="space-y-4">
-                        {/* Header */}
-                        <div className="space-y-6">
-                            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                                <div className="space-y-1">
-                                    <h3 className="text-sm font-semibold text-slate-300 flex items-center gap-2">
-                                        <span>Full Pricing Reference</span>
-                                        <Clock className="w-4 h-4 text-slate-500" />
-                                    </h3>
-                                    <div className="text-xs font-mono text-slate-600 flex items-center gap-1.5">
-                                        <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                                        Prices last verified: {PRICING_DATA.last_updated}
-                                    </div>
-                                </div>
-
-                                {/* Search & Filter Bar */}
-                                <div className="space-y-2 flex-1 max-w-xl">
-                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Search & Filter Bar</p>
-                                    <div className="flex flex-col sm:flex-row gap-3">
-                                        <div className="relative flex-1">
-                                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                                            <Input 
-                                                placeholder="Search models or providers..." 
-                                                className="pl-9 bg-white/5 border-white/10 h-9 text-sm focus-visible:ring-indigo-500"
-                                                value={searchQuery}
-                                                onChange={(e) => setSearchQuery(e.target.value)}
-                                            />
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <Select value={activeProviderFilter} onValueChange={setActiveProviderFilter}>
-                                                <SelectTrigger className="w-full sm:w-[130px] bg-white/5 border-white/10 h-9 text-[11px]">
-                                                    <Filter className="w-3 h-3 mr-1.5 text-slate-500" />
-                                                    <SelectValue placeholder="Provider" />
-                                                </SelectTrigger>
-                                                <SelectContent className="bg-slate-900 border-white/10">
-                                                    {providerList.map(p => (
-                                                        <SelectItem key={p} value={p}>{p}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <Select value={activeTierFilter} onValueChange={setActiveTierFilter}>
-                                                <SelectTrigger className="w-full sm:w-[130px] bg-white/5 border-white/10 h-9 text-[11px]">
-                                                    <Layers className="w-3 h-3 mr-1.5 text-slate-500" />
-                                                    <SelectValue placeholder="Tier" />
-                                                </SelectTrigger>
-                                                <SelectContent className="bg-slate-900 border-white/10">
-                                                    {tierList.map(t => (
-                                                        <SelectItem key={t} value={t}>{t}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Quick Filters/Highlights */}
-                            <div className="space-y-3 border-t border-white/5 pt-4">
-                                <div className="flex flex-wrap gap-2">
-                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest self-center mr-2">Quick Filters:</span>
-                                    {["Cheapest", "Fastest", "Intelligence", "Max Context"].map(h => (
-                                        <button
-                                            key={h}
-                                            onClick={() => setActiveHighlight(activeHighlight === h ? null : h)}
-                                            className={`px-3 py-1 rounded-full text-[11px] font-bold border transition-all flex items-center gap-1.5 ${
-                                                activeHighlight === h
-                                                    ? "bg-indigo-500/20 border-indigo-500 text-indigo-400 shadow-sm shadow-indigo-500/10"
-                                                    : "bg-white/5 border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-300"
-                                            }`}
-                                        >
-                                            {h === "Cheapest" && <TrendingDown className="w-3 h-3" />}
-                                            {h === "Fastest" && <Zap className="w-3 h-3" />}
-                                            {h === "Intelligence" && <Brain className="w-3 h-3" />}
-                                            {h === "Max Context" && <MousePointer2 className="w-3 h-3" />}
-                                            {h}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Desktop Table */}
-                        <div className="hidden md:block overflow-x-auto max-h-[600px] overflow-y-auto custom-scrollbar">
-                            <table className="w-full text-xs text-left border-separate border-spacing-0">
-                                <thead className="sticky top-0 z-10">
-                                    <tr className="bg-slate-900/95 backdrop-blur-sm shadow-sm">
-                                        <th className="py-4 pr-4 pl-2 text-slate-400 border-b border-white/10 first:rounded-tl-lg">
-                                            <SortHeader
-                                                label="Provider"
-                                                column="provider"
-                                                currentSort={sortColumn}
-                                                currentDir={sortDir}
-                                                onClick={() => handleSort("provider")}
-                                            />
-                                        </th>
-                                        <th className="py-4 pr-4 text-slate-400 border-b border-white/10">
-                                            <SortHeader
-                                                label="Model"
-                                                column="model"
-                                                currentSort={sortColumn}
-                                                currentDir={sortDir}
-                                                onClick={() => handleSort("model")}
-                                            />
-                                        </th>
-                                        <th className="py-4 pr-4 text-slate-400 border-b border-white/10">
-                                            <SortHeader
-                                                label="Tier"
-                                                column="tier"
-                                                currentSort={sortColumn}
-                                                currentDir={sortDir}
-                                                onClick={() => handleSort("tier")}
-                                            />
-                                        </th>
-                                        <th className="py-4 pr-4 text-right text-slate-400 border-b border-white/10">
-                                            <div className="flex items-center justify-end">
-                                                <SortHeader
-                                                    label="Input / 1M"
-                                                    column="input"
-                                                    currentSort={sortColumn}
-                                                    currentDir={sortDir}
-                                                    onClick={() => handleSort("input")}
-                                                />
-                                                <CostTooltip inputRate={1} outputRate={0} />
-                                            </div>
-                                        </th>
-                                        <th className="py-4 pr-4 text-right text-slate-400 border-b border-white/10">
-                                            <div className="flex items-center justify-end">
-                                                <SortHeader
-                                                    label="Output / 1M"
-                                                    column="output"
-                                                    currentSort={sortColumn}
-                                                    currentDir={sortDir}
-                                                    onClick={() => handleSort("output")}
-                                                />
-                                                <CostTooltip inputRate={0} outputRate={1} />
-                                            </div>
-                                        </th>
-                                        <th className="py-4 pr-4 text-right text-slate-400 border-b border-white/10">
-                                            <SortHeader
-                                                label="Context"
-                                                column="context"
-                                                currentSort={sortColumn}
-                                                currentDir={sortDir}
-                                                onClick={() => handleSort("context")}
-                                            />
-                                        </th>
-                                        <th className="py-4 pr-2 text-right text-slate-400 border-b border-white/10 last:rounded-tr-lg">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {pricingTableData.map((model, idx) => {
-                                        const tier = getModelTier(model.name);
-                                        const capabilityTier = model.tier as ModelTier;
-                                        const isBest = model.id === bestValueId;
-                                        const inputBg = getHeatmapColor(model.input_1m, heatmapStats.inputMin, heatmapStats.inputMax);
-                                        const outputBg = getHeatmapColor(model.output_1m, heatmapStats.outputMin, heatmapStats.outputMax);
-
-                                        return (
-                                            <tr
-                                                key={model.id}
-                                                className={`border-b border-white/5 hover:bg-white/5 transition-colors group ${
-                                                    idx % 2 === 0 ? "bg-white/[0.01]" : "bg-transparent"
-                                                }`}
-                                            >
-                                                <td className="py-3.5 pr-4 pl-2 text-slate-400 font-medium">{model.provider}</td>
-                                                <td className="py-3.5 pr-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-slate-100 font-semibold">{model.name}</span>
-                                                        {tier && <TierBadge tier={tier} />}
-                                                    </div>
-                                                </td>
-                                                <td className="py-3.5 pr-4">
-                                                    <CapabilityTierBadge tier={capabilityTier} />
-                                                </td>
-                                                <td
-                                                    className="py-3.5 pr-4 text-right font-mono text-slate-200"
-                                                    style={{ backgroundColor: inputBg }}
-                                                >
-                                                    ${model.input_1m.toFixed(3)}
-                                                </td>
-                                                <td
-                                                    className="py-3.5 pr-4 text-right font-mono text-slate-200"
-                                                    style={{ backgroundColor: outputBg }}
-                                                >
-                                                    ${model.output_1m.toFixed(3)}
-                                                </td>
-                                                <td className="py-3.5 pr-4 text-right">
-                                                    <ContextBar value={model.maxContext || 200000} max={heatmapStats.contextMax} />
-                                                </td>
-                                                <td className="py-3.5 pr-2 text-right">
-                                                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <Link href={`/?model=${encodeURIComponent(model.name)}`}>
-                                                            <button
-                                                                className="p-1.5 rounded bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 transition-colors"
-                                                                title="Use in Calculator"
-                                                            >
-                                                                <Calculator className="w-3.5 h-3.5" />
-                                                            </button>
-                                                        </Link>
-                                                        <button
-                                                            onClick={() => handleCopyRow(model)}
-                                                            className="p-1.5 rounded hover:bg-white/10 text-slate-400 transition-colors"
-                                                            title="Copy Info"
-                                                        >
-                                                            {copiedId === model.id ? (
-                                                                <Check className="w-3.5 h-3.5 text-green-400" />
-                                                            ) : (
-                                                                <Copy className="w-3.5 h-3.5" />
-                                                            )}
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* Mobile Card View - Enhanced */}
-                        <div className="md:hidden space-y-4">
-                            {pricingTableData.map((model) => {
-                                const tier = getModelTier(model.name);
-                                const capabilityTier = model.tier as ModelTier;
                                 return (
-                                    <div
+                                    <tr 
                                         key={model.id}
-                                        className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-4 hover:border-indigo-500/30 transition-colors"
+                                        className={cn(
+                                            "group transition-all duration-200 hover:bg-white/[0.035]",
+                                            isCheapest ? "bg-plasma-500/[0.03] border-l-2 border-l-plasma-500" : "border-l-2 border-l-transparent"
+                                        )}
                                     >
-                                        <div className="flex justify-between items-start">
-                                            <div className="space-y-1.5">
-                                                <div className="flex flex-wrap items-center gap-2">
-                                                    <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider bg-indigo-500/10 px-1.5 py-0.5 rounded">
-                                                        {model.provider}
-                                                    </span>
-                                                    <CapabilityTierBadge tier={capabilityTier} />
-                                                    {tier && <TierBadge tier={tier} />}
-                                                </div>
-                                                <h4 className="font-bold text-slate-100">{model.name}</h4>
-                                            </div>
-                                            <button
-                                                onClick={() => handleCopyRow(model)}
-                                                className="p-2 rounded bg-white/5 text-slate-400"
-                                            >
-                                                {copiedId === model.id ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
-                                            </button>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <div className="bg-white/5 rounded-lg p-2.5 space-y-0.5 border border-white/5">
-                                                <span className="text-[10px] text-slate-500 uppercase font-bold">Input / 1M</span>
-                                                <p className="font-mono text-sm text-indigo-300">${model.input_1m.toFixed(3)}</p>
-                                            </div>
-                                            <div className="bg-white/5 rounded-lg p-2.5 space-y-0.5 border border-white/5">
-                                                <span className="text-[10px] text-slate-500 uppercase font-bold">Output / 1M</span>
-                                                <p className="font-mono text-sm text-indigo-300">${model.output_1m.toFixed(3)}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center justify-between gap-4 pt-2 border-t border-white/5">
+                                        <td className={cn(
+                                            "py-5 pl-6 font-mono text-xs",
+                                            isCheapest ? "text-plasma-400 font-black" : "text-slate-600"
+                                        )}>
+                                            {idx + 1}
+                                        </td>
+                                        <td className="py-5 px-4">
                                             <div className="flex flex-col">
-                                                <span className="text-[10px] text-slate-500 uppercase font-bold">Context Window</span>
-                                                <span className="text-xs text-slate-300 font-mono">{formatContext(model.maxContext || 200000)}</span>
+                                                <span className={cn(
+                                                    "text-sm font-bold tracking-tight",
+                                                    isCheapest ? "text-white" : "text-slate-300"
+                                                )}>
+                                                    {model.name}
+                                                </span>
+                                                <span className="text-[10px] text-slate-600 font-medium uppercase tracking-wider">
+                                                    {model.provider}
+                                                </span>
                                             </div>
-                                            <Link href={`/?model=${encodeURIComponent(model.name)}`} className="flex-1 max-w-[160px]">
-                                                <Button size="sm" variant="outline" className="w-full h-9 text-xs border-indigo-500/30 hover:bg-indigo-500/10 text-indigo-400 gap-2">
-                                                    Use in Calculator
-                                                    <ArrowRight className="w-3 h-3" />
-                                                </Button>
-                                            </Link>
-                                        </div>
-                                    </div>
+                                        </td>
+                                        <td className="py-5 px-4 text-right font-mono text-xs text-slate-500">
+                                            ${model.inputPricePer1M.toFixed(2)}
+                                        </td>
+                                        <td className="py-5 px-4 text-right font-mono text-xs text-slate-500">
+                                            ${model.outputPricePer1M.toFixed(2)}
+                                        </td>
+                                        <td className="py-5 px-4 text-right">
+                                            <div className="flex flex-col items-end">
+                                                <span className={cn(
+                                                    "text-sm font-black font-mono",
+                                                    isCheapest ? "text-plasma-400" : "text-white"
+                                                )}>
+                                                    {formatCost(model.totalCost)}
+                                                </span>
+                                                <div className="w-24 mt-1">
+                                                    <AnimatedCostBar ratio={ratio} />
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="py-5 pr-6 text-right">
+                                            <button 
+                                                onClick={() => handleCopyRow(model)}
+                                                className="opacity-0 group-hover:opacity-100 p-2 rounded-lg hover:bg-white/10 text-slate-500 transition-all"
+                                            >
+                                                {copiedId === model.id ? <Check className="w-3.5 h-3.5 text-plasma-400" /> : <Copy className="w-3.5 h-3.5" />}
+                                            </button>
+                                        </td>
+                                    </tr>
                                 );
                             })}
-                        </div>
-                        
-                        {pricingTableData.length === 0 && (
-                            <div className="py-20 text-center space-y-4">
-                                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/5 text-slate-600">
-                                    <Search className="w-6 h-6" />
-                                </div>
-                                <p className="text-slate-500 text-sm">No models found matching your filters.</p>
-                                <Button variant="link" onClick={() => { setSearchQuery(""); setActiveProviderFilter("All"); setActiveTierFilter("All"); setActiveHighlight(null); }} className="text-indigo-400">Clear all filters</Button>
-                            </div>
-                        )}
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
             </div>
+
+
         </div>
     );
 }
-

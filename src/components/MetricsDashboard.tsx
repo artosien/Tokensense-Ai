@@ -40,7 +40,9 @@ export default function MetricsDashboard() {
     const [shareCopied, setShareCopied] = useState(false);
     const { buildUrl, copyShareUrl } = useShareableUrl();
 
-    const model = getModelById(selectedModelId) ?? models[0];
+    const actualModel = getModelById(selectedModelId);
+    const model = actualModel ?? models[0];
+    const hasModel = !!actualModel;
     const totalInputTokens = inputTokenCount + fileTokenCount;
 
     const singleCost = useMemo(
@@ -153,13 +155,16 @@ export default function MetricsDashboard() {
     return (
         <div className="space-y-5 pb-8 md:pb-0">
             {/* Hero Cost Display */}
-            <Card className="border-plasma-500/20 bg-gradient-to-b from-plasma-500/10 to-transparent backdrop-blur-md md:hidden">
+            <Card className="border-[#00dcb4]/30 bg-gradient-to-b from-[#00dcb4]/10 to-[#00dcb4]/5 backdrop-blur-md md:hidden rounded-2xl p-2 shadow-[0_0_30px_rgba(0,220,180,0.1)]">
               <CardContent className="pt-8 pb-6 text-center">
-                <span className="text-[10px] font-bold text-plasma-400 uppercase tracking-widest block mb-2">Estimated Cost</span>
-                <div className="text-5xl font-bold font-mono text-plasma-400 tabular-nums tracking-tighter mb-2">
+                <span className="text-[10px] font-bold text-[#00dcb4] uppercase tracking-widest block mb-2">Estimated Cost</span>
+                <div 
+                  className="text-[2.2rem] font-bold font-mono text-[#00dcb4] tabular-nums tracking-tighter mb-2 leading-none"
+                  style={{ textShadow: '0 0 24px rgba(0,220,180,0.35)' }}
+                >
                   {formatCost(totalCost)}
                 </div>
-                <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground/60 font-mono">
+                <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground/60 font-mono mt-4">
                   <span>{formatTokens(totalInputTokens)} in</span>
                   <ArrowRight className="w-3 h-3" />
                   <span>{formatTokens(expectedOutputTokens)} out</span>
@@ -168,11 +173,13 @@ export default function MetricsDashboard() {
             </Card>
 
             {/* Model Selector */}
-            <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
-                <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between">
-                        <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Model</CardTitle>      
-                        <Button
+            <div>
+              <div className="text-xs font-mono text-[#00dcb4] uppercase tracking-wider mb-2">Step 2 — Select your model</div>
+              <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
+                  <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                          <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Model</CardTitle>      
+                          <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => { triggerHaptic(15); setCompareMode(true); }}
@@ -185,24 +192,40 @@ export default function MetricsDashboard() {
                 </CardHeader>
                 <CardContent className="space-y-3 pt-1">
                     <ModelPickerModal selectedModelId={selectedModelId} onChange={(id) => { triggerHaptic(15); setSelectedModelId(id); }} />        
-                    <Separator className="opacity-20" />
-                    <div className="text-[11px] md:text-xs text-muted-foreground/70 space-y-1.5">
-                        <div className="flex justify-between">
-                            <span className="flex items-center">
-                                <TermTooltip termKey="contextWindow">Context window</TermTooltip>:
-                            </span>
-                            <span className="font-mono">{(model.maxContext / 1000).toFixed(0)}k tokens</span>   
-                        </div>
-                        <div className="flex justify-between">
-                            <span className="flex items-center gap-1">
-                                Price
-                                <TermTooltip termKey="inputCost" iconOnly />/<TermTooltip termKey="outputCost" iconOnly />:
-                            </span>
-                            <span className="font-mono">${model.inputPricePer1M} / ${model.outputPricePer1M} per 1M</span>
-                        </div>
-                    </div>
+                    {hasModel && (
+                        <>
+                            <Separator className="opacity-20" />
+                            <div className="text-[11px] md:text-xs text-muted-foreground/70 space-y-1.5">
+                                <div className="flex justify-between">
+                                    <span className="flex items-center">
+                                        <TermTooltip termKey="contextWindow">Context window</TermTooltip>:
+                                    </span>
+                                    <span className="font-mono">{(model.maxContext / 1000).toFixed(0)}k tokens</span>   
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="flex items-center gap-1">
+                                        Price
+                                        <TermTooltip termKey="inputCost" iconOnly />/<TermTooltip termKey="outputCost" iconOnly />:
+                                    </span>
+                                    <span className="font-mono">${model.inputPricePer1M} / ${model.outputPricePer1M} per 1M</span>
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </CardContent>
             </Card>
+            </div>
+
+            <div className="text-xs font-mono text-[#00dcb4] uppercase tracking-wider mb-2 mt-6">Step 3 — View your cost</div>
+            {!hasModel ? (
+                <div className="rounded-2xl border border-dashed border-border/40 bg-card/10 backdrop-blur-sm p-8 text-center flex flex-col items-center justify-center min-h-[300px]">
+                    <p className="text-sm text-muted-foreground font-medium">
+                        &larr; Choose a model to calculate
+                    </p>
+                </div>
+            ) : (
+                <>
+                {/* Hero Cost Display */}
 
             {/* Cost Gauge (Desktop Only) */}
             <div className="hidden md:block">
@@ -376,6 +399,8 @@ export default function MetricsDashboard() {
 
             {/* Recent History */}
             <RecentCalculations />
+                </>
+            )}
         </div>
     );
 }

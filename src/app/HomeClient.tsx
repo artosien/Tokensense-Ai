@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import SiteHeader from "@/components/SiteHeader";
 import dynamic from "next/dynamic";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
@@ -11,12 +11,96 @@ import { useDebounce } from "@/hooks/useDebounce";
 import SocialShareBar from "@/components/SocialShareBar";
 import { StickyResultsBar } from "@/components/StickyResultsBar";
 import { BudgetCalculator } from "@/components/BudgetCalculator";
+import { ApiIntegrationSection } from "@/components/ApiIntegrationSection";
 import { useShareableUrl } from "@/hooks/useShareableUrl";
 import { Card } from "@/components/ui/card";
 import { Calculator, LayoutDashboard, ChevronRight, Sparkles, Zap, ShieldCheck, Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { models } from "@/lib/models";
+
+// ── Animation A: Typewriter hook ─────────────────────────────────────────────
+function useTypewriter(text: string, speed = 60, startDelay = 400) {
+  const [displayed, setDisplayed] = useState("");
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    setDisplayed("");
+    setDone(false);
+    const delay = setTimeout(() => {
+      let i = 0;
+      const tick = setInterval(() => {
+        i++;
+        setDisplayed(text.slice(0, i));
+        if (i >= text.length) { clearInterval(tick); setDone(true); }
+      }, speed);
+      return () => clearInterval(tick);
+    }, startDelay);
+    return () => clearTimeout(delay);
+  }, [text, speed, startDelay]);
+  return { displayed, done };
+}
+
+// ── Animation D: Pricing Ticker ───────────────────────────────────────────────
+function PricingTicker() {
+  const items = models.map(m => `${m.name}  ·  $${m.inputPricePer1M} in / $${m.outputPricePer1M} out`);
+  const doubled = [...items, ...items]; // seamless loop
+  return (
+    <div className="overflow-hidden w-full py-3 border-t border-b border-[#00dcb4]/10 bg-[#00dcb4]/3 mt-6">
+      <div
+        className="flex gap-12 whitespace-nowrap"
+        style={{
+          animation: "ticker-scroll 32s linear infinite",
+          width: "max-content",
+        }}
+      >
+        {doubled.map((item, i) => (
+          <span key={i} className="text-[11px] font-mono text-muted-foreground/60 shrink-0">
+            <span className="text-[#00dcb4]/60 mr-1">▸</span>{item}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Animation E: Gradient Mesh Orbs ──────────────────────────────────────────
+function GradientOrbs() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden -z-10">
+      {/* Teal orb — top left */}
+      <div
+        className="absolute rounded-full"
+        style={{
+          width: 600, height: 600,
+          top: "-20%", left: "-10%",
+          background: "radial-gradient(circle, rgba(0,220,180,0.13) 0%, transparent 70%)",
+          animation: "orb-drift-1 10s ease-in-out infinite alternate",
+        }}
+      />
+      {/* Indigo orb — top right */}
+      <div
+        className="absolute rounded-full"
+        style={{
+          width: 500, height: 500,
+          top: "-10%", right: "-5%",
+          background: "radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%)",
+          animation: "orb-drift-2 12s ease-in-out infinite alternate",
+        }}
+      />
+      {/* Purple orb — bottom center */}
+      <div
+        className="absolute rounded-full"
+        style={{
+          width: 400, height: 400,
+          bottom: "-15%", left: "40%",
+          background: "radial-gradient(circle, rgba(168,85,247,0.10) 0%, transparent 70%)",
+          animation: "orb-drift-3 14s ease-in-out infinite alternate",
+        }}
+      />
+    </div>
+  );
+}
 
 // Dynamic imports with loading skeletons to reduce CLS (M11)
 const PromptEditor = dynamic(() => import("@/components/PromptEditor"), { 
@@ -36,11 +120,32 @@ const PromptCostComparisonTable = dynamic(() => import("@/components/PromptCostC
   ssr: false,
   loading: () => <div className="h-[400px] mt-8 animate-pulse bg-card/50 rounded-2xl border border-border/40" />
 });
+const CompareMode = dynamic(() => import("@/components/CompareMode").then(m => m.CompareMode), { ssr: false });
 const ModelComparisonSlider = dynamic(() => import("@/components/ModelComparisonSlider"), { ssr: false });
+
+// ── Animation A: Hero Headline with typewriter ────────────────────────────────
+function HeroHeadline() {
+  const { displayed, done } = useTypewriter("instantly.", 65, 500);
+  return (
+    <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black tracking-tight leading-[1.1] text-foreground mt-0">
+      Calculate your AI <br className="hidden lg:block" />
+      prompt costs{" "}
+      <span className="bg-gradient-to-r from-plasma-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
+        {displayed}
+        <span
+          className="inline-block w-[3px] h-[0.85em] ml-0.5 align-middle rounded-sm bg-plasma-400"
+          style={{
+            animation: done ? "cursor-blink 1s step-end infinite" : "none",
+            opacity: done ? undefined : 1,
+          }}
+        />
+      </span>
+    </h1>
+  );
+}
 
 export default function HomeClient() {
   const [mounted, setMounted] = useState(false);
-  const [hasCalculatedOnce, setHasCalculatedOnce] = useState(false);
 
   const { input, model, restored, setRestored } = usePersistedCalculator();
   const { 
@@ -48,9 +153,7 @@ export default function HomeClient() {
     systemPrompt, 
     setUserPrompt, 
     setSelectedModelId, 
-    setExpectedOutputTokens,
-    activeTab,
-    setActiveTab
+    setExpectedOutputTokens
   } = useTokenSenseStore();
   const { parseUrlState } = useShareableUrl();
 
@@ -72,16 +175,7 @@ export default function HomeClient() {
     setMounted(true);
   }, [input, model, parseUrlState, setSelectedModelId, setUserPrompt, setExpectedOutputTokens]);
 
-  // Auto-switch to results tab on first calculation
-  useEffect(() => {
-    if (hasPromptContent && !hasCalculatedOnce) {
-      const timer = setTimeout(() => {
-        setActiveTab("results");
-        setHasCalculatedOnce(true);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [hasPromptContent, hasCalculatedOnce, setActiveTab]);
+
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
@@ -93,16 +187,19 @@ export default function HomeClient() {
         {/* Social Share - Top */}
         <SocialShareBar variant="top" />
 
-        {/* CTA Block */}
-        <div className="pt-10 pb-16 text-center lg:text-left flex flex-col lg:flex-row items-center justify-between gap-12">
+        {/* CTA Block — wraps in a relative container for the orbs */}
+        <div className="relative pt-10 pb-16 text-center lg:text-left flex flex-col lg:flex-row items-center justify-between gap-12">
+          {/* Animation E: Gradient Mesh Orbs */}
+          <GradientOrbs />
+
           <div className="max-w-3xl space-y-6">
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black tracking-tight leading-[1.1] text-foreground">
-              Calculate your AI <br className="hidden lg:block" />
-              prompt costs{" "}
-              <span className="bg-gradient-to-r from-plasma-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                instantly.
-              </span>
-            </h1>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#00dcb4]/30 bg-[#00dcb4]/10 text-[#00dcb4] text-xs font-mono font-bold tracking-wide mb-2 animate-in fade-in slide-in-from-bottom-2">
+              The only calculator that simulates agent loop costs
+            </div>
+
+            {/* Animation A: Typewriter on 'instantly.' */}
+            <HeroHeadline />
+
             <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium">
               Know your token counts and pricing across GPT-4o, Claude 3.5, Gemini 1.5, and 50+ other major models before you hit send.
             </p>
@@ -110,10 +207,10 @@ export default function HomeClient() {
             <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start pt-4">
               <Button 
                 size="lg" 
-                className="w-full sm:w-auto h-14 px-10 text-lg font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xl shadow-indigo-500/25 transition-all hover:scale-105 active:scale-95"
+                className="w-full sm:w-auto h-[56px] px-[28px] text-lg font-bold bg-[#00dcb4] hover:bg-[#00c5a1] text-black shadow-xl shadow-[#00dcb4]/20 transition-all hover:-translate-y-0.5 hover:shadow-[0_0_20px_rgba(0,220,180,0.4)] active:scale-95"
                 asChild
               >
-                <Link href="/#calculate-section">Try Calculator Now</Link>
+                <Link href="/#calculate-section">Try Calculator Now &rarr;</Link>
               </Button>
               <Button 
                 variant="outline" 
@@ -125,21 +222,14 @@ export default function HomeClient() {
               </Button>
             </div>
 
+            {/* Animation D: Pricing Ticker */}
+            <PricingTicker />
+
             {/* Trust badges */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-6">
-              {[
-                { icon: <ShieldCheck className="w-3.5 h-3.5" />, label: "100% Client-Side" },
-                { icon: <Zap className="w-3.5 h-3.5" />, label: "No Sign-up" },
-                { icon: <Sparkles className="w-3.5 h-3.5" />, label: "Free Forever" },
-                { icon: <Bot className="w-3.5 h-3.5" />, label: "Open Source" },
-              ].map((badge, idx) => (
-                <div
-                  key={idx}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-indigo-500/20 bg-indigo-500/5 backdrop-blur-sm"
-                >
-                  <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-1.5">
-                    {badge.icon} {badge.label}
-                  </span>
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-2 pt-2">
+              {["100% Client-Side", "No Sign-up", "Free Forever", "Open Source"].map((label, idx) => (
+                <div key={idx} className="flex items-center gap-1.5 font-mono text-xs font-medium text-muted-foreground">
+                  <span className="text-[#00dcb4] font-bold">✓</span> {label}
                 </div>
               ))}
             </div>
@@ -173,72 +263,96 @@ export default function HomeClient() {
           </div>
         </div>
 
-        {/* Two-panel layout / Tabbed layout */}
-        <div id="calculate-section" className="relative overflow-hidden min-h-[600px] scroll-mt-20">
-          {/* Mobile view container with slide transition */}
-          <div className={cn(
-            "flex w-[200%] transition-transform duration-300 ease-in-out md:hidden",
-            activeTab === "results" ? "-translate-x-1/2" : "translate-x-0"
-          )}>
-            {/* Calculate Tab Pane */}
-            <div className="w-1/2 space-y-6 px-1">
-              {mounted && restored && (
-                <RestoredSessionBanner onClear={() => setRestored(false)} />
-              )}
-              <PromptEditor />
-              <FileContextUploader />
-              <AgentLoopSimulator />
-            </div>
-
-            {/* Results Tab Pane */}
-            <div className="w-1/2 px-1">
-              {hasPromptContent ? (
-                <div className="space-y-6">
-                  <MetricsDashboard />
-                  <ConversationSimulator />
-                </div>
-              ) : (
-                <div className="rounded-2xl border border-border/40 bg-card/50 backdrop-blur-sm p-8 text-center h-full flex flex-col items-center justify-center min-h-[400px]">
-                  <div className="text-3xl mb-3">📊</div>
-                  <p className="text-sm text-muted-foreground">
-                    Enter your prompt in the Calculate tab to see token cost estimates.
-                  </p>
-                </div>
-              )}
-            </div>
+        {/* Stats Bar */}
+        <div className="py-6 border-y border-border/40 bg-card/20 backdrop-blur-sm mt-8 mb-16">
+          <div className="max-w-5xl mx-auto flex flex-wrap justify-center sm:justify-between items-center gap-8 px-4">
+            {[
+              { val: "30+", label: "Models Supported" },
+              { val: "100%", label: "Client-Side" },
+              { val: "<50ms", label: "Token Count Speed" },
+              { val: "$0", label: "Cost to Use" },
+            ].map((stat, i) => (
+              <div key={i} className="flex flex-col items-center">
+                <span className="text-2xl sm:text-3xl font-black tracking-tighter text-foreground">{stat.val}</span>
+                <span className="text-[10px] sm:text-xs font-mono text-muted-foreground uppercase">{stat.label}</span>
+              </div>
+            ))}
           </div>
+        </div>
 
-          {/* Desktop view container (hidden on mobile) */}
-          <div className="hidden md:flex flex-row gap-6">
+        {/* Inline Header for Calculator (Step 01) */}
+        <div className="text-center mb-8 mt-12">
+            <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-[#00dcb4]/10 text-[#00dcb4] text-sm font-mono font-bold tracking-widest uppercase mb-4 border border-[#00dcb4]/20">
+              STEP 01 &mdash; Count your tokens &amp; estimate cost
+            </div>
+            <p className="text-muted-foreground text-lg font-medium">
+              Paste your prompt, choose a model, and see your cost instantly.
+            </p>
+        </div>
+
+        {/* Two-panel layout: Step 01 stacked on mobile, inline on desktop */}
+        <div id="calculate-section" className="relative scroll-mt-20">
+          <div className="flex flex-col md:flex-row gap-6">
             {/* Left Panel - 60% */}
             <div className="w-full lg:w-[60%] space-y-6">
               {mounted && restored && (
                 <RestoredSessionBanner onClear={() => setRestored(false)} />
               )}
               <PromptEditor />
-              <FileContextUploader />
-              <AgentLoopSimulator />
             </div>
 
             {/* Right Panel - 40%, sticky */}
             <div className="w-full lg:w-[40%]">
               <div className="lg:sticky lg:top-[72px]">
-                {hasPromptContent ? (
-                  <div className="space-y-6">
-                    <MetricsDashboard />
-                    <ConversationSimulator />
-                  </div>
-                ) : (
-                  <div className="rounded-2xl border border-border/40 bg-card/50 backdrop-blur-sm p-8 text-center min-h-[300px] flex flex-col items-center justify-center">
-                    <div className="text-3xl mb-3">📊</div>
-                    <p className="text-sm text-muted-foreground">
-                      Enter your prompt above to see token cost estimates.
-                    </p>
-                  </div>
-                )}
+                <div className="space-y-6">
+                  <MetricsDashboard />
+                  {hasPromptContent && <ConversationSimulator />}
+                </div>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Visual Connector */}
+        <div className="hidden md:flex justify-center mt-8 mb-4">
+          <div className="w-px h-16 border-l-2 border-dashed border-[#00dcb4]/40"></div>
+        </div>
+
+        {/* Step 02 - Compare Mode */}
+        {showComparisonTable && (
+          <>
+            <div className="animate-fade-in my-8 relative z-10">
+              <CompareMode />
+            </div>
+            
+            {/* Visual Connector */}
+            <div className="hidden md:flex justify-center mt-8 mb-4">
+              <div className="w-px h-16 border-l-2 border-dashed border-[#00dcb4]/40"></div>
+            </div>
+          </>
+        )}
+
+        {/* Step 03 - Agentic Loop Simulator section */}
+        <div className="my-8 relative z-10 text-center">
+            <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-[#00dcb4]/10 text-[#00dcb4] text-sm font-mono font-bold tracking-widest uppercase mb-4 border border-[#00dcb4]/20">
+              STEP 03 &mdash; Simulate your agent&apos;s total cost over time
+            </div>
+            <p className="text-muted-foreground text-lg font-medium mb-8">
+              See how costs compound across multiple turns &mdash; before you build.
+            </p>
+            <div className="text-left space-y-6 max-w-4xl mx-auto">
+              <div className="text-xs font-mono text-[#00dcb4] uppercase tracking-wider mb-2">Step 1 — Set your initial context (optional)</div>
+              <FileContextUploader />
+              
+              <div className="text-xs font-mono text-[#00dcb4] uppercase tracking-wider mb-2 mt-8">Step 2 — Configure your loop parameters</div>
+              <AgentLoopSimulator />
+            </div>
+        </div>
+
+
+        {/* API Integration Section */}
+        <div className="pt-8">
+          <ApiIntegrationSection />
         </div>
 
         {/* Budget Reverse Calculator */}
@@ -248,12 +362,7 @@ export default function HomeClient() {
           </Card>
         </div>
 
-        {/* Model Cost Comparison Table - appears after debounced prompt */}
-        {showComparisonTable && (
-          <div className="animate-fade-in min-h-[400px]">
-            <PromptCostComparisonTable prompt={debouncedPrompt} systemPrompt={systemPrompt} />
-          </div>
-        )}
+
 
         {/* Features Showcase */}
         <div className="pt-24 pb-12">
@@ -265,54 +374,58 @@ export default function HomeClient() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Feature 1 */}
-            <div className="group flex flex-col space-y-4 p-8 rounded-3xl bg-card border border-border/40 hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all duration-300">
+            <div className="group flex flex-col space-y-4 p-8 rounded-3xl bg-card border border-border/40 hover:border-[#00dcb4]/40 hover:bg-black/20 hover:-translate-y-1 transition-all duration-[250ms] relative overflow-hidden">
+              <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-transparent to-transparent group-hover:via-[#00dcb4]/70 transition-all duration-300"></div>
               <div className="w-14 h-14 rounded-2xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center text-3xl mb-2 group-hover:scale-110 transition-transform">
                 ⚡
               </div>
               <div className="space-y-2 flex-1">
                 <h3 className="text-2xl font-bold tracking-tight">Instant Token Count</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed font-medium">
-                  Paste any system prompt or user message and see your token count in real time. Supports Tiktoken and model-specific tokenizers.
+                  Real-time token counting using each model&apos;s exact tokenizer &mdash; as you type.
                 </p>
               </div>
               <div className="pt-4">
-                <Button className="w-full justify-between font-bold group-hover:bg-indigo-600 transition-colors" asChild>
+                <Button className="w-full justify-between font-bold group-hover:bg-[#00dcb4] group-hover:text-black transition-colors" asChild>
                   <Link href="/#calculate-section">Launch Tool <ChevronRight className="w-4 h-4 ml-2" /></Link>
                 </Button>
               </div>
             </div>
 
             {/* Feature 2 */}
-            <div className="group flex flex-col space-y-4 p-8 rounded-3xl bg-card border border-border/40 hover:border-green-500/50 hover:bg-green-500/5 transition-all duration-300">
+            <div className="group flex flex-col space-y-4 p-8 rounded-3xl bg-card border border-border/40 hover:border-[#00dcb4]/40 hover:bg-black/20 hover:-translate-y-1 transition-all duration-[250ms] relative overflow-hidden">
+              <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-transparent to-transparent group-hover:via-[#00dcb4]/70 transition-all duration-300"></div>
               <div className="w-14 h-14 rounded-2xl bg-green-500/10 text-green-500 flex items-center justify-center text-3xl mb-2 group-hover:scale-110 transition-transform">
                 💸
               </div>
               <div className="space-y-2 flex-1">
                 <h3 className="text-2xl font-bold tracking-tight">Pre-Flight Cost Estimate</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed font-medium">
-                  See the estimated cost per API call - in dollars - before you run your prompt. Compare prices side-by-side across major providers.
+                  Accurate input + output cost projections before you make a single API call.
                 </p>
               </div>
               <div className="pt-4">
-                <Button className="w-full justify-between font-bold group-hover:bg-green-600 transition-colors" asChild>
+                <Button className="w-full justify-between font-bold group-hover:bg-[#00dcb4] group-hover:text-black transition-colors" asChild>
                   <Link href="/comparison">Compare Costs <ChevronRight className="w-4 h-4 ml-2" /></Link>
                 </Button>
               </div>
             </div>
 
             {/* Feature 3 */}
-            <div className="group flex flex-col space-y-4 p-8 rounded-3xl bg-card border border-border/40 hover:border-blue-500/50 hover:bg-blue-500/5 transition-all duration-300">
+            <div className="group flex flex-col space-y-4 p-8 rounded-3xl bg-card border border-border/40 hover:border-[#00dcb4]/40 hover:bg-black/20 hover:-translate-y-1 transition-all duration-[250ms] relative overflow-hidden">
+              <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-transparent to-transparent group-hover:via-[#00dcb4]/70 transition-all duration-300"></div>
               <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-3xl mb-2 group-hover:scale-110 transition-transform">
                 🔍
               </div>
               <div className="space-y-2 flex-1">
-                <h3 className="text-2xl font-bold tracking-tight">Agentic Loop Simulator</h3>
+                <h3 className="text-2xl font-bold tracking-tight">Multi-Step Agent Cost Estimator</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed font-medium">
-                  Running a multi-step AI agent? Simulate looped calls and see how token costs compound across complex architectural iterations.
+                  See how costs compound across multi-step agent workflows, turn by turn.
+                  <span className="block mt-2 text-xs italic text-muted-foreground/70">e.g. 10 tool calls + 5 replies = $X total</span>
                 </p>
               </div>
               <div className="pt-4">
-                <Button className="w-full justify-between font-bold group-hover:bg-blue-600 transition-colors" asChild>
+                <Button className="w-full justify-between font-bold group-hover:bg-[#00dcb4] group-hover:text-black transition-colors" asChild>
                   <Link href="/workflow">Simulate Loops <ChevronRight className="w-4 h-4 ml-2" /></Link>
                 </Button>
               </div>
@@ -361,56 +474,7 @@ export default function HomeClient() {
           </div>
         </div>
 
-        {/* How It Works Section */}
-        <div className="pt-8 pb-16 border-t border-border/40">
-          <div className="max-w-4xl mx-auto space-y-10">
-            <h2 className="text-3xl font-bold tracking-tight text-center text-foreground">How It Works</h2>     
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-              {/* Connecting line for desktop */}
-              <div className="hidden md:block absolute top-[28px] left-[16.6%] right-[16.6%] h-[2px] bg-border/60 z-0"></div>
-
-              {/* Step 1 */}
-              <div className="flex flex-col items-center text-center space-y-4 relative z-10">
-                <div className="w-14 h-14 rounded-full bg-background border-2 border-indigo-500 flex items-center justify-center text-indigo-500 font-bold text-xl shadow-md">
-                  1
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold tracking-tight text-foreground mb-2">Write or paste your prompt</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed px-2 font-medium">
-                    Add your system prompt and user message. Tokensense-Ai counts tokens instantly using the same tokenization method each model uses.
-                  </p>
-                </div>
-              </div>
-
-              {/* Step 2 */}
-              <div className="flex flex-col items-center text-center space-y-4 relative z-10">
-                <div className="w-14 h-14 rounded-full bg-background border-2 border-indigo-500 flex items-center justify-center text-indigo-500 font-bold text-xl shadow-md">
-                  2
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold tracking-tight text-foreground mb-2">Choose your model</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed px-2 font-medium">
-                    Select from GPT-4o, Claude, Gemini, and more. See the current input and output price per million tokens.
-                  </p>
-                </div>
-              </div>
-
-              {/* Step 3 */}
-              <div className="flex flex-col items-center text-center space-y-4 relative z-10">
-                <div className="w-14 h-14 rounded-full bg-background border-2 border-indigo-500 flex items-center justify-center text-indigo-500 font-bold text-xl shadow-md">
-                  3
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold tracking-tight text-foreground mb-2">Get your cost estimate</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed px-2 font-medium">
-                    See total tokens, estimated cost per call, and a cost severity rating - all before you touch your API quota.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Token Basics FAQ Section */}
         <div className="pt-8 pb-16 border-t border-border/40">
@@ -524,38 +588,6 @@ export default function HomeClient() {
         <SocialShareBar variant="bottom" />
       </main>
 
-      {/* Mobile Tab Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-[100] bg-background/80 backdrop-blur-xl border-t border-border/40 md:hidden pb-[env(safe-area-inset-bottom)]">
-        <div className="flex h-16 items-center justify-around">
-          <button
-            onClick={() => setActiveTab("calculate")}
-            className={cn(
-              "flex flex-col items-center justify-center w-full h-full gap-1 transition-colors relative",
-              activeTab === "calculate" ? "text-plasma-400" : "text-muted-foreground"
-            )}
-          >
-            <Calculator className="w-5 h-5" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider">Calculate</span>
-            {activeTab === "calculate" && (
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-plasma-400 rounded-t-full shadow-[0_-2px_8px_rgba(34,211,238,0.4)]" />
-            )}
-          </button>
-          
-          <button
-            onClick={() => setActiveTab("results")}
-            className={cn(
-              "flex flex-col items-center justify-center w-full h-full gap-1 transition-colors relative",
-              activeTab === "results" ? "text-plasma-400" : "text-muted-foreground"
-            )}
-          >
-            <LayoutDashboard className="w-5 h-5" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider">Results</span>
-            {activeTab === "results" && (
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-plasma-400 rounded-t-full shadow-[0_-2px_8px_rgba(34,211,238,0.4)]" />
-            )}
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

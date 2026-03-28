@@ -252,9 +252,10 @@ export default function PromptEditor() {
 
             {/* User Prompt */}
             <div className="space-y-2">
+                <div className="text-xs font-mono text-[#00dcb4] uppercase tracking-wider mb-2">Step 1 — Paste your prompt</div>
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <Label htmlFor="user-prompt" className="text-sm font-medium text-muted-foreground">     
+                        <Label htmlFor="user-prompt" className="text-sm font-medium text-muted-foreground hidden">     
                             User Prompt
                         </Label>
                     </div>

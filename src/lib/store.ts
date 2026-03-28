@@ -1,4 +1,4 @@
-﻿import { create } from "zustand";
+import { create } from "zustand";
 
 interface TokenSenseState {
     // Prompt text
@@ -43,7 +43,7 @@ export const useTokenSenseStore = create<TokenSenseState>((set) => ({
     userPrompt: "",
     fileText: "",
 
-    selectedModelId: "gpt-4o",
+    selectedModelId: "",
 
     expectedOutputTokens: 1000,
 

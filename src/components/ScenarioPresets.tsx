@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTokenSenseStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { FileText, Info, Files, BookOpen } from "lucide-react";
+import { FileText, Info, Files, BookOpen, Code2 } from "lucide-react";
 
 interface Preset {
   label: string;
@@ -42,8 +42,8 @@ const PRESETS: Preset[] = [
   {
     label: "Code Review",
     icon: "💻",
-    inputTokens: 2000,
-    outputTokens: 800,
+    inputTokens: 0, // Dynamic
+    outputTokens: 0, // Dynamic
     modelId: "claude-3-5-sonnet",
     description: "Review a code file",
   },
@@ -79,6 +79,12 @@ const DOC_SIZE_PRESETS = [
   { label: "Deep (25k words)", words: 25000 },
 ];
 
+const CODE_REVIEW_COMPLEXITY = [
+  { label: "Low", description: "Small bug fix / script", inputAvg: 500, outputAvg: 200 },
+  { label: "Medium", description: "Standard component or class", inputAvg: 2000, outputAvg: 800 },
+  { label: "High", description: "Complex system or large PR", inputAvg: 8000, outputAvg: 2500 },
+];
+
 export function ScenarioPresets() {
   const { setUserPrompt, setExpectedOutputTokens, setSelectedModelId, setInputTokenCount } =
     useTokenSenseStore();
@@ -92,6 +98,9 @@ export function ScenarioPresets() {
   const [docCount, setDocCount] = useState(1);
   const [docSizeIdx, setDocSizeIdx] = useState(0);
 
+  // Dynamic state for Code Review
+  const [codeReviewIdx, setCodeReviewIdx] = useState(1);
+
   const applyPreset = (preset: Preset, forceUpdate: boolean = false) => {
     if (activePreset === preset.label && !forceUpdate) return;
     setActivePreset(preset.label);
@@ -99,34 +108,39 @@ export function ScenarioPresets() {
     let inTokens = preset.inputTokens;
     let outTokens = preset.outputTokens;
 
+    let promptText = "";
+
     if (preset.label === "Content Rewrite") {
       const range = WORD_COUNT_RANGES[wordRangeIdx];
       const totalWords = range.avg * postCount;
       inTokens = Math.round(totalWords * 1.35);
       outTokens = inTokens; 
+      promptText = `You are an expert editor. Please rewrite the following ${postCount} blog articles (totaling ~${(WORD_COUNT_RANGES[wordRangeIdx].avg * postCount).toLocaleString()} words) to improve SEO, readability, and engagement.\n\n[Content of ${postCount} articles would follow here...]`;
     } else if (preset.label === "Doc Summary") {
       const size = DOC_SIZE_PRESETS[docSizeIdx];
       const totalWords = size.words * docCount;
       inTokens = Math.round(totalWords * 1.35);
       outTokens = 500 * docCount; // ~500 tokens summary per doc
+      promptText = `Please provide a concise executive summary for the following ${docCount} documents. Each document is approximately ${DOC_SIZE_PRESETS[docSizeIdx].words.toLocaleString()} words.\n\n[Document data for ${docCount} files would appear here...]`;
+    } else if (preset.label === "Code Review") {
+      const complexity = CODE_REVIEW_COMPLEXITY[codeReviewIdx];
+      inTokens = complexity.inputAvg;
+      outTokens = complexity.outputAvg;
+      if (codeReviewIdx === 0) {
+        promptText = `Please review this small utility function for minor bugs, edge cases, and style improvements.\n\n[~${complexity.inputAvg} tokens of simple code]`;
+      } else if (codeReviewIdx === 1) {
+        promptText = `Please perform a standard code review on this React component. Focus on state management, accessibility, and performance.\n\n[~${complexity.inputAvg} tokens of standard code]`;
+      } else {
+        promptText = `Perform an in-depth architecture and code review on this complex module. Look for race conditions, memory leaks, security vulnerabilities, and logic bugs.\n\n[~${complexity.inputAvg} tokens of complex system code]`;
+      }
+    } else {
+      const samplePrompts: Record<string, string> = {
+        "Chatbot Turn": "Hi, can you help me understand how transformer models handle long-range dependencies in text?",
+        "Long Report": "Analyze the following market data and write a comprehensive report...",
+        "Agent Loop": "You are an autonomous research agent. Your goal is to search and synthesize papers...",
+      };
+      promptText = samplePrompts[preset.label] || `[Preset applied]`;
     }
-
-    const samplePrompts: Record<string, string> = {
-      "Chatbot Turn":
-        "Hi, can you help me understand how transformer models handle long-range dependencies in text?",
-      "Doc Summary":
-        `Please provide a concise executive summary for the following ${docCount} documents. Each document is approximately ${DOC_SIZE_PRESETS[docSizeIdx].words.toLocaleString()} words.\n\n[Document data for ${docCount} files would appear here...]`,
-      "Content Rewrite": 
-        `You are an expert editor. Please rewrite the following ${postCount} blog articles (totaling ~${(WORD_COUNT_RANGES[wordRangeIdx].avg * postCount).toLocaleString()} words) to improve SEO, readability, and engagement.\n\n[Content of ${postCount} articles would follow here...]`,
-      "Code Review":
-        `Please review this Python function for bugs and style...`,
-      "Long Report":
-        "Analyze the following market data and write a comprehensive report...",
-      "Agent Loop":
-        "You are an autonomous research agent. Your goal is to search and synthesize papers...",
-    };
-
-    const promptText = samplePrompts[preset.label] || `[Preset applied]`;
 
     setUserPrompt(promptText);
     setInputTokenCount(inTokens);
@@ -295,7 +309,47 @@ export function ScenarioPresets() {
         </div>
       )}
 
-      {activePreset && activePreset !== "Content Rewrite" && activePreset !== "Doc Summary" && (
+      {/* Dynamic Controls for Code Review */}
+      {activePreset === "Code Review" && (
+        <div className="bg-plasma-500/5 border border-plasma-500/10 rounded-2xl p-4 animate-in slide-in-from-top-2 duration-300">
+          <div className="flex flex-col md:flex-row md:items-center gap-6">
+            <div className="flex-1 space-y-3">
+              <label className="text-[10px] font-bold text-plasma-400 uppercase tracking-widest flex items-center gap-2">
+                <Code2 className="w-3 h-3" />
+                Code Complexity
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {CODE_REVIEW_COMPLEXITY.map((comp, idx) => (
+                  <button
+                    key={comp.label}
+                    onClick={() => {
+                      setCodeReviewIdx(idx);
+                      applyPreset(PRESETS.find(p => p.label === "Code Review")!, true);
+                    }}
+                    className={cn(
+                      "px-2 py-2 rounded-lg text-[9px] font-bold uppercase transition-all border",
+                      codeReviewIdx === idx
+                        ? "bg-plasma-500 text-black border-plasma-400"
+                        : "bg-plasma-500/5 text-plasma-400 border-plasma-500/20 hover:border-plasma-500/40"
+                    )}
+                  >
+                    {comp.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-4 pt-3 border-t border-plasma-500/10 flex items-center justify-between text-[10px] font-mono">
+            <span className="text-muted-foreground">{CODE_REVIEW_COMPLEXITY[codeReviewIdx].description}</span>
+            <span className="text-plasma-400 font-bold">
+              ~{CODE_REVIEW_COMPLEXITY[codeReviewIdx].inputAvg.toLocaleString()} estimated tokens
+            </span>
+          </div>
+        </div>
+      )}
+
+      {activePreset && activePreset !== "Content Rewrite" && activePreset !== "Doc Summary" && activePreset !== "Code Review" && (
         <p className="text-[10px] text-plasma-500/70 font-mono animate-in fade-in duration-300">
           Preset applied
         </p>

@@ -19,10 +19,10 @@ const PROVIDER_COLORS: Record<string, string> = {
 };
 
 interface CompareModeProps {
-  onClose: () => void;
+  onClose?: () => void;
 }
 
-export function CompareMode({ onClose }: CompareModeProps) {
+export function CompareMode({ onClose }: CompareModeProps = {}) {
   const { inputTokenCount, fileTokenCount, expectedOutputTokens, selectedModelId } =
     useTokenSenseStore();
 
@@ -30,10 +30,11 @@ export function CompareMode({ onClose }: CompareModeProps) {
 
   // Start with 2 columns: current model + cheapest different model
   const defaultSecond = models.find((m) => m.id !== selectedModelId) ?? models[1];
-  const [selectedIds, setSelectedIds] = useState<string[]>([
-    selectedModelId,
-    defaultSecond.id,
-  ]);
+  // Guard: ensure the two initial IDs are not the same (can happen if store hasn't hydrated yet)
+  const initialIds = selectedModelId && selectedModelId !== defaultSecond.id
+    ? [selectedModelId, defaultSecond.id]
+    : [models[0].id, models[1].id];
+  const [selectedIds, setSelectedIds] = useState<string[]>(initialIds);
 
   const [showPicker, setShowPicker] = useState(false);
   const [pickerSearch, setPickerSearch] = useState("");
@@ -73,17 +74,26 @@ export function CompareMode({ onClose }: CompareModeProps) {
 
   const filteredModels = models.filter(
     (m) =>
-      !selectedIds.includes(m.id) &&
-      (m.name.toLowerCase().includes(pickerSearch.toLowerCase()) ||
-        m.provider.toLowerCase().includes(pickerSearch.toLowerCase()))
+      m.name.toLowerCase().includes(pickerSearch.toLowerCase()) ||
+      m.provider.toLowerCase().includes(pickerSearch.toLowerCase())
   );
 
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+        <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-[#00dcb4]/10 text-[#00dcb4] text-sm font-mono font-bold tracking-widest uppercase mb-4 border border-[#00dcb4]/20">
+              STEP 02 &mdash; Compare your model across 30+ options
+            </div>
+            <p className="text-muted-foreground text-lg font-medium">
+              Add multiple models to see side-by-side costs for the same prompt.
+            </p>
+        </div>
+
+      {/* Header / Add Button */}
+      <div className="flex items-center justify-between mt-4">
         <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-plasma-400" />
+          <Layers className="w-4 h-4 text-[#00dcb4]" />
           <span className="text-sm font-semibold text-foreground">Compare Mode</span>
           <span className="text-xs text-muted-foreground/60">
             ({selectedIds.length} models)
@@ -95,21 +105,23 @@ export function CompareMode({ onClose }: CompareModeProps) {
               variant="outline"
               size="sm"
               onClick={() => setShowPicker(!showPicker)}
-              className="h-7 text-xs gap-1 border-plasma-500/30 hover:bg-plasma-500/10 hover:text-plasma-400"
+              className="h-8 text-xs gap-1 border-[#00dcb4]/30 hover:bg-[#00dcb4]/10 hover:text-[#00dcb4]"
             >
-              <Plus className="w-3 h-3" />
+              <Plus className="w-3.5 h-3.5" />
               Add Model
             </Button>
           )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="h-7 text-xs text-muted-foreground hover:text-foreground"
-          >
-            <X className="w-3 h-3 mr-1" />
-            Exit
-          </Button>
+          {onClose && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="h-8 text-xs text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-3.5 h-3.5 mr-1" />
+              Exit
+            </Button>
+          )}
         </div>
       </div>
 
@@ -125,23 +137,29 @@ export function CompareMode({ onClose }: CompareModeProps) {
             className="w-full px-3 py-1.5 text-xs font-mono bg-background/50 border border-border/50 rounded-md focus:outline-none focus:border-plasma-500/50 text-foreground placeholder:text-muted-foreground/50"
           />
           <div className="max-h-40 overflow-y-auto space-y-0.5">
-            {filteredModels.map((m) => (
+            {filteredModels.map((m) => {
+              const isSelected = selectedIds.includes(m.id);
+              return (
               <button
                 key={m.id}
                 onClick={() => addModel(m.id)}
-                className="w-full flex items-center justify-between px-3 py-1.5 text-xs rounded-md hover:bg-accent/50 transition-colors text-left"
+                disabled={isSelected}
+                className={`w-full flex items-center justify-between px-3 py-1.5 text-xs rounded-md text-left transition-colors ${
+                  isSelected ? "opacity-40 cursor-not-allowed bg-muted/20" : "hover:bg-accent/50 cursor-pointer"
+                }`}
               >
                 <div className="flex items-center gap-2">
                   <span className={`font-medium ${PROVIDER_COLORS[m.provider] ?? "text-foreground"}`}>
                     {m.name}
                   </span>
                   <span className="text-muted-foreground/50">{m.provider}</span>
+                  {isSelected && <span className="text-[10px] text-muted-foreground ml-1">(Added)</span>}
                 </div>
                 <span className="font-mono text-muted-foreground/60 text-[10px]">
                   ${m.inputPricePer1M}/${m.outputPricePer1M}
                 </span>
               </button>
-            ))}
+            )})}
             {filteredModels.length === 0 && (
               <p className="text-xs text-muted-foreground/50 px-3 py-2">No more models to add.</p>
             )}
@@ -149,15 +167,29 @@ export function CompareMode({ onClose }: CompareModeProps) {
         </div>
       )}
 
+      {/* Sticky Token Context Header */}
+      <div className="sticky top-[60px] lg:top-[72px] z-10 bg-background/80 backdrop-blur-md p-3 rounded-xl border border-border/50 shadow-sm flex items-center justify-between transition-all">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 w-full justify-between">
+           <div className="flex items-center gap-2">
+             <span className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Pricing Context:</span>
+           </div>
+           <div className="flex items-center gap-3 text-sm font-mono whitespace-nowrap">
+             <span className="text-foreground font-semibold">{totalInputTokens.toLocaleString()} <span className="text-muted-foreground/60">in</span></span>
+             <span className="text-muted-foreground/30">+</span>
+             <span className="text-foreground font-semibold">{expectedOutputTokens.toLocaleString()} <span className="text-muted-foreground/60">out</span></span>
+           </div>
+        </div>
+      </div>
+
       {/* Columns — desktop: flex row, mobile: stacked */}
-      <div className="flex flex-col lg:flex-row gap-3">
-        {columns.map(({ model, cost }) => {
+      <div className="flex flex-col lg:flex-row gap-3 relative">
+        {sortedByCost.map(({ model, cost }, i) => {
           const isCheapest = model.id === cheapestId && columns.length > 1;
           const isMostExpensive = model.id === mostExpensiveId && columns.length > 1;
 
           return (
             <div
-              key={model.id}
+              key={`${model.id}-${i}`}
               className={`
                 flex-1 min-w-0 rounded-xl border p-4 space-y-3 relative transition-all duration-300
                 bg-card/50 backdrop-blur-sm

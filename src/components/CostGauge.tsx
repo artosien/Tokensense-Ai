@@ -65,12 +65,12 @@ export default function CostGauge({ totalCost }: CostGaugeProps) {
     const needleBase2 = polarToCartesian(cx, cy, 6, needleAngle + 90);
 
     return (
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center relative py-4">
             <svg
                 width={size}
                 height={size * 0.7}
                 viewBox={`0 0 ${size} ${size * 0.75}`}
-                className="drop-shadow-lg"
+                className="drop-shadow-lg scale-110"
             >
                 {/* Background glow */}
                 <defs>
@@ -143,21 +143,21 @@ export default function CostGauge({ totalCost }: CostGaugeProps) {
                 <circle cx={cx} cy={cy} r={8} fill="rgba(255,255,255,0.15)" />
                 <circle cx={cx} cy={cy} r={4} fill={tier.color} className="transition-colors duration-500" />
 
-                {/* Cost display */}
-                <text
-                    x={cx}
-                    y={cy + 28}
-                    textAnchor="middle"
-                    className="fill-foreground text-lg font-bold font-mono"
-                    fontSize="18"
+            </svg>
+
+            {/* Cost display */}
+            <div className="absolute top-[55%] left-1/2 -translate-x-1/2 flex flex-col items-center mt-3 z-10 w-full">
+                <div 
+                    className="text-[2.2rem] md:text-[3.5rem] font-bold font-mono text-[#00dcb4] tabular-nums tracking-tighter leading-none"
+                    style={{ textShadow: '0 0 24px rgba(0,220,180,0.35)' }}
                 >
                     ${totalCost < 0.001 ? totalCost.toFixed(6) : totalCost < 0.01 ? totalCost.toFixed(4) : totalCost.toFixed(4)}
-                </text>
-            </svg>
+                </div>
+            </div>
 
             {/* Tier label */}
             <div
-                className="mt-1 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors duration-500"
+                className="mt-6 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors duration-500"
                 style={{
                     color: tier.color,
                     backgroundColor: tier.bgGlow,

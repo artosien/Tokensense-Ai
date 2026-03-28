@@ -226,6 +226,34 @@
       opacity: 1;
     }
   }
+
+  /* ── Hero Animations ─────────────────────────────────────────── */
+
+  /* Animation A: Typewriter cursor blink */
+  @keyframes cursor-blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
+
+  /* Animation D: Pricing ticker scroll */
+  @keyframes ticker-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* Animation E: Gradient orb drifts — each moves differently */
+  @keyframes orb-drift-1 {
+    from { transform: translate(0px,   0px)  scale(1);    }
+    to   { transform: translate(40px, 30px)  scale(1.08); }
+  }
+  @keyframes orb-drift-2 {
+    from { transform: translate(0px,  0px)   scale(1);    }
+    to   { transform: translate(-30px, 40px) scale(1.06); }
+  }
+  @keyframes orb-drift-3 {
+    from { transform: translate(0px,  0px)   scale(1);    }
+    to   { transform: translate(20px, -35px) scale(1.10); }
+  }
 }
 
 @layer utilities {

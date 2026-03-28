@@ -185,6 +185,8 @@ export default function AgentLoopSimulator() {
 
                     <Separator className="opacity-30" />
 
+                    <div className="text-xs font-mono text-[#00dcb4] uppercase tracking-wider mb-2 mt-6">Step 3 — View your cost projection</div>
+
                     {/* ── Chart & Table ─────────────────────────────────────── */}
                     {loopResult && chartData.length > 0 ? (
                         <>
