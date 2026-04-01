@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo } from "react";
 import { models, getModelById } from "@/lib/models";
 import { calculateCost } from "@/lib/costEngine";
 import { TermTooltip } from "./TermTooltip";
 import { ModelPickerModal } from "./ModelPickerModal";
-import { ChevronDown, Calculator, AlertTriangle, TrendingUp } from "lucide-react";
+import { Calculator, AlertTriangle, TrendingUp } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import { useTranslations } from "next-intl";
 
 const PROVIDER_COLORS: Record<string, string> = {
   OpenAI: "text-emerald-400",
@@ -30,6 +31,11 @@ function fmtCost(v: number) {
 }
 
 export function BudgetCalculator() {
+  const tBudget = useTranslations("budget");
+  const tCalc = useTranslations("calculator");
+  const tMetrics = useTranslations("metrics");
+  const tCompare = useTranslations("compare");
+
   const [budget, setBudget] = useState(50);
   const [inputTokens, setInputTokens] = useState(500);
   const [outputTokens, setOutputTokens] = useState(300);
@@ -68,8 +74,8 @@ export function BudgetCalculator() {
       {/* Header */}
       <div className="flex items-center gap-2">
         <Calculator className="w-4 h-4 text-plasma-400" />
-        <span className="text-sm font-semibold text-foreground">Budget Mode</span>
-        <span className="text-xs text-muted-foreground/60">— How many API calls can I afford?</span>
+        <span className="text-sm font-semibold text-foreground">{tBudget("title")}</span>
+        <span className="text-xs text-muted-foreground/60">— {tBudget("subtitle")}</span>
       </div>
 
       {/* Inputs grid */}
@@ -77,7 +83,7 @@ export function BudgetCalculator() {
         {/* Monthly Budget */}
         <div className="space-y-2">
           <label className="text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider">
-            Monthly Budget (USD)
+            {tBudget("monthly_budget")}
           </label>
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground font-mono">$</span>
@@ -109,12 +115,12 @@ export function BudgetCalculator() {
         {/* Tokens per request */}
         <div className="space-y-2">
           <label className="text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-            Tokens per Request
+            {tBudget("tokens_per_request")}
             <TermTooltip termKey="tokens" iconOnly />
           </label>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <div className="text-[10px] text-muted-foreground/50 mb-1 font-mono">Input</div>
+              <div className="text-[10px] text-muted-foreground/50 mb-1 font-mono">{tCompare("input") || "Input"}</div>
               <input
                 type="number"
                 value={inputTokens}
@@ -124,7 +130,7 @@ export function BudgetCalculator() {
               />
             </div>
             <div>
-              <div className="text-[10px] text-muted-foreground/50 mb-1 font-mono">Output</div>
+              <div className="text-[10px] text-muted-foreground/50 mb-1 font-mono">{tCompare("output") || "Output"}</div>
               <input
                 type="number"
                 value={outputTokens}
@@ -139,7 +145,7 @@ export function BudgetCalculator() {
         {/* Model selector — full width */}
         <div className="sm:col-span-2 space-y-2">
           <label className="text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider">
-            Model
+            {tMetrics("model")}
           </label>
           <ModelPickerModal selectedModelId={selectedModelId} onChange={setSelectedModelId} />
         </div>
@@ -153,12 +159,12 @@ export function BudgetCalculator() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <TrendingUp className={`w-4 h-4 ${isOverBudget ? "text-red-400" : "text-indigo-400"}`} />
-                <span className="text-sm font-bold uppercase tracking-wider">Monthly Projection</span>
+                <span className="text-sm font-bold uppercase tracking-wider">{tBudget("monthly_projection")}</span>
               </div>
               {isOverBudget && (
                 <div className="flex items-center gap-1.5 px-2 py-1 bg-red-500/20 rounded-md text-[10px] font-bold text-red-400 uppercase tracking-tighter">
                   <AlertTriangle className="w-3 h-3" />
-                  Threshold Hit
+                  {tBudget("threshold_hit")}
                 </div>
               )}
             </div>
@@ -169,14 +175,14 @@ export function BudgetCalculator() {
                   ${projectedMonthlySpend.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  at {dailyVolume.toLocaleString()} req/day
+                  {tBudget("at_req_day", { volume: dailyVolume.toLocaleString() })}
                 </div>
               </div>
 
               <div className="space-y-3 pt-2">
                 <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                  <span>Adjust daily volume</span>
-                  <span>{dailyVolume} req/day</span>
+                  <span>{tBudget("adjust_volume")}</span>
+                  <span>{dailyVolume} {tBudget("req_day")}</span>
                 </div>
                 <Slider 
                   defaultValue={[dailyVolume]} 
@@ -188,7 +194,7 @@ export function BudgetCalculator() {
 
               <div className="grid grid-cols-2 gap-4 mt-2">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase">Alert Threshold</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase">{tBudget("alert_threshold")}</label>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground">$</span>
                     <input 
@@ -200,9 +206,9 @@ export function BudgetCalculator() {
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase">Model Cost</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase">{tBudget("model_cost")}</label>
                   <div className="text-xs font-mono font-bold text-foreground py-1">
-                    {fmtCost(cost.totalCost)}/req
+                    {tBudget("per_req", { cost: fmtCost(cost.totalCost) })}
                   </div>
                 </div>
               </div>
@@ -213,17 +219,17 @@ export function BudgetCalculator() {
           <div className="grid grid-cols-3 gap-3">
             {[
               {
-                label: "Requests / Month",
+                label: tBudget("requests_month"),
                 value: fmt(requestsPerMonth),
                 accent: true,
               },
               {
-                label: "Requests / Day",
+                label: tBudget("requests_day"),
                 value: `≈ ${fmt(requestsPerDay)}/day`,
                 accent: false,
               },
               {
-                label: "Cost / Request",
+                label: tBudget("cost_request"),
                 value: fmtCost(cost.totalCost),
                 accent: false,
               },
@@ -249,7 +255,7 @@ export function BudgetCalculator() {
           {/* Budget fill bar */}
           <div className="space-y-1.5">
             <div className="flex justify-between text-[10px] font-mono text-muted-foreground/60">
-              <span>Budget utilization</span>
+              <span>{tBudget("utilization")}</span>
               <span>
                 {fmtCost(cost.totalCost * requestsPerMonth)} / ${budget}
               </span>
@@ -269,17 +275,17 @@ export function BudgetCalculator() {
           {/* "What if I switch?" */}
           <div className="space-y-2">
             <div className="text-xs font-mono font-semibold text-muted-foreground/70 uppercase tracking-wider">
-              What if I switch models?
+              {tBudget("switch_models")}
             </div>
             <div className="space-y-1.5">
               {alternatives.map(({ model: alt, costPerReq, requestsPerMonth: altReqsPerMonth }) => {
                 const diff = altReqsPerMonth - requestsPerMonth;
                 const diffLabel =
                   diff === 0
-                    ? "same"
+                    ? tBudget("diff_same")
                     : diff > 0
-                    ? `+${fmt(diff)} more`
-                    : `${fmt(diff)} fewer`;
+                    ? tBudget("diff_more", { count: fmt(diff) })
+                    : tBudget("diff_fewer", { count: fmt(Math.abs(diff)) });
                 const diffColor = diff > 0 ? "text-emerald-400" : diff < 0 ? "text-red-400" : "text-muted-foreground";
                 const pColor = PROVIDER_COLORS[alt.provider] ?? "text-muted-foreground";
                 const barPct = Math.min((costPerReq * altReqsPerMonth) / budget, 1) * 100;
@@ -310,7 +316,7 @@ export function BudgetCalculator() {
                         {fmt(altReqsPerMonth)}
                       </div>
                       <div className="text-[9px] font-mono text-muted-foreground/50">
-                        {fmtCost(costPerReq)}/req
+                        {tBudget("per_req", { cost: fmtCost(costPerReq) })}
                       </div>
                     </div>
                   </div>
@@ -321,10 +327,9 @@ export function BudgetCalculator() {
         </div>
       ) : (
         <div className="text-center py-6 text-sm text-muted-foreground/50">
-          Enter token counts and budget to see estimate.
+          {tBudget("empty_state")}
         </div>
       )}
     </div>
   );
 }
-

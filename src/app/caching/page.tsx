@@ -2,6 +2,7 @@ import SiteHeader from "@/components/SiteHeader";
 import { Zap } from "lucide-react";
 import ContextCachingCalculator from "@/components/ContextCachingCalculator";
 import SocialShareBar from "@/components/SocialShareBar";
+import { useTranslations } from "next-intl";
 import type { Metadata } from 'next';
 
 export const dynamic = 'force-static';
@@ -56,6 +57,8 @@ function CachingSchema() {
 }
 
 export default function CachingCalculatorPage() {
+    const tTools = useTranslations("tools");
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <CachingSchema />
@@ -72,7 +75,7 @@ export default function CachingCalculatorPage() {
                         Up to 90% Cost Reduction
                     </div>
                     <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-foreground uppercase">
-                        Context <span className="text-indigo-500">Caching</span> Calculator
+                        {tTools("context_caching")}
                     </h1>
                     <p className="text-lg text-muted-foreground max-w-3xl border-l-4 border-indigo-500 pl-4">
                         Anthropic and Google offer prompt caching, drastically reducing the cost of long-context inputs if they are reused. Understand your exact savings by splitting your input into static and dynamic context.

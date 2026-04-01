@@ -2,6 +2,7 @@ import SiteHeader from "@/components/SiteHeader";
 import MultimodalEstimator from "@/components/MultimodalEstimator";
 import SocialShareBar from "@/components/SocialShareBar";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useTranslations } from "next-intl";
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -56,6 +57,8 @@ function MultimodalSchema() {
 }
 
 export default function MultimodalPage() {
+    const tTools = useTranslations("tools");
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <MultimodalSchema />
@@ -71,7 +74,7 @@ export default function MultimodalPage() {
                         Private & Local Processing
                     </span>
                     <h1 className="mt-4 text-4xl font-black text-white sm:text-6xl uppercase tracking-tight">
-                        Multimodal <span className="text-blue-500">Vision</span> Estimator
+                        {tTools("image_estimator")}
                     </h1>
                     <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto border-l-4 border-blue-500 pl-4 text-left md:text-center">
                         Image token costs are calculated based on pixel scaling, not file size. 

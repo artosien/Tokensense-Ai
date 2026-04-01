@@ -1,6 +1,12 @@
-import Link from "next/link";
+"use client";
+
+import { Link } from "@/lib/i18n/navigation";
+import { useTranslations } from "next-intl";
 
 export default function Footer() {
+  const t = useTranslations("footer");
+  const tNav = useTranslations("nav");
+
   return (
     <footer className="border-t border-gray-800 bg-gray-950 mt-16 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -10,20 +16,20 @@ export default function Footer() {
           <div className="col-span-1">
             <h3 className="text-white font-semibold text-lg mb-2">Tokensense</h3>
             <p className="text-gray-400 text-sm">
-              Free LLM token cost calculator. Know your costs before every API call.
+              {t("tagline")}
             </p>
           </div>
 
           {/* Main Links */}
           <div>
-            <h4 className="text-white font-semibold mb-4 text-center md:text-left">Links</h4>
+            <h4 className="text-white font-semibold mb-4 text-center md:text-left">{t("links")}</h4>
             <ul className="flex flex-row flex-wrap justify-center md:justify-start md:flex-col gap-x-6 gap-y-2 md:gap-0 md:space-y-2">
               <li>
                 <Link
                   href="/"
                   className="text-gray-400 hover:text-plasma-400 transition text-sm"
                 >
-                  Home
+                  {tNav("home")}
                 </Link>
               </li>
               <li>
@@ -31,7 +37,7 @@ export default function Footer() {
                   href="/about"
                   className="text-gray-400 hover:text-plasma-400 transition text-sm"
                 >
-                  About
+                  {t("about") || "About"}
                 </Link>
               </li>
               <li>
@@ -39,7 +45,7 @@ export default function Footer() {
                   href="/contact"
                   className="text-gray-400 hover:text-plasma-400 transition text-sm"
                 >
-                  Contact Us
+                  {t("contact_us") || "Contact Us"}
                 </Link>
               </li>
               <li>
@@ -47,7 +53,7 @@ export default function Footer() {
                   href="/changelog"
                   className="text-gray-400 hover:text-plasma-400 transition text-sm"
                 >
-                  Changelog
+                  {t("changelog") || "Changelog"}
                 </Link>
               </li>
             </ul>
@@ -55,14 +61,14 @@ export default function Footer() {
 
           {/* Legal Links */}
           <div>
-            <h4 className="text-white font-semibold mb-4 text-center md:text-left">Legal</h4>
+            <h4 className="text-white font-semibold mb-4 text-center md:text-left">{t("legal")}</h4>
             <ul className="flex flex-row flex-wrap justify-center md:justify-start md:flex-col gap-x-6 gap-y-2 md:gap-0 md:space-y-2">
               <li>
                 <Link
                   href="/privacy"
                   className="text-gray-400 hover:text-plasma-400 transition text-sm"
                 >
-                  Privacy Policy
+                  {t("privacy_policy")}
                 </Link>
               </li>
               <li>
@@ -70,7 +76,7 @@ export default function Footer() {
                   href="/terms"
                   className="text-gray-400 hover:text-plasma-400 transition text-sm"
                 >
-                  Terms of Service
+                  {t("terms_of_service")}
                 </Link>
               </li>
             </ul>
@@ -78,7 +84,7 @@ export default function Footer() {
 
           {/* Support Section */}
           <div>
-            <h4 className="text-white font-semibold mb-4 text-center md:text-left">Support</h4>
+            <h4 className="text-white font-semibold mb-4 text-center md:text-left">{t("support")}</h4>
             <ul className="flex flex-row flex-wrap justify-center md:justify-start md:flex-col gap-x-6 gap-y-2 md:gap-0 md:space-y-2">
               <li className="text-center md:text-left">
                 <a
@@ -90,7 +96,7 @@ export default function Footer() {
                   GitHub
                 </a>
                 <p className="text-[10px] text-gray-500 mt-1 max-w-[150px] mx-auto md:mx-0">
-                  If you find the tool useful, please give it a star on GitHub.
+                  {t("github_note") || "If you find the tool useful, please give it a star on GitHub."}
                 </p>
               </li>
             </ul>
@@ -101,7 +107,7 @@ export default function Footer() {
         <div className="border-t border-gray-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
             <p className="text-gray-400 text-sm mb-3">
-              Support Tokensense Development
+              {t("support_dev") || "Support Tokensense Development"}
             </p>
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4">
               <iframe
@@ -129,13 +135,11 @@ export default function Footer() {
 
           {/* Copyright */}
           <div className="text-gray-500 text-sm text-center sm:text-right">
-            <p>&copy; {new Date().getFullYear()} Tokensense. All rights reserved.</p>
-            <p className="mt-1">Built with Next.js • Open Source (Apache 2.0)</p>
+            <p>&copy; {new Date().getFullYear()} Tokensense. {t("all_rights")}</p>
+            <p className="mt-1">{t("built_with")}</p>
           </div>
         </div>
       </div>
     </footer>
   );
 }
-
-

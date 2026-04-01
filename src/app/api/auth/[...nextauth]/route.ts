@@ -17,8 +17,9 @@ export const authOptions: AuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     }),
     GithubProvider({
-      clientId: process.env.GITHUB_ID as string,
-      clientSecret: process.env.GITHUB_SECRET as string,
+      // Supporting both GITHUB_ID (guide) and GITHUB_CLIENT_ID (common practice)
+      clientId: (process.env.GITHUB_ID || process.env.GITHUB_CLIENT_ID) as string,
+      clientSecret: (process.env.GITHUB_SECRET || process.env.GITHUB_CLIENT_SECRET) as string,
     }),
   ],
   
@@ -75,22 +76,11 @@ export const authOptions: AuthOptions = {
     },
   },
 
-  // Enable debug messages in development
-  debug: true, // Force debug true to see logs during troubleshooting
+  // Enable debug messages in development to help troubleshoot auth issues
+  debug: process.env.NODE_ENV === "development",
 };
 
-const handler = (req: any, res: any) => {
-  console.log("Auth API route hit:", req.method);
-  console.log("Environment check:", {
-    hasUrl: !!process.env.NEXTAUTH_URL,
-    hasSecret: !!process.env.NEXTAUTH_SECRET,
-    hasGoogleId: !!process.env.GOOGLE_CLIENT_ID,
-    hasGoogleSecret: !!process.env.GOOGLE_CLIENT_SECRET,
-    hasGithubId: !!process.env.GITHUB_ID,
-    hasGithubSecret: !!process.env.GITHUB_SECRET,
-    nodeEnv: process.env.NODE_ENV
-  });
-  return NextAuth(req, res, authOptions);
-};
+// NextAuth handler for App Router
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };

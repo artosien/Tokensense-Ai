@@ -1,10 +1,11 @@
 import { Metadata } from 'next';
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { notFound } from "next/navigation";
 import SiteHeader from "@/components/SiteHeader";
 import { getBlogPostBySlug, getPublishedPosts } from "@/lib/blog-service";
 import { Calendar, Clock, ArrowLeft, Share2, Twitter, Linkedin } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -38,6 +39,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
+  const locale = 'en';
+  setRequestLocale(locale);
+  const tNav = await getTranslations("nav");
   const post = await getBlogPostBySlug(slug);
 
   if (!post) {
@@ -53,7 +57,7 @@ export default async function BlogPostPage({ params }: Props) {
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <Link href="/blog">
             <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-indigo-400 gap-2 pl-0">
-              <ArrowLeft className="w-4 h-4" /> Back to Blog
+              <ArrowLeft className="w-4 h-4" /> Back to {tNav("blog")}
             </Button>
           </Link>
           <div className="flex items-center gap-3">

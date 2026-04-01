@@ -1,7 +1,8 @@
 import ModelComparisonTable from "@/components/ModelComparisonTable";
 import SiteHeader from "@/components/SiteHeader";
 import SocialShareBar from "@/components/SocialShareBar";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
+import { useTranslations } from "next-intl";
 import type { Metadata } from "next";
 
 export const dynamic = 'force-static';
@@ -55,6 +56,9 @@ function ComparisonSchema() {
 }
 
 export default function ComparisonPage() {
+    const tCompare = useTranslations("compare");
+    const tCommon = useTranslations("common");
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <ComparisonSchema />
@@ -79,7 +83,7 @@ export default function ComparisonPage() {
                         <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-foreground">
                             LLM Pricing{" "}
                             <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                                Comparison
+                                {tCompare("title").split(" ").pop()}
                             </span>
                         </h1>
                         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">

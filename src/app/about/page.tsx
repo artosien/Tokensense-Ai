@@ -2,7 +2,6 @@ import { Metadata } from 'next';
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import BugReportForm from "@/components/BugReportForm";
-import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "About Tokensense-Ai | Precision AI Cost Intelligence",
@@ -85,6 +84,7 @@ function AboutSchema() {
 export const dynamic = 'force-static';
 
 export default function AboutPage() {
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <AboutSchema />
@@ -103,17 +103,21 @@ export default function AboutPage() {
                         Tokensense-Ai is a free LLM token cost calculator built for developers, AI engineers, and prompt designers who want to estimate API costs before going live.
                     </p>
                     <p>
-                        When you build with large language model APIs like OpenAI, Anthropic Claude, or Google Gemini, you&apos;re billed by the token — not the word, not the character. A single system prompt, a long user message, or an attached file can quietly balloon your cost-per-call. Tokensense-Ai makes that visible.
+                        {"When you build with large language model APIs like OpenAI, Anthropic Claude, or Google Gemini, you're billed by the token - not the word, not the character. A single system prompt, a long user message, or an attached file can quietly balloon your cost-per-call. Tokensense-Ai makes that visible."}
                     </p>
 
                     <h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">With Tokensense-Ai you can:</h2>
                     <ul className="list-disc pl-6 space-y-2">
-                        <li>Count tokens in any prompt (system, user, or combined)</li>
-                        <li>Estimate cost per API call across popular models like GPT-4o, Claude 3.5 Sonnet, and Gemini 1.5 Pro</li>
-                        <li>Adjust expected output length to see how response tokens affect your bill</li>
-                        <li>Attach files (.txt, .md, .csv, code, .pdf) to measure file context costs</li>
-                        <li>Simulate agentic loop costs across multiple LLM calls</li>
-                        <li>Compare input token price vs. output token price side-by-side</li>
+                        {[
+                          "Count tokens in any prompt (system, user, or combined)",
+                          "Estimate cost per API call across popular models like GPT-4o, Claude 3.5 Sonnet, and Gemini 1.5 Pro",
+                          "Adjust expected output length to see how response tokens affect your bill",
+                          "Attach files (.txt, .md, .csv, code, .pdf) to measure file context costs",
+                          "Simulate agentic loop costs across multiple LLM calls",
+                          "Compare input token price vs. output token price side-by-side"
+                        ].map((item, index) => (
+                          <li key={index}>{item}</li>
+                        ))}
                     </ul>
                     <p className="font-medium text-foreground">
                         No sign-up. No server. Your prompts never leave your browser.
@@ -253,4 +257,5 @@ export default function AboutPage() {
         </div>
     );
 }
+
 

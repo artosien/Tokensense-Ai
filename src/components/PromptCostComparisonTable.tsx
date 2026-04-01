@@ -7,6 +7,7 @@ import { countTokens } from "@/lib/tokenizer";
 import { useTokenSenseStore } from "@/lib/store";
 import { Trophy } from "lucide-react";
 import { InfoTooltip } from "./InfoTooltip";
+import { useTranslations } from "next-intl";
 
 interface PromptCostComparisonTableRow {
   id: string;
@@ -28,6 +29,10 @@ export default function PromptCostComparisonTable({
   prompt,
   systemPrompt,
 }: PromptCostComparisonTableProps) {
+  const tCompare = useTranslations("compare");
+  const tMetrics = useTranslations("metrics");
+  const tCalc = useTranslations("calculator");
+
   const { expectedOutputTokens, fileText } = useTokenSenseStore();
   const [rows, setRows] = useState<PromptCostComparisonTableRow[]>([]);
 
@@ -74,12 +79,12 @@ export default function PromptCostComparisonTable({
       <div className="px-5 py-4 border-b border-border/40">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-semibold text-foreground tracking-wide uppercase">
-            Model Cost Comparison
+            {tCompare("cost_comparison_title") || "Model Cost Comparison"}
           </h3>
-          <InfoTooltip text="Output tokens are estimated based on your expected output setting. Actual costs may vary." />
+          <InfoTooltip text={tCompare("output_est_tooltip") || "Output tokens are estimated based on your expected output setting. Actual costs may vary."} />
         </div>
         <p className="text-xs text-muted-foreground mt-1">
-          Sorted by total cost — cheapest model first
+          {tCompare("sorted_by_cost") || "Sorted by total cost — cheapest model first"}
         </p>
       </div>
 
@@ -88,16 +93,16 @@ export default function PromptCostComparisonTable({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border/40 text-xs text-muted-foreground uppercase tracking-wider">
-              <th className="text-left px-5 py-3 font-medium">Model</th>
-              <th className="text-left px-5 py-3 font-medium">Provider</th>
-              <th className="text-right px-5 py-3 font-medium">Input Tokens</th>
+              <th className="text-left px-5 py-3 font-medium">{tMetrics("model")}</th>
+              <th className="text-left px-5 py-3 font-medium">{tCompare("provider") || "Provider"}</th>
+              <th className="text-right px-5 py-3 font-medium">{tMetrics("input_tokens")}</th>
               <th className="text-right px-5 py-3 font-medium">
                 <span className="flex items-center justify-end gap-1">
-                  Output Tokens
-                  <span className="text-[10px] normal-case font-normal text-muted-foreground/60">(est.)</span>
+                  {tMetrics("output_tokens")}
+                  <span className="text-[10px] normal-case font-normal text-muted-foreground/60">({tCompare("est_abbreviation") || "est."})</span>
                 </span>
               </th>
-              <th className="text-right px-5 py-3 font-medium">Total Cost (USD)</th>
+              <th className="text-right px-5 py-3 font-medium">{tMetrics("total_cost")} (USD)</th>
             </tr>
           </thead>
           <tbody>
@@ -115,7 +120,7 @@ export default function PromptCostComparisonTable({
                       {isCheapest && (
                         <span className="inline-flex items-center gap-0.5 rounded-full bg-plasma-500/15 border border-plasma-500/30 px-1.5 py-0.5 text-[10px] font-semibold text-plasma-400 whitespace-nowrap">
                           <Trophy className="w-2.5 h-2.5" />
-                          Cheapest
+                          {tCompare("cheapest") || "Cheapest"}
                         </span>
                       )}
                       <span>{row.name}</span>
@@ -155,7 +160,7 @@ export default function PromptCostComparisonTable({
                   {isCheapest && (
                     <span className="inline-flex items-center gap-0.5 rounded-full bg-plasma-500/15 border border-plasma-500/30 px-1.5 py-0.5 text-[10px] font-semibold text-plasma-400">
                       <Trophy className="w-2.5 h-2.5" />
-                      Cheapest
+                      {tCompare("cheapest") || "Cheapest"}
                     </span>
                   )}
                 </div>
@@ -166,9 +171,9 @@ export default function PromptCostComparisonTable({
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 <span>{row.provider}</span>
                 <span>·</span>
-                <span className="font-mono">{formatTokens(row.inputTokens)} in</span>
+                <span className="font-mono">{formatTokens(row.inputTokens)} {tCompare("in")}</span>
                 <span>·</span>
-                <span className="font-mono">{formatTokens(row.outputTokens)} out</span>
+                <span className="font-mono">{formatTokens(row.outputTokens)} {tCompare("out")}</span>
               </div>
             </div>
           );

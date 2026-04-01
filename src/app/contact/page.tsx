@@ -1,8 +1,8 @@
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import SiteHeader from "@/components/SiteHeader";
 import ContactForm from "@/components/ContactForm";
 import { Send, MessageSquare } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -52,6 +52,8 @@ function ContactSchema() {
 }
 
 export default function ContactPage() {
+    const tMobile = useTranslations("mobile");
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <ContactSchema />
@@ -61,7 +63,7 @@ export default function ContactPage() {
             <main className="flex-1 mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8 py-12 md:py-20">
                 <div className="mb-12 text-center">
                     <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground mb-4">
-                        Get in Touch
+                        {tMobile("contact_us")}
                     </h1>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                         Have a question, feedback, or found a bug? Use the form below to reach the Tokensense-Ai team.

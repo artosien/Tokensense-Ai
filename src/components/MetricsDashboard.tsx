@@ -22,8 +22,14 @@ import { useShareableUrl } from "@/hooks/useShareableUrl";
 import { TooltipKey } from "@/lib/tooltips";
 import Link from "next/link";
 import { cn, triggerHaptic } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export default function MetricsDashboard() {
+    const tMetrics = useTranslations("metrics");
+    const tCalc = useTranslations("calculator");
+    const tSmart = useTranslations("smart_routing");
+    const tShare = useTranslations("share");
+
     const {
         inputTokenCount,
         expectedOutputTokens,
@@ -157,7 +163,7 @@ export default function MetricsDashboard() {
             {/* Hero Cost Display */}
             <Card className="border-[#00dcb4]/30 bg-gradient-to-b from-[#00dcb4]/10 to-[#00dcb4]/5 backdrop-blur-md md:hidden rounded-2xl p-2 shadow-[0_0_30px_rgba(0,220,180,0.1)]">
               <CardContent className="pt-8 pb-6 text-center">
-                <span className="text-[10px] font-bold text-[#00dcb4] uppercase tracking-widest block mb-2">Estimated Cost</span>
+                <span className="text-[10px] font-bold text-[#00dcb4] uppercase tracking-widest block mb-2">{tMetrics("estimated_cost")}</span>
                 <div 
                   className="text-[2.2rem] font-bold font-mono text-[#00dcb4] tabular-nums tracking-tighter mb-2 leading-none"
                   style={{ textShadow: '0 0 24px rgba(0,220,180,0.35)' }}
@@ -174,11 +180,11 @@ export default function MetricsDashboard() {
 
             {/* Model Selector */}
             <div>
-              <div className="text-xs font-mono text-[#00dcb4] uppercase tracking-wider mb-2">Step 2 — Select your model</div>
+              <div className="text-xs font-mono text-[#00dcb4] uppercase tracking-wider mb-2">{tCalc("step2_label")}</div>
               <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
                   <CardHeader className="pb-2">
                       <div className="flex items-center justify-between">
-                          <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Model</CardTitle>      
+                          <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{tMetrics("model")}</CardTitle>      
                           <Button
                             variant="ghost"
                             size="sm"
@@ -186,7 +192,7 @@ export default function MetricsDashboard() {
                             className="h-9 md:h-7 text-xs gap-1.5 text-muted-foreground hover:text-plasma-400 hover:bg-plasma-500/10 border border-border/40 md:border-transparent hover:border-plasma-500/30 transition-all px-3"
                         >
                             <Layers className="w-3.5 h-3.5" />
-                            Compare
+                            {tMetrics("compare")}
                         </Button>
                     </div>
                 </CardHeader>
@@ -198,16 +204,16 @@ export default function MetricsDashboard() {
                             <div className="text-[11px] md:text-xs text-muted-foreground/70 space-y-1.5">
                                 <div className="flex justify-between">
                                     <span className="flex items-center">
-                                        <TermTooltip termKey="contextWindow">Context window</TermTooltip>:
+                                        <TermTooltip termKey="contextWindow">{tMetrics("context_window")}</TermTooltip>:
                                     </span>
-                                    <span className="font-mono">{(model.maxContext / 1000).toFixed(0)}k tokens</span>   
+                                    <span className="font-mono">{(model.maxContext / 1000).toFixed(0)}k {tCalc("output_tokens")}</span>   
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="flex items-center gap-1">
-                                        Price
+                                        {tMetrics("price")}
                                         <TermTooltip termKey="inputCost" iconOnly />/<TermTooltip termKey="outputCost" iconOnly />:
                                     </span>
-                                    <span className="font-mono">${model.inputPricePer1M} / ${model.outputPricePer1M} per 1M</span>
+                                    <span className="font-mono">${model.inputPricePer1M} / ${model.outputPricePer1M} {tMetrics("per_1m")}</span>
                                 </div>
                             </div>
                         </>
@@ -216,11 +222,11 @@ export default function MetricsDashboard() {
             </Card>
             </div>
 
-            <div className="text-xs font-mono text-[#00dcb4] uppercase tracking-wider mb-2 mt-6">Step 3 — View your cost</div>
+            <div className="text-xs font-mono text-[#00dcb4] uppercase tracking-wider mb-2 mt-6">{tCalc("step3_label")}</div>
             {!hasModel ? (
                 <div className="rounded-2xl border border-dashed border-border/40 bg-card/10 backdrop-blur-sm p-8 text-center flex flex-col items-center justify-center min-h-[300px]">
                     <p className="text-sm text-muted-foreground font-medium">
-                        &larr; Choose a model to calculate
+                        {tCalc("choose_model")}
                     </p>
                 </div>
             ) : (
@@ -234,7 +240,7 @@ export default function MetricsDashboard() {
                       <CostGauge totalCost={totalCost} />
                       {agentLoopEnabled && agentIterations > 1 && (
                           <p className="text-xs text-muted-foreground">
-                              Total across {agentIterations} turns
+                              {tMetrics("total_turns", { turns: agentIterations })}
                           </p>
                       )}
                       <CostDisclaimer className="max-w-[240px] text-center justify-center" />
@@ -256,12 +262,11 @@ export default function MetricsDashboard() {
                 <Card className="border-indigo-500/30 bg-indigo-500/5 backdrop-blur-sm overflow-hidden animate-in fade-in slide-in-from-bottom-2">
                     <div className="bg-indigo-500/10 px-4 py-2 flex items-center gap-2 border-b border-indigo-500/20">
                         <Lightbulb className="w-4 h-4 text-indigo-400" />
-                        <span className="text-[10px] font-bold text-indigo-300 tracking-widest uppercase">Smart Routing</span>
+                        <span className="text-[10px] font-bold text-indigo-300 tracking-widest uppercase">{tSmart("title")}</span>
                     </div>
                     <CardContent className="pt-4 pb-4">
                         <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                            Want to run this <strong className="text-foreground">{multiplier}x cheaper</strong>?
-                            This prompt fits within <strong className="text-indigo-300">{recommendedModel.name}</strong>.
+                            {tSmart("desc", { multiplier, model: recommendedModel.name })}
                         </p>
                         <Button
                             onClick={handleApplyRecommendation}
@@ -270,7 +275,7 @@ export default function MetricsDashboard() {
                             className="w-full bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/20 transition-all font-semibold h-11 md:h-9"
                         >
                             <Zap className="w-4 h-4 mr-2 fill-indigo-400 text-indigo-400" />
-                            Switch & Save
+                            {tSmart("switch_save")}
                             <ArrowRight className="w-4 h-4 ml-2 opacity-70" />
                         </Button>
                     </CardContent>
@@ -280,31 +285,31 @@ export default function MetricsDashboard() {
             {/* Metrics Cards */}
             <div className="grid grid-cols-2 gap-3">
                 <MetricCard
-                    label="Input Tokens"
+                    label={tMetrics("input_tokens")}
                     tooltipKey="inputTokens"
                     value={formatTokens(totalInputTokens)}
-                    sublabel={`Prompt: ${formatTokens(inputTokenCount)} | Attach: ${formatTokens(fileTokenCount)}`}
+                    sublabel={`${tMetrics("prompt")}: ${formatTokens(inputTokenCount)} | ${tMetrics("attach")}: ${formatTokens(fileTokenCount)}`}
                     icon="??"
                 />
                 <MetricCard
-                    label="Output Tokens"
+                    label={tMetrics("output_tokens")}
                     tooltipKey="outputTokens"
                     value={formatTokens(expectedOutputTokens)}
                     sublabel={`${formatCost(singleCost.outputCost)}`}
                     icon="??"
                 />
                 <MetricCard
-                    label="Total Tokens"
+                    label={tMetrics("total_tokens")}
                     tooltipKey="totalTokens"
                     value={formatTokens(totalInputTokens + expectedOutputTokens)}
-                    sublabel="per call"
+                    sublabel={tMetrics("per_call")}
                     icon="??"
                 />
                 <MetricCard
-                    label="Total Cost"
+                    label={tMetrics("total_cost")}
                     tooltipKey="totalCost"
                     value={formatCost(singleCost.totalCost)}
-                    sublabel="single call"
+                    sublabel={tMetrics("single_call")}
                     icon="??"
                     highlight={true}
                     showDisclaimer={true}
@@ -329,13 +334,13 @@ export default function MetricsDashboard() {
                         )}
                     >
                         {shareCopied ? (
-                            <><Check className="w-4 h-4" /> Link copied!</>
+                            <><Check className="w-4 h-4" /> {tShare("link_copied")}</>
                         ) : (
                             <div className="flex items-center gap-2">
                               {(typeof navigator !== "undefined" && "share" in navigator && window.innerWidth < 768) ? (
-                                <><Share2 className="w-4 h-4" /> Share estimate</>
+                                <><Share2 className="w-4 h-4" /> {tShare("share_estimate")}</>
                               ) : (
-                                <><Link2 className="w-4 h-4" /> Copy share link</>
+                                <><Link2 className="w-4 h-4" /> {tShare("copy_link")}</>
                               )}
                             </div>
                         )}
@@ -349,12 +354,12 @@ export default function MetricsDashboard() {
                     <CardContent className="pt-4 pb-3">
                         <div className="text-[11px] text-muted-foreground/60 space-y-2">
                             <div className="flex justify-between">
-                                <TermTooltip termKey="inputCost">Input price</TermTooltip>
+                                <TermTooltip termKey="inputCost">{tMetrics("input_price")}</TermTooltip>
                                 <span className="font-mono">${model.inputPricePer1M} / 1M</span>
                             </div>
                             <Separator className="opacity-20" />
                             <div className="flex justify-between">
-                                <TermTooltip termKey="outputCost">Output price</TermTooltip>
+                                <TermTooltip termKey="outputCost">{tMetrics("output_price")}</TermTooltip>
                                 <span className="font-mono">${model.outputPricePer1M} / 1M</span>
                             </div>
                         </div>
@@ -377,17 +382,17 @@ export default function MetricsDashboard() {
                   <CardContent className="pt-4 pb-3">
                       <div className="text-xs text-muted-foreground/60 space-y-1">
                           <div className="flex justify-between">
-                              <TermTooltip termKey="inputCost">Input price</TermTooltip>
-                              <span className="font-mono">${model.inputPricePer1M} / 1M tokens</span>
+                              <TermTooltip termKey="inputCost">{tMetrics("input_price")}</TermTooltip>
+                              <span className="font-mono">${model.inputPricePer1M} / 1M {tCalc("output_tokens")}</span>
                           </div>
                           <Separator className="opacity-30" />
                           <div className="flex justify-between">
-                              <TermTooltip termKey="outputCost">Output price</TermTooltip>
-                              <span className="font-mono">${model.outputPricePer1M} / 1M tokens</span>
+                              <TermTooltip termKey="outputCost">{tMetrics("output_price")}</TermTooltip>
+                              <span className="font-mono">${model.outputPricePer1M} / 1M {tCalc("output_tokens")}</span>
                           </div>
                           <Separator className="opacity-30" />
                           <div className="flex justify-between items-center">
-                              <span>Prices last updated</span>
+                              <span>{tMetrics("prices_updated")}</span>
                               <Link href="/changelog" className="text-plasma-500/70 hover:text-plasma-400 font-mono transition-colors underline underline-offset-2">
                                   March 2026 ?
                               </Link>

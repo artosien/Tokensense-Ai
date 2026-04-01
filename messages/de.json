@@ -1,0 +1,207 @@
+{
+  "metadata": {
+    "home": {
+      "title": "Tokensense-Ai | Kostenloser LLM-Token-Zähler & Prompt-Kostenrechner",
+      "description": "Berechnen Sie KI-Prompt-Kosten sofort. Schätzen Sie die Token-Nutzung und API-Preise für GPT-5, Claude 3.5 und Gemini. 100% clientseitig, privat und keine Anmeldung erforderlich.",
+      "keywords": "LLM-Token-Zähler, Prompt-Kostenrechner, GPT-5 Preise, KI-Entwickler-Tools, Claude Token-Zählung, Gemini API-Kosten",
+      "og_title": "Tokensense-Ai | KI-Prompt-Kostenrechner",
+      "og_description": "Kennen Sie Ihre API-Kosten, bevor Sie auf Senden klicken. 100% private, clientseitige Token-Zählung.",
+      "twitter_title": "Tokensense-Ai | LLM-Token- & Kostenrechner",
+      "twitter_description": "Sofortige Kostenschätzungen für GPT-, Claude- und Gemini-Prompts."
+    }
+  },
+  "nav": {
+    "home": "Start",
+    "tools": "Tools",
+    "blog": "Blog",
+    "faq": "FAQ",
+    "login": "Anmelden",
+    "try_calculator": "Rechner ausprobieren"
+  },
+  "hero": {
+    "badge": "Der einzige Rechner, der Agent-Schleifenkosten simuliert",
+    "headline_1": "Berechne deine KI-",
+    "headline_2": "Prompt-Kosten",
+    "headline_word": "sofort.",
+    "subheadline": "Kenne deine Token-Anzahl und Preise für GPT-4o, Claude 3.5, Gemini 1.5 und 50+ Modelle, bevor du sendest.",
+    "cta_primary": "Rechner jetzt starten →",
+    "cta_secondary": "So funktioniert's",
+    "trust_client_side": "100% Client-seitig",
+    "trust_no_signup": "Ohne Registrierung",
+    "trust_free": "Kostenlos für immer",
+    "trust_open_source": "Open Source"
+  },
+  "stats": {
+    "models": "Unterstützte Modelle",
+    "client_side": "Client-seitig",
+    "speed": "Token-Zählgeschwindigkeit",
+    "cost": "Nutzungskosten"
+  },
+  "calculator": {
+    "step1_label": "Schritt 1 — Prompt einfügen",
+    "step2_label": "Schritt 2 — Modell auswählen",
+    "step3_label": "Schritt 3 — Kosten anzeigen",
+    "step_compress": "Token-Diät (Komprimieren)",
+    "compress_basic": "Basis-Komprimierung",
+    "compress_basic_desc": "Entfernt Leerzeichen und Zeilenumbrüche. Minifiziert JSON. Sehr sicher.",
+    "compress_advanced": "Erweiterte Komprimierung",
+    "compress_advanced_desc": "Entfernt Markdown-Struktur und Code-Kommentare. Ausgabe prüfen.",
+    "paste_placeholder": "Prompt hier eingeben...",
+    "output_length": "Ausgabelänge",
+    "output_tokens": "Token",
+    "add_system_prompt": "System-Prompt hinzufügen (optional)",
+    "hide_system_prompt": "System-Prompt ausblenden",
+    "system_placeholder": "Du bist ein hilfreicher Assistent...",
+    "attached_file": "Angehängte Datei",
+    "characters_extracted": "Zeichen extrahiert",
+    "calculate_button": "Berechnen & Ergebnisse anzeigen",
+    "updates_realtime": "Schätzungen werden in Echtzeit aktualisiert",
+    "choose_model": "← Modell auswählen zum Berechnen",
+    "words": "Wörter"
+  },
+  "model_picker": {
+    "placeholder": "Modell auswählen, um Kosten zu sehen →",
+    "search": "Modelle suchen...",
+    "models_available": "Modelle verfügbar",
+    "added": "Hinzugefügt"
+  },
+  "metrics": {
+    "input_tokens": "Eingabe-Token",
+    "output_tokens": "Ausgabe-Token",
+    "total_tokens": "Gesamt-Token",
+    "total_cost": "Gesamtkosten",
+    "estimated_cost": "Geschätzte Kosten",
+    "per_call": "pro Aufruf",
+    "single_call": "Einzelaufruf",
+    "prompt": "Prompt",
+    "attach": "Anhang",
+    "context_window": "Kontextfenster",
+    "price": "Preis",
+    "per_1m": "pro 1M",
+    "input_price": "Eingabepreis",
+    "output_price": "Ausgabepreis",
+    "prices_updated": "Preise zuletzt aktualisiert"
+  },
+  "compare": {
+    "title": "Vergleichsmodus",
+    "step_label": "SCHRITT 02 — Modell mit 30+ Optionen vergleichen",
+    "step_desc": "Füge mehrere Modelle hinzu, um Kosten für denselben Prompt nebeneinander zu sehen.",
+    "add_model": "Modell hinzufügen",
+    "exit": "Beenden",
+    "best_value": "✦ Bestes Preis-Leistungs-Verhältnis",
+    "most_capable": "⚡ Leistungsstärkstes",
+    "pricing_context": "Preiskontext:",
+    "in": "Eingabe",
+    "out": "Ausgabe",
+    "enter_prompt": "Prompt eingeben, um Kostenvergleich zu sehen.",
+    "input": "Eingabe",
+    "output": "Ausgabe"
+  },
+  "smart_routing": {
+    "title": "Intelligentes Routing",
+    "desc": "Möchtest du das {multiplier}x günstiger ausführen? Dieser Prompt passt zu {model}.",
+    "switch_save": "Wechseln & Sparen"
+  },
+  "share": {
+    "copy_link": "Link kopieren",
+    "share_estimate": "Schätzung teilen",
+    "link_copied": "Link kopiert!"
+  },
+  "footer": {
+    "tagline": "LLM-Kostenrechner vor dem Senden",
+    "tools": "Tools",
+    "company": "Unternehmen",
+    "legal": "Rechtliches"
+  },
+  "common": {
+    "loading": "Lädt...",
+    "search": "Suchen...",
+    "close": "Schließen",
+    "copy": "Kopieren",
+    "copied": "Kopiert!",
+    "error": "Etwas ist schiefgelaufen.",
+    "try_again": "Erneut versuchen"
+  },
+  "video_planner": {
+    "shell": {
+      "title": "Video Token Budget Planner",
+      "description": "Estimate and compare AI video processing costs across providers.",
+      "mode_simple": "Simple",
+      "mode_advanced": "Advanced",
+      "config_title": "Configuration",
+      "analysis_title": "Visual Analysis",
+      "no_video_title": "No video analyzed yet",
+      "no_video_description": "Upload a file or paste a URL on the left to start planning your token budget and comparing provider costs.",
+      "privacy_title": "Privacy & Security",
+      "privacy_description": "Tokensense is a client-side tool. Your video data is processed locally in your browser for file uploads. API keys are stored in your browser's localStorage and are never sent to our servers. External URL analysis is performed via a secure proxy that does not store your content.",
+      "methodology_title": "Calculation Methodology",
+      "methodology_description": "Estimates are based on published tokenization rates for Gemini, Claude, and GPT-4o models. Actual costs may vary slightly based on specific prompt overhead and provider-side adjustments."
+    },
+    "input": {
+      "upload_title": "Upload a video file",
+      "upload_description": "Drag and drop or click to browse",
+      "upload_limit": "MP4, MOV, WEBM, MKV (Up to 2GB)",
+      "url_divider": "Or process from URL",
+      "url_placeholder": "Paste YouTube, Vimeo, or direct video link...",
+      "analyze_button": "Analyze",
+      "error_title": "Analysis Failed",
+      "loading_text": "Extracting metadata & analyzing video streams..."
+    },
+    "metadata": {
+      "duration": "Duration",
+      "resolution": "Resolution",
+      "fps": "FPS",
+      "audio": "Audio",
+      "size": "Size",
+      "audio_included": "Included",
+      "audio_none": "None",
+      "res_4k": "4K (Ultra HD)",
+      "res_1080p": "1080p (Full HD)",
+      "res_720p": "720p (HD)",
+      "res_480p": "480p (SD)"
+    },
+    "config": {
+      "title": "Parameters",
+      "description": "Adjust sampling and context settings",
+      "i_want_to": "I want to...",
+      "sampling_rate": "Sampling Rate (FPS)",
+      "sampling_hint": "Higher FPS increases visual detail but significantly increases token cost.",
+      "sampling_recommendation": "1 FPS is recommended for most tasks.",
+      "prompt_tokens": "Prompt Tokens",
+      "tokens_unit": "tokens",
+      "process_audio": "Process Audio",
+      "process_audio_desc": "Include audio stream in analysis"
+    },
+    "results": {
+      "title": "Analysis Results",
+      "footprint": "Estimated footprint: {tokens}",
+      "reset": "Reset",
+      "cost_comparison": "Cost Comparison",
+      "measure_exactly": "Measure Exactly",
+      "estimate_mode": "Estimate Mode",
+      "pricing_disclaimer": "Pricing last updated: March 2026. Includes input tokens only. Output costs vary by response length."
+    },
+    "keys": {
+      "title": "API Keys",
+      "privacy_title": "Privacy First",
+      "privacy_description": "Keys are saved in your browser's localStorage only. They are never sent to our servers. All provider calls happen directly from your browser.",
+      "get_key": "Get key ↗",
+      "save": "Save",
+      "saved": "Saved",
+      "clear_all": "Clear all saved keys",
+      "clear_all_confirm": "Are you sure you want to clear all saved API keys?",
+      "exact_measure_hint": "Connect a key to enable Exact Measurement mode."
+    },
+    "recommendation": {
+      "strategy_label": "Recommended Strategy",
+      "tips_label": "Optimization Tips"
+    },
+    "table": {
+      "col_model": "Model",
+      "col_cost": "Cost",
+      "col_status": "Status",
+      "best_value": "Best Value",
+      "ready": "Ready"
+    }
+  }
+}

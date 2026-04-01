@@ -7,6 +7,7 @@ import { useTokenSenseStore } from "@/lib/store";
 import { X, Plus, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CostBreakdownBar } from "./CostBreakdownBar";
+import { useTranslations } from "next-intl";
 
 const MAX_MODELS = 4;
 
@@ -23,6 +24,9 @@ interface CompareModeProps {
 }
 
 export function CompareMode({ onClose }: CompareModeProps = {}) {
+  const tCompare = useTranslations("compare");
+  const tCalc = useTranslations("calculator");
+
   const { inputTokenCount, fileTokenCount, expectedOutputTokens, selectedModelId } =
     useTokenSenseStore();
 
@@ -83,10 +87,10 @@ export function CompareMode({ onClose }: CompareModeProps = {}) {
       {/* Header */}
         <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-[#00dcb4]/10 text-[#00dcb4] text-sm font-mono font-bold tracking-widest uppercase mb-4 border border-[#00dcb4]/20">
-              STEP 02 &mdash; Compare your model across 30+ options
+              {tCompare("step_label")}
             </div>
             <p className="text-muted-foreground text-lg font-medium">
-              Add multiple models to see side-by-side costs for the same prompt.
+              {tCompare("step_desc")}
             </p>
         </div>
 
@@ -94,9 +98,9 @@ export function CompareMode({ onClose }: CompareModeProps = {}) {
       <div className="flex items-center justify-between mt-4">
         <div className="flex items-center gap-2">
           <Layers className="w-4 h-4 text-[#00dcb4]" />
-          <span className="text-sm font-semibold text-foreground">Compare Mode</span>
+          <span className="text-sm font-semibold text-foreground">{tCompare("title")}</span>
           <span className="text-xs text-muted-foreground/60">
-            ({selectedIds.length} models)
+            ({selectedIds.length} {tCalc("models") || "models"})
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -108,7 +112,7 @@ export function CompareMode({ onClose }: CompareModeProps = {}) {
               className="h-8 text-xs gap-1 border-[#00dcb4]/30 hover:bg-[#00dcb4]/10 hover:text-[#00dcb4]"
             >
               <Plus className="w-3.5 h-3.5" />
-              Add Model
+              {tCompare("add_model")}
             </Button>
           )}
           {onClose && (
@@ -119,7 +123,7 @@ export function CompareMode({ onClose }: CompareModeProps = {}) {
               className="h-8 text-xs text-muted-foreground hover:text-foreground"
             >
               <X className="w-3.5 h-3.5 mr-1" />
-              Exit
+              {tCompare("exit")}
             </Button>
           )}
         </div>
@@ -131,7 +135,7 @@ export function CompareMode({ onClose }: CompareModeProps = {}) {
           <input
             autoFocus
             type="text"
-            placeholder="Search models..."
+            placeholder={tCalc("search_placeholder") || "Search models..."}
             value={pickerSearch}
             onChange={(e) => setPickerSearch(e.target.value)}
             className="w-full px-3 py-1.5 text-xs font-mono bg-background/50 border border-border/50 rounded-md focus:outline-none focus:border-plasma-500/50 text-foreground placeholder:text-muted-foreground/50"
@@ -153,7 +157,7 @@ export function CompareMode({ onClose }: CompareModeProps = {}) {
                     {m.name}
                   </span>
                   <span className="text-muted-foreground/50">{m.provider}</span>
-                  {isSelected && <span className="text-[10px] text-muted-foreground ml-1">(Added)</span>}
+                  {isSelected && <span className="text-[10px] text-muted-foreground ml-1">({tCalc("added") || "Added"})</span>}
                 </div>
                 <span className="font-mono text-muted-foreground/60 text-[10px]">
                   ${m.inputPricePer1M}/${m.outputPricePer1M}
@@ -161,7 +165,7 @@ export function CompareMode({ onClose }: CompareModeProps = {}) {
               </button>
             )})}
             {filteredModels.length === 0 && (
-              <p className="text-xs text-muted-foreground/50 px-3 py-2">No more models to add.</p>
+              <p className="text-xs text-muted-foreground/50 px-3 py-2">{tCalc("no_results") || "No more models to add."}</p>
             )}
           </div>
         </div>
@@ -171,12 +175,12 @@ export function CompareMode({ onClose }: CompareModeProps = {}) {
       <div className="sticky top-[60px] lg:top-[72px] z-10 bg-background/80 backdrop-blur-md p-3 rounded-xl border border-border/50 shadow-sm flex items-center justify-between transition-all">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 w-full justify-between">
            <div className="flex items-center gap-2">
-             <span className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Pricing Context:</span>
+             <span className="text-xs font-mono text-muted-foreground uppercase tracking-widest">{tCompare("pricing_context")}</span>
            </div>
            <div className="flex items-center gap-3 text-sm font-mono whitespace-nowrap">
-             <span className="text-foreground font-semibold">{totalInputTokens.toLocaleString()} <span className="text-muted-foreground/60">in</span></span>
+             <span className="text-foreground font-semibold">{totalInputTokens.toLocaleString()} <span className="text-muted-foreground/60">{tCompare("in")}</span></span>
              <span className="text-muted-foreground/30">+</span>
-             <span className="text-foreground font-semibold">{expectedOutputTokens.toLocaleString()} <span className="text-muted-foreground/60">out</span></span>
+             <span className="text-foreground font-semibold">{expectedOutputTokens.toLocaleString()} <span className="text-muted-foreground/60">{tCompare("out")}</span></span>
            </div>
         </div>
       </div>
@@ -218,12 +222,12 @@ export function CompareMode({ onClose }: CompareModeProps = {}) {
                 </div>
                 {isCheapest && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-                    ✦ Best Value
+                    {tCompare("best_value")}
                   </span>
                 )}
                 {isMostExpensive && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-full">
-                    ⚡ Most Capable
+                    {tCompare("most_capable")}
                   </span>
                 )}
               </div>
@@ -236,11 +240,11 @@ export function CompareMode({ onClose }: CompareModeProps = {}) {
               {/* Breakdown */}
               <div className="space-y-1 text-xs font-mono text-muted-foreground/70">
                 <div className="flex justify-between">
-                  <span className="text-plasma-400/70">Input</span>
+                  <span className="text-plasma-400/70">{tCompare("input")}</span>
                   <span>{formatCost(cost.inputCost)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400/70">Output</span>
+                  <span className="text-slate-400/70">{tCompare("output")}</span>
                   <span>{formatCost(cost.outputCost)}</span>
                 </div>
               </div>
@@ -255,7 +259,7 @@ export function CompareMode({ onClose }: CompareModeProps = {}) {
 
               {/* Pricing reference */}
               <div className="text-[10px] font-mono text-muted-foreground/40 pt-1 border-t border-border/30">
-                ${model.inputPricePer1M} / ${model.outputPricePer1M} per 1M tokens
+                ${model.inputPricePer1M} / ${model.outputPricePer1M} {tCompare("per_1m_tokens") || "per 1M tokens"}
               </div>
             </div>
           );
@@ -265,10 +269,9 @@ export function CompareMode({ onClose }: CompareModeProps = {}) {
       {/* No tokens prompt */}
       {totalInputTokens === 0 && (
         <p className="text-xs text-center text-muted-foreground/50 py-2">
-          Enter a prompt to see cost comparison across models.
+          {tCompare("enter_prompt")}
         </p>
       )}
     </div>
   );
 }
-

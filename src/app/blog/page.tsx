@@ -1,10 +1,11 @@
 import { Metadata } from 'next';
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import SiteHeader from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
 import { getPublishedPosts } from "@/lib/blog-service";
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 export const metadata: Metadata = {
   title: "Tokensense-Ai Blog | LLM Economics, Prompt Engineering & Cost Optimization",
@@ -66,6 +67,9 @@ async function BlogSchema() {
 }
 
 export default async function BlogPage() {
+  const locale = 'en';
+  setRequestLocale(locale);
+  const tNav = await getTranslations("nav");
   const posts = await getPublishedPosts();
 
   return (
@@ -81,7 +85,7 @@ export default async function BlogPage() {
             Latest Insights
           </div>
           <h1 className="text-4xl sm:text-6xl font-black text-white uppercase tracking-tight">
-            Tokensense <span className="text-indigo-500">Blog</span>
+            Tokensense <span className="text-indigo-500">{tNav("blog")}</span>
           </h1>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-lg">
             Master the economics of AI. Expert strategies for prompt optimization, cost management, and staying ahead of the intelligence deflation curve.

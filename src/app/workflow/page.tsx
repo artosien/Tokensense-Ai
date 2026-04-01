@@ -1,7 +1,8 @@
 import WorkflowSimulator from "@/components/WorkflowSimulator";
 import SiteHeader from "@/components/SiteHeader";
 import SocialShareBar from "@/components/SocialShareBar";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
+import { useTranslations } from "next-intl";
 import type { Metadata } from "next";
 
 export const dynamic = 'force-static';
@@ -56,6 +57,8 @@ function WorkflowSchema() {
 }
 
 export default function WorkflowSimulatorPage() {
+    const tTools = useTranslations("tools");
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <WorkflowSchema />
@@ -77,15 +80,10 @@ export default function WorkflowSimulatorPage() {
                             Blueprint Model
                         </div>
                         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
-                            Workflow{" "}
-                            <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
-                                Cost Estimator
-                            </span>
+                            {tTools("workflow_estimator")}
                         </h1>
                         <p className="text-lg text-muted-foreground max-w-2xl">
-                            Pick a real-world AI workflow blueprint, set your volume, and
-                            instantly see the monthly cost breakdown — from token bills to
-                            platform fees. Compare Zapier, Make, and n8n side by side.
+                            {tTools("workflow_estimator_subtitle")}
                         </p>
                     </div>
                 </div>
@@ -228,4 +226,3 @@ export default function WorkflowSimulatorPage() {
         </div>
     );
 }
-

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTokenSenseStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { FileText, Info, Files, BookOpen, Code2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface Preset {
   label: string;
@@ -12,80 +13,11 @@ interface Preset {
   outputTokens: number;
   modelId: string;
   description: string;
+  id: string;
 }
 
-const PRESETS: Preset[] = [
-  {
-    label: "Chatbot Turn",
-    icon: "💬",
-    inputTokens: 500,
-    outputTokens: 300,
-    modelId: "gpt-4o-mini",
-    description: "Typical back-and-forth message",
-  },
-  {
-    label: "Doc Summary",
-    icon: "📄",
-    inputTokens: 0, // Dynamic
-    outputTokens: 0, // Dynamic
-    modelId: "claude-3-5-haiku",
-    description: "Summarize multiple documents",
-  },
-  {
-    label: "Content Rewrite",
-    icon: "✍️",
-    inputTokens: 0, // Dynamic
-    outputTokens: 0, // Dynamic
-    modelId: "claude-3-5-sonnet",
-    description: "Bulk rewriting existing blog articles",
-  },
-  {
-    label: "Code Review",
-    icon: "💻",
-    inputTokens: 0, // Dynamic
-    outputTokens: 0, // Dynamic
-    modelId: "claude-3-5-sonnet",
-    description: "Review a code file",
-  },
-  {
-    label: "Long Report",
-    icon: "📊",
-    inputTokens: 8000,
-    outputTokens: 2000,
-    modelId: "gemini-1-5-pro",
-    description: "Analyse and write a full report",
-  },
-  {
-    label: "Agent Loop",
-    icon: "🔄",
-    inputTokens: 3000,
-    outputTokens: 1200,
-    modelId: "claude-3-5-sonnet",
-    description: "Multi-step agentic task",
-  },
-];
-
-const WORD_COUNT_RANGES = [
-  { label: "Low (10K-20K)", min: 10000, max: 20000, avg: 15000 },
-  { label: "Medium (30K-50K)", min: 30000, max: 50000, avg: 40000 },
-  { label: "High (55K-80K)", min: 55000, max: 80000, avg: 67500 },
-  { label: "Max (90K+)", min: 90000, max: 120000, avg: 105000 },
-];
-
-const DOC_SIZE_PRESETS = [
-  { label: "Short (1k words)", words: 1000 },
-  { label: "Medium (4k words)", words: 4000 },
-  { label: "Long (12k words)", words: 12000 },
-  { label: "Deep (25k words)", words: 25000 },
-];
-
-const CODE_REVIEW_COMPLEXITY = [
-  { label: "Low", description: "Small bug fix / script", inputAvg: 500, outputAvg: 200 },
-  { label: "Medium", description: "Standard component or class", inputAvg: 2000, outputAvg: 800 },
-  { label: "High", description: "Complex system or large PR", inputAvg: 8000, outputAvg: 2500 },
-];
-
 export function ScenarioPresets() {
+  const t = useTranslations("presets");
   const { setUserPrompt, setExpectedOutputTokens, setSelectedModelId, setInputTokenCount } =
     useTokenSenseStore();
   const [activePreset, setActivePreset] = useState<string | null>(null);
@@ -101,45 +33,122 @@ export function ScenarioPresets() {
   // Dynamic state for Code Review
   const [codeReviewIdx, setCodeReviewIdx] = useState(1);
 
+  const PRESETS: Preset[] = [
+    {
+      id: "chatbot",
+      label: t("chatbot_label"),
+      icon: "💬",
+      inputTokens: 500,
+      outputTokens: 300,
+      modelId: "gpt-4o-mini",
+      description: t("chatbot_desc"),
+    },
+    {
+      id: "doc_summary",
+      label: t("doc_summary_label"),
+      icon: "📄",
+      inputTokens: 0, // Dynamic
+      outputTokens: 0, // Dynamic
+      modelId: "claude-3-5-haiku",
+      description: t("doc_summary_desc"),
+    },
+    {
+      id: "content_rewrite",
+      label: t("content_rewrite_label"),
+      icon: "✍️",
+      inputTokens: 0, // Dynamic
+      outputTokens: 0, // Dynamic
+      modelId: "claude-3-5-sonnet",
+      description: t("content_rewrite_desc"),
+    },
+    {
+      id: "code_review",
+      label: t("code_review_label"),
+      icon: "💻",
+      inputTokens: 0, // Dynamic
+      outputTokens: 0, // Dynamic
+      modelId: "claude-3-5-sonnet",
+      description: t("code_review_desc"),
+    },
+    {
+      id: "long_report",
+      label: t("long_report_label"),
+      icon: "📊",
+      inputTokens: 8000,
+      outputTokens: 2000,
+      modelId: "gemini-1-5-pro",
+      description: t("long_report_desc"),
+    },
+    {
+      id: "agent_loop",
+      label: t("agent_loop_label"),
+      icon: "🔄",
+      inputTokens: 3000,
+      outputTokens: 1200,
+      modelId: "claude-3-5-sonnet",
+      description: t("agent_loop_desc"),
+    },
+  ];
+
+  const WORD_COUNT_RANGES = [
+    { label: t("low") + " (10K-20K)", min: 10000, max: 20000, avg: 15000 },
+    { label: t("medium") + " (30K-50K)", min: 30000, max: 50000, avg: 40000 },
+    { label: t("high") + " (55K-80K)", min: 55000, max: 80000, avg: 67500 },
+    { label: t("max") + " (90K+)", min: 90000, max: 120000, avg: 105000 },
+  ];
+
+  const DOC_SIZE_PRESETS = [
+    { label: t("short") + " (1k words)", words: 1000 },
+    { label: t("medium") + " (4k words)", words: 4000 },
+    { label: t("high") + " (12k words)", words: 12000 },
+    { label: t("deep") + " (25k words)", words: 25000 },
+  ];
+
+  const CODE_REVIEW_COMPLEXITY = [
+    { label: t("low"), description: t("code_review_low", { count: 500 }), inputAvg: 500, outputAvg: 200 },
+    { label: t("medium"), description: t("code_review_medium", { count: 2000 }), inputAvg: 2000, outputAvg: 800 },
+    { label: t("high"), description: t("code_review_high", { count: 8000 }), inputAvg: 8000, outputAvg: 2500 },
+  ];
+
   const applyPreset = (preset: Preset, forceUpdate: boolean = false) => {
-    if (activePreset === preset.label && !forceUpdate) return;
-    setActivePreset(preset.label);
+    if (activePreset === preset.id && !forceUpdate) return;
+    setActivePreset(preset.id);
 
     let inTokens = preset.inputTokens;
     let outTokens = preset.outputTokens;
 
     let promptText = "";
 
-    if (preset.label === "Content Rewrite") {
+    if (preset.id === "content_rewrite") {
       const range = WORD_COUNT_RANGES[wordRangeIdx];
       const totalWords = range.avg * postCount;
       inTokens = Math.round(totalWords * 1.35);
       outTokens = inTokens; 
-      promptText = `You are an expert editor. Please rewrite the following ${postCount} blog articles (totaling ~${(WORD_COUNT_RANGES[wordRangeIdx].avg * postCount).toLocaleString()} words) to improve SEO, readability, and engagement.\n\n[Content of ${postCount} articles would follow here...]`;
-    } else if (preset.label === "Doc Summary") {
+      promptText = t("content_rewrite_text", { count: postCount, total: (range.avg * postCount).toLocaleString() });
+    } else if (preset.id === "doc_summary") {
       const size = DOC_SIZE_PRESETS[docSizeIdx];
       const totalWords = size.words * docCount;
       inTokens = Math.round(totalWords * 1.35);
       outTokens = 500 * docCount; // ~500 tokens summary per doc
-      promptText = `Please provide a concise executive summary for the following ${docCount} documents. Each document is approximately ${DOC_SIZE_PRESETS[docSizeIdx].words.toLocaleString()} words.\n\n[Document data for ${docCount} files would appear here...]`;
-    } else if (preset.label === "Code Review") {
+      promptText = t("doc_summary_text", { count: docCount, words: DOC_SIZE_PRESETS[docSizeIdx].words.toLocaleString() });
+    } else if (preset.id === "code_review") {
       const complexity = CODE_REVIEW_COMPLEXITY[codeReviewIdx];
       inTokens = complexity.inputAvg;
       outTokens = complexity.outputAvg;
       if (codeReviewIdx === 0) {
-        promptText = `Please review this small utility function for minor bugs, edge cases, and style improvements.\n\n[~${complexity.inputAvg} tokens of simple code]`;
+        promptText = t("code_review_low", { count: complexity.inputAvg });
       } else if (codeReviewIdx === 1) {
-        promptText = `Please perform a standard code review on this React component. Focus on state management, accessibility, and performance.\n\n[~${complexity.inputAvg} tokens of standard code]`;
+        promptText = t("code_review_medium", { count: complexity.inputAvg });
       } else {
-        promptText = `Perform an in-depth architecture and code review on this complex module. Look for race conditions, memory leaks, security vulnerabilities, and logic bugs.\n\n[~${complexity.inputAvg} tokens of complex system code]`;
+        promptText = t("code_review_high", { count: complexity.inputAvg });
       }
     } else {
       const samplePrompts: Record<string, string> = {
-        "Chatbot Turn": "Hi, can you help me understand how transformer models handle long-range dependencies in text?",
-        "Long Report": "Analyze the following market data and write a comprehensive report...",
-        "Agent Loop": "You are an autonomous research agent. Your goal is to search and synthesize papers...",
+        "chatbot": t("chatbot_text"),
+        "long_report": t("long_report_text"),
+        "agent_loop": t("agent_loop_text"),
       };
-      promptText = samplePrompts[preset.label] || `[Preset applied]`;
+      promptText = samplePrompts[preset.id] || `[Preset applied]`;
     }
 
     setUserPrompt(promptText);
@@ -152,7 +161,7 @@ export function ScenarioPresets() {
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-          Quick Presets
+          {t("title")}
         </span>
         <div className="flex-1 h-px bg-border/40" />
       </div>
@@ -160,10 +169,10 @@ export function ScenarioPresets() {
       <div className="relative group/scroll">
         <div className="flex md:flex-wrap gap-2 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 scrollbar-none mask-fade-right md:mask-none -mx-4 px-4 md:mx-0 md:px-0">
           {PRESETS.map((preset) => {
-            const isActive = activePreset === preset.label;
+            const isActive = activePreset === preset.id;
             return (
               <button
-                key={preset.label}
+                key={preset.id}
                 type="button"
                 onClick={() => applyPreset(preset)}
                 className={cn(
@@ -185,13 +194,13 @@ export function ScenarioPresets() {
       </div>
 
       {/* Dynamic Controls for Content Rewrite */}
-      {activePreset === "Content Rewrite" && (
+      {activePreset === "content_rewrite" && (
         <div className="bg-plasma-500/5 border border-plasma-500/10 rounded-2xl p-4 animate-in slide-in-from-top-2 duration-300">
           <div className="flex flex-col md:flex-row md:items-center gap-6">
             <div className="flex-1 space-y-3">
               <label className="text-[10px] font-bold text-plasma-400 uppercase tracking-widest flex items-center gap-2">
                 <FileText className="w-3 h-3" />
-                Number of Articles
+                {t("num_articles")}
               </label>
               <div className="flex items-center gap-3">
                 <input 
@@ -202,7 +211,7 @@ export function ScenarioPresets() {
                   onChange={(e) => {
                     const val = parseInt(e.target.value);
                     setPostCount(val);
-                    applyPreset(PRESETS.find(p => p.label === "Content Rewrite")!, true);
+                    applyPreset(PRESETS.find(p => p.id === "content_rewrite")!, true);
                   }}
                   className="flex-1 h-1.5 bg-plasma-500/20 rounded-lg appearance-none cursor-pointer accent-plasma-500"
                 />
@@ -215,7 +224,7 @@ export function ScenarioPresets() {
             <div className="flex-1 space-y-3">
               <label className="text-[10px] font-bold text-plasma-400 uppercase tracking-widest flex items-center gap-2">
                 <Info className="w-3 h-3" />
-                Word Count Scale (Total)
+                {t("word_count_scale")}
               </label>
               <div className="grid grid-cols-2 xs:grid-cols-4 gap-2">
                 {WORD_COUNT_RANGES.map((range, idx) => (
@@ -223,7 +232,7 @@ export function ScenarioPresets() {
                     key={range.label}
                     onClick={() => {
                       setWordRangeIdx(idx);
-                      applyPreset(PRESETS.find(p => p.label === "Content Rewrite")!, true);
+                      applyPreset(PRESETS.find(p => p.id === "content_rewrite")!, true);
                     }}
                     className={cn(
                       "px-2 py-2 rounded-lg text-[9px] font-bold uppercase transition-all border",
@@ -240,22 +249,22 @@ export function ScenarioPresets() {
           </div>
           
           <div className="mt-4 pt-3 border-t border-plasma-500/10 flex items-center justify-between text-[10px] font-mono">
-            <span className="text-muted-foreground">Estimated Payload:</span>
+            <span className="text-muted-foreground">{t("est_payload")}</span>
             <span className="text-plasma-400 font-bold">
-              ~{(WORD_COUNT_RANGES[wordRangeIdx].avg * postCount).toLocaleString()} words total
+              {t("words_total", { count: (WORD_COUNT_RANGES[wordRangeIdx].avg * postCount).toLocaleString() })}
             </span>
           </div>
         </div>
       )}
 
       {/* Dynamic Controls for Doc Summary */}
-      {activePreset === "Doc Summary" && (
+      {activePreset === "doc_summary" && (
         <div className="bg-plasma-500/5 border border-plasma-500/10 rounded-2xl p-4 animate-in slide-in-from-top-2 duration-300">
           <div className="flex flex-col md:flex-row md:items-center gap-6">
             <div className="flex-1 space-y-3">
               <label className="text-[10px] font-bold text-plasma-400 uppercase tracking-widest flex items-center gap-2">
                 <Files className="w-3 h-3" />
-                Number of Documents
+                {t("num_docs")}
               </label>
               <div className="flex items-center gap-3">
                 <input 
@@ -266,7 +275,7 @@ export function ScenarioPresets() {
                   onChange={(e) => {
                     const val = Math.max(1, parseInt(e.target.value) || 1);
                     setDocCount(val);
-                    applyPreset(PRESETS.find(p => p.label === "Doc Summary")!, true);
+                    applyPreset(PRESETS.find(p => p.id === "doc_summary")!, true);
                   }}
                   className="w-full h-10 bg-plasma-500/10 border border-plasma-500/20 rounded-lg px-3 font-mono text-white focus:outline-none focus:border-plasma-500/50 transition-colors"
                 />
@@ -276,7 +285,7 @@ export function ScenarioPresets() {
             <div className="flex-1 space-y-3">
               <label className="text-[10px] font-bold text-plasma-400 uppercase tracking-widest flex items-center gap-2">
                 <BookOpen className="w-3 h-3" />
-                Size per Document
+                {t("size_per_doc")}
               </label>
               <div className="grid grid-cols-2 xs:grid-cols-4 gap-2">
                 {DOC_SIZE_PRESETS.map((size, idx) => (
@@ -284,7 +293,7 @@ export function ScenarioPresets() {
                     key={size.label}
                     onClick={() => {
                       setDocSizeIdx(idx);
-                      applyPreset(PRESETS.find(p => p.label === "Doc Summary")!, true);
+                      applyPreset(PRESETS.find(p => p.id === "doc_summary")!, true);
                     }}
                     className={cn(
                       "px-2 py-2 rounded-lg text-[9px] font-bold uppercase transition-all border",
@@ -301,22 +310,22 @@ export function ScenarioPresets() {
           </div>
           
           <div className="mt-4 pt-3 border-t border-plasma-500/10 flex items-center justify-between text-[10px] font-mono">
-            <span className="text-muted-foreground">Estimated Word Total:</span>
+            <span className="text-muted-foreground">{t("est_word_total")}</span>
             <span className="text-plasma-400 font-bold">
-              ~{(DOC_SIZE_PRESETS[docSizeIdx].words * docCount).toLocaleString()} words
+              {t("words_unit", { count: (DOC_SIZE_PRESETS[docSizeIdx].words * docCount).toLocaleString() })}
             </span>
           </div>
         </div>
       )}
 
       {/* Dynamic Controls for Code Review */}
-      {activePreset === "Code Review" && (
+      {activePreset === "code_review" && (
         <div className="bg-plasma-500/5 border border-plasma-500/10 rounded-2xl p-4 animate-in slide-in-from-top-2 duration-300">
           <div className="flex flex-col md:flex-row md:items-center gap-6">
             <div className="flex-1 space-y-3">
               <label className="text-[10px] font-bold text-plasma-400 uppercase tracking-widest flex items-center gap-2">
                 <Code2 className="w-3 h-3" />
-                Code Complexity
+                {t("code_complexity")}
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {CODE_REVIEW_COMPLEXITY.map((comp, idx) => (
@@ -324,7 +333,7 @@ export function ScenarioPresets() {
                     key={comp.label}
                     onClick={() => {
                       setCodeReviewIdx(idx);
-                      applyPreset(PRESETS.find(p => p.label === "Code Review")!, true);
+                      applyPreset(PRESETS.find(p => p.id === "code_review")!, true);
                     }}
                     className={cn(
                       "px-2 py-2 rounded-lg text-[9px] font-bold uppercase transition-all border",
@@ -341,17 +350,17 @@ export function ScenarioPresets() {
           </div>
           
           <div className="mt-4 pt-3 border-t border-plasma-500/10 flex items-center justify-between text-[10px] font-mono">
-            <span className="text-muted-foreground">{CODE_REVIEW_COMPLEXITY[codeReviewIdx].description}</span>
+            <span className="text-muted-foreground">{CODE_REVIEW_COMPLEXITY[codeReviewIdx].description.split('\n')[0]}</span>
             <span className="text-plasma-400 font-bold">
-              ~{CODE_REVIEW_COMPLEXITY[codeReviewIdx].inputAvg.toLocaleString()} estimated tokens
+              {t("est_tokens", { count: CODE_REVIEW_COMPLEXITY[codeReviewIdx].inputAvg.toLocaleString() })}
             </span>
           </div>
         </div>
       )}
 
-      {activePreset && activePreset !== "Content Rewrite" && activePreset !== "Doc Summary" && activePreset !== "Code Review" && (
+      {activePreset && !["content_rewrite", "doc_summary", "code_review"].includes(activePreset) && (
         <p className="text-[10px] text-plasma-500/70 font-mono animate-in fade-in duration-300">
-          Preset applied
+          {t("applied")}
         </p>
       )}
 

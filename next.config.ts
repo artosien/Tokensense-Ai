@@ -1,9 +1,24 @@
-﻿import type { NextConfig } from "next";
+import createNextIntlPlugin from 'next-intl/plugin';
+import type { NextConfig } from "next";
+
+const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
- // output: "export",
-  trailingSlash: true,
-  
+  trailingSlash: false,
+  serverExternalPackages: ["@ffprobe-installer/ffprobe", "fluent-ffmpeg"],
+
+  async redirects() {
+    return [
+      {
+        // Matches /en, /zh, /tl, etc. and any sub-paths
+        // But NOT /api routes
+        source: '/:lang([a-z]{2})/:path((?!api/).*)',
+        destination: '/:path*',
+        permanent: true,
+      },
+    ];
+  },
+
   // Turbopack config (Next.js 16+ default bundler)
   turbopack: {},
 
@@ -26,4 +41,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

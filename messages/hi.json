@@ -1,0 +1,207 @@
+{
+  "metadata": {
+    "home": {
+      "title": "Tokensense-Ai | फ्री LLM टोकन काउंटर और प्रॉम्प्ट लागत कैलकुलेटर",
+      "description": "AI प्रॉम्प्ट की लागत का तुरंत गणना करें। GPT-5, Claude 3.5 और Gemini के लिए टोकन उपयोग और API मूल्य निर्धारण का अनुमान लगाएं। 100% क्लाइंट-साइड, निजी और कोई साइन-अप आवश्यक नहीं।",
+      "keywords": "LLM टोकन काउंटर, प्रॉम्प्ट लागत कैलकुलेटर, GPT-5 मूल्य निर्धारण, AI डेवलपर टूल, Claude टोकन गणना, Gemini API लागत",
+      "og_title": "Tokensense-Ai | AI प्रॉम्प्ट लागत कैलकुलेटर",
+      "og_description": "भेजने से पहले अपनी API लागत जानें। 100% निजी, क्लाइंट-साइड टोकन गिनती।",
+      "twitter_title": "Tokensense-Ai | LLM टोकन और लागत कैलकुलेटर",
+      "twitter_description": "GPT, Claude और Gemini प्रॉम्प्ट के लिए त्वरित लागत अनुमान।"
+    }
+  },
+  "nav": {
+    "home": "होम",
+    "tools": "टूल्स",
+    "blog": "ब्लॉग",
+    "faq": "FAQ",
+    "login": "लॉगिन",
+    "try_calculator": "कैलकुलेटर आज़माएं"
+  },
+  "hero": {
+    "badge": "एजेंट लूप लागत सिमुलेट करने वाला एकमात्र कैलकुलेटर",
+    "headline_1": "अपनी AI",
+    "headline_2": "प्रॉम्प्ट लागत",
+    "headline_word": "तुरंत जानें।",
+    "subheadline": "भेजने से पहले GPT-4o, Claude 3.5, Gemini 1.5 और 50+ मॉडलों के टोकन और मूल्य जानें।",
+    "cta_primary": "कैलकुलेटर आज़माएं →",
+    "cta_secondary": "जानें यह कैसे काम करता है",
+    "trust_client_side": "100% क्लाइंट-साइड",
+    "trust_no_signup": "साइन-अप नहीं",
+    "trust_free": "हमेशा मुफ़्त",
+    "trust_open_source": "ओपन सोर्स"
+  },
+  "stats": {
+    "models": "समर्थित मॉडल",
+    "client_side": "क्लाइंट-साइड",
+    "speed": "टोकन गणना गति",
+    "cost": "उपयोग लागत"
+  },
+  "calculator": {
+    "step1_label": "चरण 1 — अपना प्रॉम्प्ट पेस्ट करें",
+    "step2_label": "चरण 2 — मॉडल चुनें",
+    "step3_label": "चरण 3 — लागत देखें",
+    "step_compress": "टोकन डाइट (कम्प्रेस)",
+    "compress_basic": "बेसिक कम्प्रेस",
+    "compress_basic_desc": "व्हाइटस्पेस और न्यूलाइन हटाता है। बहुत सुरक्षित।",
+    "compress_advanced": "एडवांस्ड कम्प्रेस",
+    "compress_advanced_desc": "Markdown संरचना और कोड टिप्पणियाँ हटाता है। आउटपुट जाँचें।",
+    "paste_placeholder": "यहाँ अपना प्रॉम्प्ट लिखें...",
+    "output_length": "आउटपुट लंबाई",
+    "output_tokens": "टोकन",
+    "add_system_prompt": "सिस्टम प्रॉम्प्ट जोड़ें (वैकल्पिक)",
+    "hide_system_prompt": "सिस्टम प्रॉम्प्ट छुपाएं",
+    "system_placeholder": "आप एक सहायक हैं...",
+    "attached_file": "संलग्न फ़ाइल",
+    "characters_extracted": "अक्षर निकाले गए",
+    "calculate_button": "गणना करें और परिणाम देखें",
+    "updates_realtime": "अनुमान रीयल-टाइम में अपडेट होते हैं",
+    "choose_model": "← गणना के लिए मॉडल चुनें",
+    "words": "शब्द"
+  },
+  "model_picker": {
+    "placeholder": "लागत देखने के लिए मॉडल चुनें →",
+    "search": "मॉडल खोजें...",
+    "models_available": "उपलब्ध मॉडल",
+    "added": "जोड़ा गया"
+  },
+  "metrics": {
+    "input_tokens": "इनपुट टोकन",
+    "output_tokens": "आउटपुट टोकन",
+    "total_tokens": "कुल टोकन",
+    "total_cost": "कुल लागत",
+    "estimated_cost": "अनुमानित लागत",
+    "per_call": "प्रति कॉल",
+    "single_call": "एकल कॉल",
+    "prompt": "प्रॉम्प्ट",
+    "attach": "अटैच",
+    "context_window": "कॉन्टेक्स्ट विंडो",
+    "price": "मूल्य",
+    "per_1m": "प्रति 10 लाख",
+    "input_price": "इनपुट मूल्य",
+    "output_price": "आउटपुट मूल्य",
+    "prices_updated": "मूल्य अंतिम बार अपडेट"
+  },
+  "compare": {
+    "title": "तुलना मोड",
+    "step_label": "चरण 02 — 30+ विकल्पों में अपने मॉडल की तुलना करें",
+    "step_desc": "एक ही प्रॉम्प्ट के लिए कई मॉडलों की लागत देखें।",
+    "add_model": "मॉडल जोड़ें",
+    "exit": "बाहर निकलें",
+    "best_value": "✦ सर्वोत्तम मूल्य",
+    "most_capable": "⚡ सबसे सक्षम",
+    "pricing_context": "मूल्य संदर्भ:",
+    "in": "इनपुट",
+    "out": "आउटपुट",
+    "enter_prompt": "मॉडल लागत तुलना देखने के लिए प्रॉम्प्ट दर्ज करें।",
+    "input": "इनपुट",
+    "output": "आउटपुट"
+  },
+  "smart_routing": {
+    "title": "स्मार्ट रूटिंग",
+    "desc": "क्या आप {multiplier}x सस्ता चलाना चाहते हैं? यह प्रॉम्प्ट {model} के लिए उपयुक्त है।",
+    "switch_save": "बदलें और बचाएं"
+  },
+  "share": {
+    "copy_link": "शेयर लिंक कॉपी करें",
+    "share_estimate": "अनुमान शेयर करें",
+    "link_copied": "लिंक कॉपी हो गया!"
+  },
+  "footer": {
+    "tagline": "प्री-फ्लाइट LLM लागत कैलकुलेटर",
+    "tools": "टूल्स",
+    "company": "कंपनी",
+    "legal": "कानूनी"
+  },
+  "common": {
+    "loading": "लोड हो रहा है...",
+    "search": "खोजें...",
+    "close": "बंद करें",
+    "copy": "कॉपी करें",
+    "copied": "कॉपी हो गया!",
+    "error": "कुछ गलत हुआ।",
+    "try_again": "फिर कोशिश करें"
+  },
+  "video_planner": {
+    "shell": {
+      "title": "Video Token Budget Planner",
+      "description": "Estimate and compare AI video processing costs across providers.",
+      "mode_simple": "Simple",
+      "mode_advanced": "Advanced",
+      "config_title": "Configuration",
+      "analysis_title": "Visual Analysis",
+      "no_video_title": "No video analyzed yet",
+      "no_video_description": "Upload a file or paste a URL on the left to start planning your token budget and comparing provider costs.",
+      "privacy_title": "Privacy & Security",
+      "privacy_description": "Tokensense is a client-side tool. Your video data is processed locally in your browser for file uploads. API keys are stored in your browser's localStorage and are never sent to our servers. External URL analysis is performed via a secure proxy that does not store your content.",
+      "methodology_title": "Calculation Methodology",
+      "methodology_description": "Estimates are based on published tokenization rates for Gemini, Claude, and GPT-4o models. Actual costs may vary slightly based on specific prompt overhead and provider-side adjustments."
+    },
+    "input": {
+      "upload_title": "Upload a video file",
+      "upload_description": "Drag and drop or click to browse",
+      "upload_limit": "MP4, MOV, WEBM, MKV (Up to 2GB)",
+      "url_divider": "Or process from URL",
+      "url_placeholder": "Paste YouTube, Vimeo, or direct video link...",
+      "analyze_button": "Analyze",
+      "error_title": "Analysis Failed",
+      "loading_text": "Extracting metadata & analyzing video streams..."
+    },
+    "metadata": {
+      "duration": "Duration",
+      "resolution": "Resolution",
+      "fps": "FPS",
+      "audio": "Audio",
+      "size": "Size",
+      "audio_included": "Included",
+      "audio_none": "None",
+      "res_4k": "4K (Ultra HD)",
+      "res_1080p": "1080p (Full HD)",
+      "res_720p": "720p (HD)",
+      "res_480p": "480p (SD)"
+    },
+    "config": {
+      "title": "Parameters",
+      "description": "Adjust sampling and context settings",
+      "i_want_to": "I want to...",
+      "sampling_rate": "Sampling Rate (FPS)",
+      "sampling_hint": "Higher FPS increases visual detail but significantly increases token cost.",
+      "sampling_recommendation": "1 FPS is recommended for most tasks.",
+      "prompt_tokens": "Prompt Tokens",
+      "tokens_unit": "tokens",
+      "process_audio": "Process Audio",
+      "process_audio_desc": "Include audio stream in analysis"
+    },
+    "results": {
+      "title": "Analysis Results",
+      "footprint": "Estimated footprint: {tokens}",
+      "reset": "Reset",
+      "cost_comparison": "Cost Comparison",
+      "measure_exactly": "Measure Exactly",
+      "estimate_mode": "Estimate Mode",
+      "pricing_disclaimer": "Pricing last updated: March 2026. Includes input tokens only. Output costs vary by response length."
+    },
+    "keys": {
+      "title": "API Keys",
+      "privacy_title": "Privacy First",
+      "privacy_description": "Keys are saved in your browser's localStorage only. They are never sent to our servers. All provider calls happen directly from your browser.",
+      "get_key": "Get key ↗",
+      "save": "Save",
+      "saved": "Saved",
+      "clear_all": "Clear all saved keys",
+      "clear_all_confirm": "Are you sure you want to clear all saved API keys?",
+      "exact_measure_hint": "Connect a key to enable Exact Measurement mode."
+    },
+    "recommendation": {
+      "strategy_label": "Recommended Strategy",
+      "tips_label": "Optimization Tips"
+    },
+    "table": {
+      "col_model": "Model",
+      "col_cost": "Cost",
+      "col_status": "Status",
+      "best_value": "Best Value",
+      "ready": "Ready"
+    }
+  }
+}

@@ -21,8 +21,12 @@ import { ScenarioPresets } from "@/components/ScenarioPresets";
 import { SamplePromptSelection } from "@/components/SamplePromptSelection";
 import { TermTooltip } from "@/components/TermTooltip";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export default function PromptEditor() {
+    const t = useTranslations("calculator");
+    const tCommon = useTranslations("common");
+
     const {
         systemPrompt,
         userPrompt,
@@ -188,12 +192,15 @@ export default function PromptEditor() {
 
                 const savingsPer1k = (tokensSaved / 1_000_000) * pricePer1M * 1000;
 
-                setSavingsMessage(`You just saved $${savingsPer1k.toFixed(3)} per 1k runs! (${tokensSaved} tokens trimmed)`);
+                setSavingsMessage(t("saved_message", { 
+                    savings: savingsPer1k.toFixed(3), 
+                    tokens: tokensSaved 
+                }));
 
                 setTimeout(() => setSavingsMessage(null), 5000);
             });
         } else {
-            setSavingsMessage("Already fully optimized! No tokens to trim.");
+            setSavingsMessage(t("fully_optimized"));
             setTimeout(() => setSavingsMessage(null), 3000);
         }
     };
@@ -216,29 +223,29 @@ export default function PromptEditor() {
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm" className="h-11 md:h-8 px-4 md:px-3 gap-2 border-indigo-500/30 hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors">
                                 <Scissors className="h-4 w-4 md:h-3.5 md:w-3.5" />
-                                <span className="text-sm md:text-xs font-semibold md:font-medium">Token Diet (Compress)</span>
+                                <span className="text-sm md:text-xs font-semibold md:font-medium">{t("step_compress")}</span>
                                 <ChevronDown className="h-4 w-4 md:h-3 md:w-3 opacity-50" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start" className="w-64 md:w-56">
                             <DropdownMenuItem onClick={() => handleCompress("basic")} className="cursor-pointer flex flex-col items-start py-3 md:py-2 min-h-[52px] md:min-h-0">
                                 <div className="flex items-center font-medium">
-                                    <Scissors className="mr-2 w-4 h-4 md:w-3.5 md:h-3.5" /> Basic Compress
+                                    <Scissors className="mr-2 w-4 h-4 md:w-3.5 md:h-3.5" /> {t("compress_basic")}
                                 </div>
-                                <span className="text-[11px] md:text-xs text-muted-foreground mt-1">Strips whitespace & newlines. Minifies JSON. Very Safe.</span>
+                                <span className="text-[11px] md:text-xs text-muted-foreground mt-1">{t("compress_basic_desc")}</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleCompress("advanced")} className="cursor-pointer flex flex-col items-start py-3 md:py-2 min-h-[52px] md:min-h-0 group">
                                 <div className="flex items-center font-medium text-amber-500 group-hover:text-amber-400">
-                                    <Sparkles className="mr-2 w-4 h-4 md:w-3.5 md:h-3.5" /> Advanced Compress
+                                    <Sparkles className="mr-2 w-4 h-4 md:w-3.5 md:h-3.5" /> {t("compress_advanced")}
                                 </div>
-                                <span className="text-[11px] md:text-xs text-muted-foreground mt-1">Strips markdown structure and code comments. Check output carefully.</span>
+                                <span className="text-[11px] md:text-xs text-muted-foreground mt-1">{t("compress_advanced_desc")}</span>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
 
                     {savingsMessage && (
                         <span className="text-[10px] md:text-xs font-medium text-green-500 bg-green-500/10 px-2.5 py-1 rounded-md ml-2 animate-in fade-in zoom-in duration-300">
-                            Success {savingsMessage}
+                            {t("optimization_success")} {savingsMessage}
                         </span>
                     )}
                 </div>
@@ -252,7 +259,7 @@ export default function PromptEditor() {
 
             {/* User Prompt */}
             <div className="space-y-2">
-                <div className="text-xs font-mono text-[#00dcb4] uppercase tracking-wider mb-2">Step 1 — Paste your prompt</div>
+                <div className="text-xs font-mono text-[#00dcb4] uppercase tracking-wider mb-2">{t("step1_label")}</div>
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <Label htmlFor="user-prompt" className="text-sm font-medium text-muted-foreground hidden">     
@@ -260,14 +267,14 @@ export default function PromptEditor() {
                         </Label>
                     </div>
                     <Badge variant="secondary" className="font-mono text-[10px] md:text-xs">
-                        {countWords(userPrompt)} words - <TermTooltip termKey="tokens" iconOnly />{formatTokens(countTokensSync(userPrompt))} tokens
+                        {countWords(userPrompt)} {t("words")} - <TermTooltip termKey="tokens" iconOnly />{formatTokens(countTokensSync(userPrompt))} {t("output_tokens")}
                     </Badge>
                 </div>
                 <div className="relative">
                     <Textarea
                         ref={userPromptInputRef}
                         id="user-prompt"
-                        placeholder="Write your prompt here..."       
+                        placeholder={t("paste_placeholder")}       
                         value={userPrompt}
                         onChange={(e) => setUserPrompt(e.target.value)}
                         className="min-h-[200px] md:min-h-[250px] resize-y bg-background/50 border-border/50 font-mono text-base md:text-sm transition-colors focus:border-primary/50 pb-14 rounded-xl"
@@ -286,13 +293,13 @@ export default function PromptEditor() {
                                             : "text-muted-foreground hover:text-plasma-400 hover:bg-plasma-500/10 border border-plasma-500/30 hover:border-plasma-400 shadow-sm bg-card"
                                         )}
                                         onClick={() => toggleDictation("user")}
-                                        aria-label="Use voice to dictate your prompt"
+                                        aria-label={t("dictate_tooltip")}
                                     >
                                         <Mic className="w-6 h-6 md:w-5 md:h-5" />
                                     </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                    <p>Use voice to dictate your prompt</p>
+                                    <p>{t("dictate_tooltip")}</p>
                                 </TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
@@ -309,7 +316,7 @@ export default function PromptEditor() {
                 <div className="w-5 h-5 flex items-center justify-center rounded-full bg-plasma-500/10 border border-plasma-500/20">
                   {showSystemPrompt ? '-' : '+'}
                 </div>
-                {showSystemPrompt ? 'Hide System Prompt' : 'Add System Prompt (optional)'}
+                {showSystemPrompt ? t("hide_system_prompt") : t("add_system_prompt")}
             </button>
 
             {/* System Prompt */}
@@ -324,17 +331,17 @@ export default function PromptEditor() {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Label htmlFor="system-prompt" className="text-sm font-medium text-muted-foreground">
-                                System Prompt <span className="text-muted-foreground/50">(optional)</span>      
+                                {t("system_prompt_label")} <span className="text-muted-foreground/50">({tCommon("optional")})</span>      
                             </Label>
                         </div>
                         <Badge variant="secondary" className="font-mono text-[10px] md:text-xs">
-                            {countWords(systemPrompt)} words - <TermTooltip termKey="tokens" iconOnly />{formatTokens(countTokensSync(systemPrompt))} tokens
+                            {countWords(systemPrompt)} {t("words")} - <TermTooltip termKey="tokens" iconOnly />{formatTokens(countTokensSync(systemPrompt))} {t("output_tokens")}
                         </Badge>
                     </div>
                     <div className="relative">
                         <Textarea
                             id="system-prompt"
-                            placeholder="You are a helpful assistant..."
+                            placeholder={t("system_placeholder")}
                             value={systemPrompt}
                             onChange={(e) => setSystemPrompt(e.target.value)}
                             className="min-h-[120px] md:min-h-[100px] resize-y bg-background/50 border-border/50 font-mono text-base md:text-sm transition-colors focus:border-primary/50 pb-14 rounded-xl"
@@ -353,13 +360,13 @@ export default function PromptEditor() {
                                                 : "text-muted-foreground hover:text-plasma-400 hover:bg-plasma-500/10 border border-plasma-500/30 hover:border-plasma-400 shadow-sm bg-card"
                                             )}
                                             onClick={() => toggleDictation("system")}
-                                            aria-label="Use voice to dictate your prompt"
+                                            aria-label={t("dictate_tooltip")}
                                         >
                                             <Mic className="w-6 h-6 md:w-5 md:h-5" />
                                         </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        <p>Use voice to dictate your prompt</p>
+                                        <p>{t("dictate_tooltip")}</p>
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
@@ -372,13 +379,13 @@ export default function PromptEditor() {
             {fileText && (
                 <div className="rounded-xl border border-border/50 bg-muted/30 p-4">
                     <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground font-medium flex items-center gap-2">Attached file</span>       
+                        <span className="text-sm text-muted-foreground font-medium flex items-center gap-2">{t("attached_file")}</span>       
                         <Badge variant="secondary" className="font-mono text-[10px] md:text-xs">
-                            {formatTokens(countTokensSync(fileText))} tokens
+                            {formatTokens(countTokensSync(fileText))} {t("output_tokens")}
                         </Badge>
                     </div>
                     <p className="text-xs text-muted-foreground/70 mt-1">
-                        {fileText.length.toLocaleString()} characters extracted
+                        {fileText.length.toLocaleString()} {t("characters_extracted")}
                     </p>
                 </div>
             )}
@@ -387,7 +394,7 @@ export default function PromptEditor() {
             <div className="space-y-4 pt-2">
                 <div className="flex items-center justify-between">
                     <Label className="text-sm font-semibold text-muted-foreground flex items-center gap-1.5 uppercase tracking-wider">       
-                        Output Length
+                        {t("output_length")}
                         <TermTooltip termKey="outputTokens" iconOnly />
                     </Label>
                     <div className="flex items-center gap-2">
@@ -400,7 +407,7 @@ export default function PromptEditor() {
                             onChange={(e) => setExpectedOutputTokens(Math.max(0, parseInt(e.target.value) || 0))}
                             className="w-24 h-11 md:h-8 md:w-20 rounded-lg border border-border/50 bg-background/50 px-3 py-1 text-right font-mono text-base md:text-sm focus:ring-1 ring-plasma-500/30 focus:border-plasma-500/50 outline-none"
                         />
-                        <span className="text-xs font-semibold text-muted-foreground uppercase">tokens</span>
+                        <span className="text-xs font-semibold text-muted-foreground uppercase">{t("output_tokens")}</span>
                     </div>
                 </div>
                 <div className="px-1 py-4">
@@ -429,10 +436,10 @@ export default function PromptEditor() {
                 className="w-full h-14 rounded-2xl bg-plasma-500 hover:bg-plasma-400 text-slate-950 font-bold text-lg shadow-lg shadow-plasma-500/20 gap-2"
               >
                 <Zap className="w-5 h-5 fill-slate-950" />
-                Calculate & View Results
+                {t("calculate_button")}
               </Button>
               <p className="text-center text-[10px] text-muted-foreground/50 uppercase tracking-widest mt-3 font-semibold">
-                Estimates update in real-time
+                {t("updates_realtime")}
               </p>
             </div>
         </div>

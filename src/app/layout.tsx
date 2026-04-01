@@ -1,4 +1,4 @@
-﻿import type { Metadata, Viewport } from "next";
+import type { Viewport, Metadata } from "next";
 import Script from "next/script";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -8,6 +8,8 @@ import LoadingScreen from "@/components/LoadingScreen";
 import ThemeProvider from "@/components/ThemeProvider";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import { AuthProvider } from "@/components/AuthProvider";
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
 
 const inter = Inter({
   variable: "--font-inter",
@@ -15,35 +17,14 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.tokensense-ai.com'),
-  title: {
-    default: "Tokensense-Ai - Free LLM Token Cost Calculator",
-    template: "%s | Tokensense-Ai" 
-  },
-  description:
-    "Estimate LLM API costs before you send a request. Tokensense-Ai is a free, client-side token cost calculator for GPT-4o, Claude, Gemini, and more. No account needed.",
-  keywords: "LLM token cost calculator, token cost estimator, GPT-4o pricing, Claude API cost, AI token counter, OpenAI token calculator, prompt token count, LLM API pricing tool",
-  manifest: "/manifest.json",
-  icons: {
-    icon: [
-      { url: "/favicon.png", sizes: "32x32" },
-      { url: "/icon.svg", type: "image/svg+xml" },
-    ],
-    shortcut: "/favicon.png",
-    apple: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-    ],
+  metadataBase: new URL("https://www.tokensense-ai.com"),
+  alternates: {
+    types: {
+      'text/plain': '/llms.txt',
+    },
   },
   other: {
-    "apple-mobile-web-app-title": "Tokensense-Ai",
-    "apple-mobile-web-app-capable": "yes",
-    "apple-mobile-web-app-status-bar-style": "black-translucent",
-  },
-  openGraph: {
-    title: "Tokensense-Ai - Free LLM Token Cost Calculator",
-    description:
-      "Know your token cost before every API call. Supports GPT-4o, Claude, Gemini & more. Free, private, client-side.",
-    type: "website",
+    'llms-content': '/llms.txt',
   },
 };
 
@@ -51,16 +32,18 @@ export const viewport: Viewport = {
   themeColor: "#09090b",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1, // M4: Prevent viewport zoom on input focus
+  maximumScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
+    <html lang="en" dir="ltr" suppressHydrationWarning>
       <head>
         {/* Google Analytics */}
         <Script
@@ -79,56 +62,72 @@ export default function RootLayout({
             `,
           }}
         />
-      </head>
-      <body className={`${inter.variable} font-sans antialiased`}>
-        <AuthProvider>
-          <ThemeProvider>
-            <LoadingScreen />
-            <PWAInstallPrompt />
-            {children}
-            <Footer />
-            <BackToTop />
-          </ThemeProvider>
-        </AuthProvider>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "WebApplication",
-              "name": "Tokensense-Ai",
-              "description": "A free, client-side pre-flight LLM token cost calculator. Estimate API costs for GPT-4o, Claude, Gemini, and more before sending any request.",
-              "applicationCategory": "DeveloperApplication",
-              "operatingSystem": "Any",
-              "offers": {
-                "@type": "Offer",
-                "price": "0",
-                "priceCurrency": "USD"
-              },
-              "featureList": [
-                "Real-time token counting",
-                "LLM API cost estimation",
-                "Multi-model support",
-                "File context upload",
-                "Agentic loop cost simulator",
-                "100% client-side, private"
+              "@graph": [
+                {
+                  "@type": "WebApplication",
+                  "name": "Tokensense-Ai",
+                  "description": "A free, client-side pre-flight LLM token cost calculator.",
+                  "applicationCategory": "DeveloperApplication",
+                  "operatingSystem": "Any",
+                  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+                  "featureList": [
+                    "Real-time token counting",
+                    "LLM API cost estimation",
+                    "Multi-model support",
+                    "File context upload",
+                    "Agentic loop cost simulator",
+                    "100% client-side, private"
+                  ]
+                },
+                {
+                  "@type": "FAQPage",
+                  "mainEntity": [
+                    {
+                      "@type": "Question",
+                      "name": "What counts as one token?",
+                      "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Tokens are pieces of words. In English, 1,000 tokens is approximately 750 words."
+                      }
+                    },
+                    {
+                      "@type": "Question",
+                      "name": "Why do different models charge different rates for the same text?",
+                      "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Each model (GPT-4o, Claude, Gemini) uses a different tokenizer and pricing structure based on its computational complexity."
+                      }
+                    }
+                  ]
+                }
               ]
             })
           }}
         />
+      </head>
+      <body className={`${inter.variable} font-sans antialiased`}>
+        <AuthProvider>
+          <ThemeProvider>
+            <NextIntlClientProvider messages={messages} locale="en">
+              <LoadingScreen />
+              <PWAInstallPrompt />
+              {children}
+              <Footer />
+              <BackToTop />
+            </NextIntlClientProvider>
+          </ThemeProvider>
+        </AuthProvider>
         <script
           dangerouslySetInnerHTML={{
             __html: `
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js').then(
-                    function(registration) {
-                      console.log('ServiceWorker registration successful');
-                    },
-                    function(err) {
-                      console.log('ServiceWorker registration failed: ', err);
-                    }
-                  );
+                  navigator.serviceWorker.register('/sw.js');
                 });
               }
             `,
