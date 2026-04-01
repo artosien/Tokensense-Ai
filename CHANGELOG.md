@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-04-01
+
+### Added
+- Metadata: Global `metadataBase` to resolve absolute URL generation issues (e.g., `localhost:3000` errors in social tags).
+- AI Crawling: Added `llms.txt` alternate links and a custom `llms-content` tag to the root metadata.
+- Infrastructure: Created `src/i18n/request.ts` and `src/lib/i18n/navigation.ts` to support `next-intl` in a flattened routing environment.
+
+### Changed
+- i18n Architecture: **Flattened Routing.** Removed dynamic `[lang]` segments from the file system, moving all pages to the root level for a simpler URL structure.
+- SEO Architecture: Refactored the homepage (`src/app/page.tsx`) to use React Server Components (RSC) for the Hero, Features, About, and FAQ sections. This ensures content is pre-rendered for search bots and improves indexing performance.
+- Localization: Hardcoded the application to a single English (`en`) locale to focus on core growth, while maintaining the underlying i18n infrastructure for future expansion.
+- Next.js Config: Integrated `createNextIntlPlugin` and added `serverExternalPackages` for `@ffprobe-installer/ffprobe` and `fluent-ffmpeg` to ensure Turbopack compatibility.
+
+### Fixed
+- Authentication: Resolved `CLIENT_FETCH_ERROR` by excluding the entire `/api/` path from global redirects in `next.config.ts`.
+- NextAuth: Refined the `NextAuth` handler and `AuthProvider` configuration for better stability in Next.js 16/Turbopack environments.
+- Blog: Updated blog routes and metadata generation to handle the removal of the dynamic `locale` parameter.
+
+### Removed
+- Language Switcher: Excised the `LanguageSwitcher` component and all multi-language UI elements from the `SiteHeader`.
+- Dynamic Routing: Deleted all `[lang]` directory structures in favor of static, root-level pages.
+
 ## [1.5.0] - 2026-03-27
 
 ### Added
