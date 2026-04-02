@@ -341,7 +341,25 @@
     "try_again": "Try again",
     "optional": "optional"
   },
-  "video_planner": {
+    "multimodal": {
+      "gallery_title": "Image Gallery",
+      "add_image": "Add Another Image",
+      "content_type": "Image Content Type",
+      "natural": "Natural Photo",
+      "document": "Document / OCR",
+      "ui": "UI / Screenshot",
+      "task_preset": "Visual Task Preset",
+      "captioning": "Image Captioning (~50 tokens)",
+      "extraction": "Detailed Extraction (~500 tokens)",
+      "vqa": "Visual Q&A (~200 tokens)",
+      "custom": "Custom Response",
+      "context_usage": "Context Window Occupancy",
+      "optimized_res": "Recommended Dimension",
+      "optimized_desc": "Resizing to {width}x{height} would save {percent}% in tokens.",
+      "download_optimized": "Download Optimized Image",
+      "compare_all": "Compare across all Vision models"
+    },
+    "video_planner": {
     "shell": {
       "title": "Video Token Budget Planner",
       "description": "Estimate and compare AI video processing costs across providers.",
@@ -389,7 +407,37 @@
       "prompt_tokens": "Prompt Tokens",
       "tokens_unit": "tokens",
       "process_audio": "Process Audio",
-      "process_audio_desc": "Include audio stream in analysis"
+      "process_audio_desc": "Include audio stream in analysis",
+      "advanced_badge": "Advanced Mode Active",
+      "advanced_description": "Manual control over sampling rates and prompt overhead.",
+      "batch_button": "Batch Estimate",
+      "batch_desc": "Calculate costs for 100+ videos via CSV.",
+      "mode_simple": "Simple Mode",
+      "mode_simple_desc": "Use smart presets for quick estimates.",
+      "mode_advanced": "Advanced Mode",
+      "mode_advanced_desc": "Fine-tune FPS and token overhead.",
+      "compare_button": "Compare Models",
+      "export_pdf": "Export Budget PDF",
+      "export_pdf_desc": "Generate a professional report for clients."
+    },
+    "batch": {
+      "title": "Batch CSV Estimator",
+      "desc": "Calculate costs for entire libraries instantly.",
+      "upload_prompt": "Drop CSV with duration/resolution",
+      "total_estimate": "Bulk Total Estimate",
+      "files_count": "{count} files processed"
+    },
+    "diet": {
+      "title": "Token Diet Optimization",
+      "desc": "Save tokens by reducing visual complexity.",
+      "potential_savings": "Potential Savings",
+      "low_res_tip": "Switch to 480p",
+      "low_fps_tip": "Reduce to 1 FPS"
+    },
+    "comparison": {
+      "title": "Model Price Comparison",
+      "vs": "vs",
+      "cost_diff": "{percent}% difference"
     },
     "results": {
       "title": "Analysis Results",

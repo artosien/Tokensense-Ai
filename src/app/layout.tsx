@@ -23,9 +23,6 @@ export const metadata: Metadata = {
       'text/plain': '/llms.txt',
     },
   },
-  other: {
-    'llms-content': '/llms.txt',
-  },
 };
 
 export const viewport: Viewport = {
@@ -45,6 +42,7 @@ export default async function RootLayout({
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
       <head>
+        <link rel="llms-content" href="/llms.txt" />
         {/* Google Analytics */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-1XGN4X2TEF"

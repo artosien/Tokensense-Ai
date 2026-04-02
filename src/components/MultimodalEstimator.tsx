@@ -1,357 +1,657 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import { useDropzone } from "react-dropzone";
-import { ImageIcon, ArrowRight, Lock, AlertCircle, Sparkles, Settings2, Info } from "lucide-react";
-import { models } from "@/lib/models";
-import { calculateImageTokens } from "@/lib/imageTokenMath";
+import { 
+    ImageIcon, ArrowRight, Lock, AlertCircle, Sparkles, Settings2, Info, 
+    Plus, Trash2, Download, Scale, Gauge, MousePointer2, FileText, Layout,
+    TrendingDown, Upload, MessageSquare, CheckCircle2, ChevronRight, Maximize2,
+    Crop, Target
+} from "lucide-react";
+import { models, ModelConfig } from "@/lib/models";
+import { calculateImageTokens, getVisionOptimization, ImageContentType } from "@/lib/imageTokenMath";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { countTokensSync } from "@/lib/tokenizer";
+
+interface ZoomCrop {
+    id: string;
+    x: number; // percentage 0-100
+    y: number;
+    w: number;
+    h: number;
+}
+
+interface ImageItem {
+    id: string;
+    width: number;
+    height: number;
+    preview: string;
+    fileName: string;
+    contentType: ImageContentType;
+    zoomCrops: ZoomCrop[];
+}
+
+const TASK_PRESETS = {
+    captioning: 50,
+    extraction: 500,
+    vqa: 200,
+    custom: 0
+};
+
+const SWEET_SPOTS = [
+    { model: "GPT-4o", zone: "Under 512x512", reward: "Low-Res Discount (85 tkn)", limit: "2048x2048 max" },
+    { model: "Gemini 1.5", zone: "Under 384x384", reward: "Flat Frame (258 tkn)", limit: "Tiled at 768px" },
+    { model: "Claude 3.5", zone: "Under 1MP", reward: "Variable (avg 1.6k)", limit: "1568x1568 max" },
+];
+
+// ─── Tile Overlay Component ───────────────────────────────────────────────────
+
+const TileOverlay = ({ width, height, model, detailMode }: { width: number, height: number, model: ModelConfig, detailMode: string }) => {
+    const strategy = model.visionPricing?.strategy;
+    
+    if (!strategy) return null;
+
+    // OpenAI 512px Tiling Logic
+    if (strategy === "openai-tiles" && detailMode === 'high') {
+        let scaledW = width;
+        let scaledH = height;
+
+        if (Math.max(scaledW, scaledH) > 2048) {
+            const ratio = 2048 / Math.max(scaledW, scaledH);
+            scaledW = Math.round(scaledW * ratio);
+            scaledH = Math.round(scaledH * ratio);
+        }
+
+        const shortSide = Math.min(scaledW, scaledH);
+        if (shortSide > 768) {
+            const ratio = 768 / shortSide;
+            scaledW = Math.round(scaledW * ratio);
+            scaledH = Math.round(scaledH * ratio);
+        }
+
+        const cols = Math.ceil(scaledW / 512);
+        const rows = Math.ceil(scaledH / 512);
+
+        return (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl border border-white/10">
+                <div className="grid w-full h-full" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)`, gridTemplateRows: `repeat(${rows}, 1fr)` }}>
+                    {Array.from({ length: cols * rows }).map((_, i) => (
+                        <div key={i} className="border-[0.5px] border-[#00dcb4]/40 bg-[#00dcb4]/5 flex flex-col items-center justify-center p-1">
+                            <span className="text-[8px] font-mono text-[#00dcb4] font-bold uppercase tracking-tighter">GPT Tile {i + 1}</span>
+                            <span className="text-[9px] font-bold text-white/80">170 tkn</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    // Gemini 768px Tiling Logic
+    if (strategy === "gemini-flat") {
+        const isMini = width <= 384 && height <= 384;
+        const cols = isMini ? 1 : Math.ceil(width / 768);
+        const rows = isMini ? 1 : Math.ceil(height / 768);
+
+        return (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl border border-white/10">
+                <div className="grid w-full h-full" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)`, gridTemplateRows: `repeat(${rows}, 1fr)` }}>
+                    {Array.from({ length: cols * rows }).map((_, i) => (
+                        <div key={i} className="border-[0.5px] border-cyan-400/40 bg-cyan-400/5 flex flex-col items-center justify-center p-1">
+                            <span className="text-[8px] font-mono text-cyan-400 uppercase tracking-tighter">
+                                {isMini ? "Low-Res Frame" : `Gemini Tile ${i + 1}`}
+                            </span>
+                            <span className="text-[9px] font-bold text-white/80">258 tkn</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    return null;
+};
+
+// ─── Main Multimodal Tool ─────────────────────────────────────────────────────
 
 export default function MultimodalEstimator() {
+    const t = useTranslations("multimodal");
     const visionModels = models.filter((m) => m.visionPricing);
     const [selectedModelId, setSelectedModelId] = useState(visionModels.length > 0 ? visionModels[0].id : "");
     const [detailMode, setDetailMode] = useState<"low" | "high">("high");
-
-    const [imageWidth, setImageWidth] = useState<number | null>(null);
-    const [imageHeight, setImageHeight] = useState<number | null>(null);
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const [fileName, setFileName] = useState<string | null>(null);
+    const [images, setImages] = useState<ImageItem[]>([]);
+    const [taskPreset, setTaskPreset] = useState<keyof typeof TASK_PRESETS>("captioning");
+    const [promptText, setPromptText] = useState("");
+    const [isDenseText, setIsDenseText] = useState(false);
+    const [customOutputTokens, setCustomOutputTokens] = useState(0);
     const [error, setError] = useState<string | null>(null);
-    const [isSample, setIsSample] = useState(true);
 
-    // Preload sample image
-    useEffect(() => {
-        const sampleUrl = "/hero-banner.jpg";
-        setImagePreview(sampleUrl);
-        setFileName("sample-image.jpg");
-        
-        const img = new window.Image();
-        img.onload = () => {
-            setImageWidth(img.width);
-            setImageHeight(img.height);
-        };
-        img.src = sampleUrl;
-    }, []);
+    // Zooming state
+    const [isZoomMode, setIsZoomMode] = useState(false);
+    const [activeImageId, setActiveImageId] = useState<string | null>(null);
+    const [dragStart, setDragStart] = useState<{ x: number, y: number } | null>(null);
+    const [dragCurrent, setDragCurrent] = useState<{ x: number, y: number } | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     const model = visionModels.find((m) => m.id === selectedModelId) || visionModels[0];
 
     const onDrop = useCallback((acceptedFiles: File[], fileRejections: any[]) => {
         setError(null);
-        
-        if (fileRejections.length > 0) {
-            const rejection = fileRejections[0];
-            if (rejection.file.size > 10 * 1024 * 1024) {
-                setError("File is too large. Max size is 10MB.");
-            } else {
-                setError("Unsupported file format. Please use PNG, JPG, WEBP, or GIF.");
-            }
-            return;
-        }
-
-        const file = acceptedFiles[0];
-        if (!file) return;
-
-        setFileName(file.name);
-        setIsSample(false);
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const dataUrl = e.target?.result as string;
-            setImagePreview(dataUrl);
-
-            const img = new window.Image();
-            img.onload = () => {
-                setImageWidth(img.width);
-                setImageHeight(img.height);
+        acceptedFiles.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const dataUrl = e.target?.result as string;
+                const img = new window.Image();
+                img.onload = () => {
+                    setImages(prev => [
+                        ...prev.filter(i => i.id !== 'sample'),
+                        {
+                            id: Math.random().toString(36).substr(2, 9),
+                            width: img.width,
+                            height: img.height,
+                            preview: dataUrl,
+                            fileName: file.name,
+                            contentType: "natural",
+                            zoomCrops: []
+                        }
+                    ]);
+                };
+                img.src = dataUrl;
             };
-            img.src = dataUrl;
-        };
-        reader.readAsDataURL(file);
+            reader.readAsDataURL(file);
+        });
     }, []);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
-        accept: {
-            "image/jpeg": [".jpg", ".jpeg"],
-            "image/png": [".png"],
-            "image/webp": [".webp"],
-            "image/gif": [".gif"],
-        },
-        maxFiles: 1,
-        maxSize: 10 * 1024 * 1024, // 10MB
+        accept: { "image/*": [".jpg", ".jpeg", ".png", ".webp", ".gif"] },
+        maxSize: 10 * 1024 * 1024,
     });
 
-    // Calculate Token Estimations
-    const result = (imageWidth && imageHeight && model)
-        ? calculateImageTokens(imageWidth, imageHeight, model, detailMode)
-        : { tokens: 0, scaledWidth: 0, scaledHeight: 0, tiles: 0 };
+    const handleMouseDown = (e: React.MouseEvent, imgId: string) => {
+        if (!isZoomMode) return;
+        const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        setDragStart({ x, y });
+        setDragCurrent({ x, y });
+        setActiveImageId(imgId);
+    };
 
-    const estimatedCost = model ? (result.tokens / 1_000_000) * model.inputPricePer1M : 0;
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (!isZoomMode || !dragStart) return;
+        const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        setDragCurrent({ x, y });
+    };
+
+    const handleMouseUp = () => {
+        if (!isZoomMode || !dragStart || !dragCurrent || !activeImageId) {
+            setDragStart(null);
+            setDragCurrent(null);
+            return;
+        }
+
+        const x = Math.min(dragStart.x, dragCurrent.x);
+        const y = Math.min(dragStart.y, dragCurrent.y);
+        const w = Math.abs(dragStart.x - dragCurrent.x);
+        const h = Math.abs(dragStart.y - dragCurrent.y);
+
+        if (w > 2 && h > 2) {
+            setImages(prev => prev.map(img => {
+                if (img.id === activeImageId) {
+                    return {
+                        ...img,
+                        zoomCrops: [...img.zoomCrops, { id: Math.random().toString(), x, y, w, h }]
+                    };
+                }
+                return img;
+            }));
+        }
+
+        setDragStart(null);
+        setDragCurrent(null);
+    };
+
+    const removeCrop = (imgId: string, cropId: string) => {
+        setImages(prev => prev.map(img => {
+            if (img.id === imgId) {
+                return { ...img, zoomCrops: img.zoomCrops.filter(c => c.id !== cropId) };
+            }
+            return img;
+        }));
+    };
+
+    const totals = useMemo(() => {
+        let inputTokensCount = 0;
+        let zoomTokensCount = 0;
+        
+        const perImageResults = images.map(img => {
+            const res = calculateImageTokens(img.width, img.height, model, detailMode, img.contentType);
+            inputTokensCount += res.tokens;
+            
+            // Agentic Zoom logic: Each crop is treated as a high-res patch (258 tokens for Gemini, 170 for GPT)
+            const zoomTokenRate = model.visionPricing?.strategy === 'gemini-flat' ? 258 : 170;
+            const imageZoomTokens = img.zoomCrops.length * zoomTokenRate;
+            zoomTokensCount += imageZoomTokens;
+
+            return { ...img, ...res, imageZoomTokens };
+        });
+
+        const promptTokens = promptText ? countTokensSync(promptText) : 0;
+        const totalInput = inputTokensCount + promptTokens + zoomTokensCount;
+        const outputTokens = taskPreset === "custom" ? customOutputTokens : TASK_PRESETS[taskPreset];
+        const totalTokens = totalInput + outputTokens;
+        const totalCost = (totalInput / 1_000_000) * model.inputPricePer1M + (outputTokens / 1_000_000) * model.outputPricePer1M;
+
+        return { inputTokens: inputTokensCount, zoomTokens: zoomTokensCount, promptTokens, totalInput, outputTokens, totalTokens, totalCost, perImageResults };
+    }, [images, model, detailMode, taskPreset, customOutputTokens, promptText]);
+
+    const contextPercent = Math.min(100, (totals.totalTokens / model.maxContext) * 100);
 
     return (
-        <>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Controls Panel */}
-                <div className="space-y-6">
-                    <Card className="shadow-xl border-white/5 bg-slate-900/50 backdrop-blur-md overflow-hidden relative">
-                        {isDragActive && (
-                            <div className="absolute inset-0 z-50 bg-indigo-600/20 border-4 border-dashed border-indigo-500 rounded-xl animate-in fade-in duration-200 flex items-center justify-center backdrop-blur-sm">
-                                <div className="text-center">
-                                    <Sparkles className="w-12 h-12 text-indigo-400 mx-auto mb-2 animate-bounce" />
-                                    <p className="text-lg font-bold text-white uppercase tracking-tighter">Drop image to analyze</p>
-                                </div>
-                            </div>
-                        )}
+        <div className="space-y-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                {/* ── Left Column: Configuration & Gallery ── */}
+                <div className="lg:col-span-7 space-y-6">
+                    
+                    {/* Primary Upload Zone */}
+                    <Card className="shadow-2xl border-indigo-500/20 bg-indigo-500/5 backdrop-blur-md overflow-hidden relative">
                         <CardHeader className="pb-4">
                             <div className="flex items-center justify-between">
-                                <CardTitle className="text-xs font-bold uppercase tracking-widest text-slate-400">Upload Image</CardTitle>
-                                <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                                    Processed Locally
+                                <CardTitle className="text-xs font-black uppercase tracking-widest text-indigo-400 flex items-center gap-2">
+                                    <Upload className="w-4 h-4" />
+                                    Master Upload Zone
+                                </CardTitle>
+                                <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    Client-Side Analysis
                                 </div>
                             </div>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div
-                                {...getRootProps()}
-                                className={`relative flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-2xl transition-all duration-300 cursor-pointer group
-                                    ${isDragActive
-                                        ? "border-indigo-500 bg-indigo-500/10"
-                                        : "border-white/10 bg-white/5 hover:bg-indigo-500/5 hover:border-indigo-500/40"}`}
-                            >
+                        <CardContent>
+                            <div {...getRootProps()} className={cn(
+                                "relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-2xl transition-all duration-500 cursor-pointer group",
+                                isDragActive ? "border-indigo-400 bg-indigo-500/20" : "border-white/10 bg-white/5 hover:border-indigo-500/40"
+                            )}>
                                 <input {...getInputProps()} />
-                                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
-                                    <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-                                        <ImageIcon className="w-8 h-8 text-indigo-400" />
-                                    </div>
-                                    <p className="mb-1 text-base text-slate-200 font-bold">
-                                        <span className="text-indigo-400">Click to upload</span> or drag image
-                                    </p>
-                                    <p className="text-xs text-slate-500 font-medium">PNG, JPG, WEBP, or GIF (Max 10MB)</p>
+                                <div className="text-center">
+                                    <ImageIcon className="w-10 h-10 text-indigo-400 mx-auto mb-4 group-hover:scale-110 transition-transform" />
+                                    <p className="text-lg text-slate-200 font-black tracking-tight uppercase">Analyze Multimodal Input</p>
+                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Drag images or click to browse</p>
                                 </div>
                             </div>
+                        </CardContent>
+                    </Card>
 
-                            {error && (
-                                <div className="flex items-center gap-2 text-xs font-bold text-red-400 bg-red-500/10 p-3 rounded-xl border border-red-500/20 animate-in shake-1 duration-300">
-                                    <AlertCircle className="w-4 h-4" />
-                                    {error}
+                    {/* Agentic Vision Section */}
+                    <Card className="border-cyan-500/20 bg-cyan-500/5 overflow-hidden">
+                        <CardHeader className="pb-4">
+                            <div className="flex items-center justify-between">
+                                <CardTitle className="text-xs font-black uppercase tracking-widest text-cyan-400 flex items-center gap-2">
+                                    <Target className="w-4 h-4" />
+                                    Agentic Vision Simulation
+                                </CardTitle>
+                                <div className="flex items-center space-x-2">
+                                    <Switch id="zoom-mode" checked={isZoomMode} onCheckedChange={setIsZoomMode} />
+                                    <Label htmlFor="zoom-mode" className="text-[10px] font-black uppercase text-slate-500 cursor-pointer">Enable Zoom Mode</Label>
                                 </div>
-                            )}
+                            </div>
+                            <CardDescription className="text-[10px] uppercase font-bold text-slate-500">
+                                Simulate Gemini 3 Flash / GPT-4o "Attention Zooms." Draw boxes on your images to calculate extra patch costs.
+                            </CardDescription>
+                        </CardHeader>
+                        {isZoomMode && (
+                            <CardContent>
+                                <div className="flex items-center gap-2 p-3 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-[10px] font-bold text-cyan-400 animate-in fade-in">
+                                    <Info className="w-3.5 h-3.5" />
+                                    INSTRUCTIONS: Draw a box over any image below to zoom in on specific details.
+                                </div>
+                            </CardContent>
+                        )}
+                        
+                        {/* Agentic Vision Explanation */}
+                        <div className="px-6 pb-6 pt-2 border-t border-cyan-500/10 bg-cyan-500/[0.02]">
+                            <div className="space-y-6">
+                                <div className="space-y-2">
+                                    <h4 className="text-[11px] font-black text-cyan-400 uppercase tracking-widest">What is Agentic Vision Simulation?</h4>
+                                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                                        In 2026, leading AI development has moved from static analysis to <strong>Agentic Vision</strong>. Models like GPT-5 and Gemini 3.1 no longer just process a single image. Instead, agents autonomously decide to crop, zoom, and re-examine specific regions to achieve higher accuracy. This isn&apos;t a single call; it&apos;s a multi-turn visual conversation.
+                                    </p>
+                                </div>
 
-                            {imageWidth && imageHeight && (
-                                <div className={`flex items-center justify-between p-3 rounded-xl border animate-in slide-in-from-bottom-2 duration-500 ${isSample ? 'bg-amber-500/10 border-amber-500/20' : 'bg-indigo-500/10 border-indigo-500/20'}`}>
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider">Active File</span>
-                                        <span className="text-sm font-bold text-slate-200 truncate max-w-[180px]">{fileName}</span>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <h5 className="text-[9px] font-black text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
+                                            <div className="w-1 h-1 rounded-full bg-cyan-500" />
+                                            Cost Multiplication
+                                        </h5>
+                                        <ul className="space-y-1.5 text-[10px] text-slate-500 leading-tight">
+                                            <li><strong className="text-slate-400">Discovery Pass:</strong> The initial low-res look at the whole scene.</li>
+                                            <li><strong className="text-slate-400">Focus Crop:</strong> A high-detail zoom on a specific detail.</li>
+                                            <li><strong className="text-slate-400">Recursive Scan:</strong> Agents may perform 3-5 crops per image.</li>
+                                        </ul>
                                     </div>
-                                    {isSample && (
-                                        <span className="text-[10px] font-black bg-amber-500 text-black px-2 py-0.5 rounded-md">SAMPLE</span>
-                                    )}
-                                    <div className="text-right">
-                                        <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider block">Native Res</span>
-                                        <span className="text-sm font-mono font-bold text-indigo-400">{imageWidth}x{imageHeight}</span>
+                                    <div className="space-y-2">
+                                        <h5 className="text-[9px] font-black text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
+                                            <div className="w-1 h-1 rounded-full bg-cyan-500" />
+                                            Why Simulate?
+                                        </h5>
+                                        <ul className="space-y-1.5 text-[10px] text-slate-500 leading-tight">
+                                            <li><strong className="text-slate-400">Token Accumulation:</strong> High-res tiles "weight" the entire history.</li>
+                                            <li><strong className="text-slate-400">ROI Calculation:</strong> Find the point where more zooms drain ROI.</li>
+                                            <li><strong className="text-slate-400">Latency vs Precision:</strong> Visualize the cost of a "deep look."</li>
+                                        </ul>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </Card>
+
+                    {/* Multimodal Prompt Buffer */}
+                    <Card className="border-white/5 bg-slate-900/50">
+                        <CardHeader className="pb-4">
+                            <CardTitle className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                                <MessageSquare className="w-4 h-4 text-indigo-400" />
+                                Multimodal Prompt Buffer
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <Textarea 
+                                placeholder="Describe the image or provide instructions... (e.g., 'Extract all text from this invoice')"
+                                className="min-h-[100px] bg-white/5 border-white/10 text-sm font-medium focus-visible:ring-indigo-500 rounded-xl"
+                                value={promptText}
+                                onChange={(e) => setPromptText(e.target.value)}
+                            />
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="flex items-center space-x-2">
+                                        <Switch id="dense-text" checked={isDenseText} onCheckedChange={setIsDenseText} />
+                                        <Label htmlFor="dense-text" className="text-[10px] font-black uppercase tracking-widest text-slate-500 cursor-pointer">Dense Text / OCR</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Switch id="detail-toggle" checked={detailMode === 'high'} onCheckedChange={(v) => setDetailMode(v ? 'high' : 'low')} />
+                                        <Label htmlFor="detail-toggle" className="text-[10px] font-black uppercase tracking-widest text-slate-500 cursor-pointer">High Detail</Label>
+                                    </div>
+                                </div>
+                                <div className="text-[10px] font-mono font-bold text-indigo-400 uppercase">
+                                    {totals.promptTokens.toLocaleString()} text tokens
+                                </div>
+                            </div>
+                            {isDenseText && (
+                                <div className="flex items-center gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[10px] font-bold text-amber-400 animate-in fade-in slide-in-from-left-2">
+                                    <AlertCircle className="w-3.5 h-3.5" />
+                                    TIP: High-detail mode is recommended for this image to ensure accurate OCR extraction.
                                 </div>
                             )}
                         </CardContent>
                     </Card>
 
-                    <Card className="shadow-xl border-white/5 bg-slate-900/50 backdrop-blur-md">
+                    {/* Global Parameters */}
+                    <Card className="border-white/5 bg-slate-900/50 backdrop-blur-md">
                         <CardHeader className="pb-4">
-                            <CardTitle className="text-xs font-bold uppercase tracking-widest text-slate-400">Vision Parameters</CardTitle>
+                            <CardTitle className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                                <Settings2 className="w-4 h-4 text-indigo-400" />
+                                Processing Configuration
+                            </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-6">
+                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-3">
-                                <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Model Selection</Label>
+                                <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Target Model</Label>
                                 <Select value={selectedModelId} onValueChange={setSelectedModelId}>
-                                    <SelectTrigger className="h-12 rounded-xl bg-white/5 border-white/10 text-slate-200">
-                                        <SelectValue placeholder="Select a model" />
+                                    <SelectTrigger className="h-11 bg-white/5 border-white/10 rounded-xl">
+                                        <SelectValue placeholder="Model" />
                                     </SelectTrigger>
                                     <SelectContent className="bg-slate-900 border-white/10">
-                                        {visionModels.map((m) => (
-                                            <SelectItem key={m.id} value={m.id} className="cursor-pointer">
-                                                {m.name}
-                                            </SelectItem>
-                                        ))}
+                                        {visionModels.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
                                     </SelectContent>
                                 </Select>
                             </div>
-
-                            {model?.visionPricing?.strategy === "openai-tiles" && (
-                                <div className="pt-4 border-t border-white/5">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className="flex items-center gap-2">
-                                            <Settings2 className="w-4 h-4 text-indigo-400" />
-                                            <Label className="text-xs font-bold text-slate-300 uppercase tracking-wider">Detail Level</Label>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <span className={`text-[10px] font-bold ${detailMode === 'low' ? 'text-indigo-400' : 'text-slate-500'}`}>LOW</span>
-                                            <Switch 
-                                                checked={detailMode === "high"} 
-                                                onCheckedChange={(val) => setDetailMode(val ? "high" : "low")} 
-                                            />
-                                            <span className={`text-[10px] font-bold ${detailMode === 'high' ? 'text-indigo-400' : 'text-slate-500'}`}>HIGH</span>
-                                        </div>
-                                    </div>
-                                    <p className="text-[10px] text-slate-500 leading-relaxed italic">
-                                        {detailMode === 'low' 
-                                            ? "Low detail mode uses a flat 85 tokens regardless of image size." 
-                                            : "High detail mode uses tiling and incurs more tokens for higher resolutions."}
-                                    </p>
-                                </div>
-                            )}
+                            <div className="space-y-3">
+                                <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{t("task_preset")}</Label>
+                                <Select value={taskPreset} onValueChange={(v: any) => setTaskPreset(v)}>
+                                    <SelectTrigger className="h-11 bg-white/5 border-white/10 rounded-xl">
+                                        <SelectValue placeholder="Task" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-slate-900 border-white/10">
+                                        <SelectItem value="captioning">{t("captioning")}</SelectItem>
+                                        <SelectItem value="vqa">{t("vqa")}</SelectItem>
+                                        <SelectItem value="extraction">{t("extraction")}</SelectItem>
+                                        <SelectItem value="custom">{t("custom")}</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </CardContent>
                     </Card>
-                </div>
 
-                {/* Results Panel */}
-                <div className="space-y-6">
-                    <Card className="shadow-2xl border-indigo-500/20 bg-slate-900/80 backdrop-blur-xl h-full flex flex-col">
-                        <CardHeader className="pb-4">
-                            <CardTitle className="text-xs font-bold uppercase tracking-widest text-indigo-400 flex items-center gap-2">
-                                <Sparkles className="w-4 h-4" />
-                                Analysis Results
+                    {/* Image Gallery */}
+                    {images.length > 0 && (
+                        <div className="grid grid-cols-1 gap-4">
+                            {totals.perImageResults.map((img) => (
+                                <Card key={img.id} className="bg-white/5 border-white/5 rounded-2xl overflow-hidden group hover:border-indigo-500/20 transition-all">
+                                    <div className="flex flex-col md:flex-row">
+                                        <div 
+                                            className={cn(
+                                                "relative w-full md:w-64 h-64 bg-black shadow-inner overflow-hidden select-none",
+                                                isZoomMode ? "cursor-crosshair" : "cursor-default"
+                                            )}
+                                            onMouseDown={(e) => handleMouseDown(e, img.id)}
+                                            onMouseMove={handleMouseMove}
+                                            onMouseUp={handleMouseUp}
+                                            onMouseLeave={handleMouseUp}
+                                        >
+                                            <Image src={img.preview} alt="Preview" fill className="object-contain pointer-events-none" unoptimized />
+                                            <TileOverlay width={img.width} height={img.height} model={model} detailMode={detailMode} />
+                                            
+                                            {/* Render Active Zoom Crops */}
+                                            {img.zoomCrops.map(crop => (
+                                                <div 
+                                                    key={crop.id}
+                                                    className="absolute border-2 border-cyan-400 bg-cyan-400/20 shadow-[0_0_10px_rgba(34,211,238,0.5)] group/crop"
+                                                    style={{ left: `${crop.x}%`, top: `${crop.y}%`, width: `${crop.w}%`, height: `${crop.h}%` }}
+                                                >
+                                                    <button 
+                                                        onClick={(e) => { e.stopPropagation(); removeCrop(img.id, crop.id); }}
+                                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover/crop:opacity-100 transition-opacity"
+                                                    >
+                                                        <Trash2 className="w-3 h-3" />
+                                                    </button>
+                                                </div>
+                                            ))}
+
+                                            {/* Render Current Drag */}
+                                            {dragStart && activeImageId === img.id && dragCurrent && (
+                                                <div 
+                                                    className="absolute border-2 border-white border-dashed bg-white/10"
+                                                    style={{
+                                                        left: `${Math.min(dragStart.x, dragCurrent.x)}%`,
+                                                        top: `${Math.min(dragStart.y, dragCurrent.y)}%`,
+                                                        width: `${Math.abs(dragStart.x - dragCurrent.x)}%`,
+                                                        height: `${Math.abs(dragStart.y - dragCurrent.y)}%`
+                                                    }}
+                                                />
+                                            )}
+
+                                            <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded border border-white/10 text-[8px] font-mono text-white/80 font-bold uppercase tracking-widest">
+                                                {model.visionPricing?.strategy === 'openai-tiles' ? "512px Tile Analysis" : "768px Frame Analysis"}
+                                            </div>
+                                        </div>
+                                        <CardContent className="flex-1 p-6 space-y-6">
+                                            <div className="flex justify-between items-start">
+                                                <div className="space-y-1">
+                                                    <p className="text-sm font-bold text-white truncate max-w-[240px]">{img.fileName}</p>
+                                                    <p className="text-[10px] font-mono text-indigo-400 font-black uppercase tracking-tighter">{img.width}x{img.height} Native Res</p>
+                                                </div>
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="icon" 
+                                                    onClick={() => setImages(prev => prev.filter(i => i.id !== img.id))}
+                                                    className="text-slate-500 hover:text-red-400 h-8 w-8"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-xl p-3">
+                                                    <div className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">Base Tokens</div>
+                                                    <div className="text-lg font-black text-white font-mono">{img.tokens.toLocaleString()}</div>
+                                                </div>
+                                                <div className="bg-cyan-500/5 border border-cyan-500/10 rounded-xl p-3">
+                                                    <div className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">Zoom Patches</div>
+                                                    <div className="text-lg font-black text-cyan-400 font-mono">+{img.imageZoomTokens.toLocaleString()}</div>
+                                                </div>
+                                            </div>
+
+                                            {/* Smart Optimization */}
+                                            {(() => {
+                                                const opt = getVisionOptimization(img.width, img.height, img.tokens);
+                                                if (opt.improvementPercent < 10) return null;
+                                                return (
+                                                    <div className="flex items-center justify-between p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-xl">
+                                                        <div className="space-y-0.5">
+                                                            <div className="text-[10px] font-black text-emerald-400 uppercase flex items-center gap-1">
+                                                                <TrendingDown className="w-3 h-3" />
+                                                                {opt.improvementPercent}% Saving Potential
+                                                            </div>
+                                                            <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">Target: {opt.recommendedWidth}px max</p>
+                                                        </div>
+                                                        <Button variant="outline" size="sm" className="h-7 text-[9px] font-black uppercase border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10">
+                                                            Optimize
+                                                        </Button>
+                                                    </div>
+                                                );
+                                            })()}
+                                        </CardContent>
+                                    </div>
+                                </Card>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Resolution Sweet Spot Guide */}
+                    <Card className="border-indigo-500/10 bg-indigo-500/5">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-xs font-black uppercase tracking-widest text-indigo-400 flex items-center gap-2">
+                                <Scale className="w-4 h-4" />
+                                Resolution "Sweet Spot" Guide
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="flex-1 flex flex-col space-y-6">
-                            {imagePreview ? (
-                                <div className="space-y-6 animate-in zoom-in-95 duration-500">
-                                    <div className="relative w-full h-56 rounded-2xl overflow-hidden border border-white/10 bg-black shadow-inner flex items-center justify-center group">
-                                        <Image 
-                                            src={imagePreview} 
-                                            alt="Preview" 
-                                            fill
-                                            unoptimized
-                                            className="object-contain transition-transform duration-700 group-hover:scale-105" 
-                                        />
-                                        <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded text-[9px] font-mono text-white/70 border border-white/5">
-                                            {imageWidth}x{imageHeight}px
+                        <CardContent>
+                            <div className="grid grid-cols-1 divide-y divide-white/5">
+                                {SWEET_SPOTS.map((s, idx) => (
+                                    <div key={idx} className="py-3 flex items-center justify-between text-[10px] font-bold">
+                                        <div className="flex flex-col gap-0.5">
+                                            <span className="text-white uppercase tracking-tight">{s.model}</span>
+                                            <span className="text-slate-500 font-black uppercase tracking-widest">{s.zone}</span>
+                                        </div>
+                                        <div className="text-right flex flex-col gap-0.5">
+                                            <span className="text-emerald-400 uppercase tracking-tighter">{s.reward}</span>
+                                            <span className="text-slate-600 font-mono">{s.limit}</span>
                                         </div>
                                     </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div className="p-5 rounded-2xl border border-white/5 bg-white/5 shadow-xl relative overflow-hidden group">
-                                            <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Token Payload</div>
-                                            <div className="text-4xl font-black tracking-tighter text-white tabular-nums font-mono">
-                                                {result.tokens.toLocaleString()}
-                                            </div>
-                                            <div className="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
-                                                <Info className="w-12 h-12 text-white" />
-                                            </div>
-                                        </div>
-                                        <div className="p-5 rounded-2xl border border-indigo-500/20 bg-indigo-500/10 shadow-xl relative overflow-hidden group">
-                                            <div className="text-[10px] font-bold uppercase tracking-widest text-indigo-400 mb-2">Est. API Cost</div>
-                                            <div className="text-4xl font-black tracking-tighter text-indigo-400 tabular-nums font-mono">
-                                                ${estimatedCost.toFixed(5)}
-                                            </div>
-                                            <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
-                                                <ArrowRight className="w-12 h-12 text-indigo-400 -rotate-45" />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <div className="h-px flex-1 bg-white/5" />
-                                            <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Tokenization Breakdown</span>
-                                            <div className="h-px flex-1 bg-white/5" />
-                                        </div>
-                                        
-                                        <div className="grid grid-cols-1 gap-2">
-                                            <TooltipProvider>
-                                                <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Processing Strategy</span>
-                                                        <Tooltip>
-                                                            <TooltipTrigger><Info className="w-3 h-3 text-slate-600" /></TooltipTrigger>
-                                                            <TooltipContent className="bg-slate-900 border-white/10 text-[10px] p-2">Different models use different math to convert pixels to tokens.</TooltipContent>
-                                                        </Tooltip>
-                                                    </div>
-                                                    <span className="text-[10px] font-bold text-indigo-400 uppercase bg-indigo-500/10 px-2 py-0.5 rounded">{(model?.visionPricing?.strategy || "").replace(/-/g, ' ')}</span>
-                                                </div>
-
-                                                <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
-                                                    <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Effective Resolution</span>
-                                                    <span className="text-xs font-mono font-bold text-slate-200">{result.scaledWidth}x{result.scaledHeight}px</span>
-                                                </div>
-
-                                                {model?.visionPricing?.strategy === "openai-tiles" && (
-                                                    <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
-                                                        <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Tile Count (512px)</span>
-                                                        <span className="text-xs font-mono font-bold text-slate-200">{result.tiles || 0} Tiles</span>
-                                                    </div>
-                                                )}
-                                            </TooltipProvider>
-                                        </div>
-                                    </div>
+                {/* ── Right Column: Summary & Analysis ── */}
+                <div className="lg:col-span-5 space-y-6">
+                    <Card className="shadow-2xl border-indigo-500/20 bg-slate-900/80 backdrop-blur-xl h-full flex flex-col sticky top-6 overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500" />
+                        <CardHeader className="pb-4 border-b border-white/5">
+                            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 flex items-center justify-between">
+                                <span className="flex items-center gap-2"><Sparkles className="w-4 h-4" /> Comprehensive Multimodal Bill</span>
+                                <span className="text-slate-500 font-mono">APRIL 2026</span>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-8 pt-8">
+                            <div className="text-center space-y-1">
+                                <div className="text-6xl font-black tracking-tighter text-white tabular-nums font-mono">
+                                    ${totals.totalCost.toFixed(5)}
                                 </div>
-                            ) : (
-                                <div className="flex-1 flex flex-col items-center justify-center p-10 text-center bg-white/5 rounded-2xl border border-dashed border-white/10">
-                                    <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-6 animate-pulse">
-                                        <ImageIcon className="w-10 h-10 text-slate-700" />
-                                    </div>
-                                    <h3 className="text-xl font-black text-slate-300 uppercase tracking-tight mb-2">Awaiting Image</h3> 
-                                    <p className="text-xs text-slate-500 max-w-xs mx-auto font-medium">     
-                                        Upload an image to see its exact token dimensions and estimated API cost.
-                                    </p>
+                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Estimated Total Cost per Request</p>
+                            </div>
+
+                            {/* Token Distribution Bar */}
+                            <div className="space-y-3">
+                                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                                    <span className="text-indigo-400">{totals.inputTokens.toLocaleString()} Vision</span>
+                                    <span className="text-cyan-400">{totals.zoomTokens.toLocaleString()} Zoom</span>
+                                    <span className="text-indigo-200">{totals.promptTokens.toLocaleString()} Text</span>
                                 </div>
-                            )}
+                                <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden flex">
+                                    <div className="h-full bg-indigo-500 transition-all duration-1000" style={{ width: `${(totals.inputTokens / totals.totalTokens) * 100}%` }} />
+                                    <div className="h-full bg-cyan-500 transition-all duration-1000" style={{ width: `${(totals.zoomTokens / totals.totalTokens) * 100}%` }} />
+                                    <div className="h-full bg-indigo-300 transition-all duration-1000" style={{ width: `${(totals.promptTokens / totals.totalTokens) * 100}%` }} />
+                                    <div className="h-full bg-slate-600 transition-all duration-1000" style={{ width: `${(totals.outputTokens / totals.totalTokens) * 100}%` }} />
+                                </div>
+                            </div>
+
+                            {/* Context Window Occupancy */}
+                            <div className="space-y-3 pt-4 border-t border-white/5">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2 font-black uppercase text-[10px] tracking-widest text-slate-400">
+                                        <Gauge className={cn("w-4 h-4", contextPercent > 80 ? "text-red-400" : "text-emerald-400")} />
+                                        Context Occupancy
+                                    </div>
+                                    <span className="text-[10px] font-mono font-bold text-white">{totals.totalTokens.toLocaleString()} / {(model.maxContext / 1000).toFixed(0)}k</span>
+                                </div>
+                                <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                    <div 
+                                        className={cn("h-full transition-all duration-1000", contextPercent > 90 ? "bg-red-500" : contextPercent > 70 ? "bg-amber-500" : "bg-indigo-500")} 
+                                        style={{ width: `${contextPercent}%` }} 
+                                    />
+                                </div>
+                                <p className="text-[9px] text-center font-black uppercase tracking-tighter text-slate-500">
+                                    {contextPercent > 90 ? "⚠️ Danger: Nearing Context Boundary" : "✅ Safe: Significant Headroom Remaining"}
+                                </p>
+                            </div>
+
+                            <div className="space-y-4 pt-4 border-t border-white/5">
+                                <div className="flex items-center justify-between text-xs font-bold">
+                                    <span className="text-slate-400 uppercase tracking-widest flex items-center gap-2"><ImageIcon className="w-3.5 h-3.5" /> Initial Pass</span>
+                                    <span className="text-white font-mono">{totals.inputTokens.toLocaleString()} tokens</span>
+                                </div>
+                                <div className="flex items-center justify-between text-xs font-bold">
+                                    <span className="text-cyan-400 uppercase tracking-widest flex items-center gap-2"><Target className="w-3.5 h-3.5" /> Zoomed Detail</span>
+                                    <span className="text-white font-mono">{totals.zoomTokens.toLocaleString()} tokens</span>
+                                </div>
+                                <div className="flex items-center justify-between text-xs font-bold">
+                                    <span className="text-slate-400 uppercase tracking-widest flex items-center gap-2"><MessageSquare className="w-3.5 h-3.5" /> Text Prompt</span>
+                                    <span className="text-white font-mono">{totals.promptTokens.toLocaleString()} tokens</span>
+                                </div>
+                                <div className="flex items-center justify-between text-xs font-bold">
+                                    <span className="text-slate-400 uppercase tracking-widest flex items-center gap-2"><ArrowRight className="w-3.5 h-3.5" /> Est. Response</span>
+                                    <span className="text-white font-mono">{totals.outputTokens.toLocaleString()} tokens</span>
+                                </div>
+                                <div className="flex items-center justify-between text-xl font-black pt-6 border-t border-white/10 text-white uppercase tracking-tighter">
+                                    <span>Total Bill</span>
+                                    <span className="font-mono text-indigo-400">{totals.totalTokens.toLocaleString()}</span>
+                                </div>
+                            </div>
+
+                            <Link href="/comparison" className="block w-full">
+                                <Button className="w-full h-14 bg-white text-black hover:bg-slate-200 font-black uppercase tracking-[0.2em] text-xs shadow-xl active:scale-95 transition-all">
+                                    <Scale className="w-4 h-4 mr-2" />
+                                    Compare Vision Models
+                                </Button>
+                            </Link>
                         </CardContent>
                     </Card>
                 </div>
             </div>
-
-            {/* Image / Multimodal FAQ Section */}
-            <div className="pt-16 border-t border-white/5 mt-16">
-                <div className="max-w-4xl mx-auto space-y-6">
-                    <div className="flex items-center gap-3">
-                        <h2 className="text-3xl font-black tracking-tight text-white uppercase">Vision <span className="text-indigo-500">Insights</span></h2>
-                        <div className="h-px flex-1 bg-white/5" />
-                    </div>
-                    <p className="text-lg text-slate-400">
-                        Common questions about image tokenization and vision model pricing.
-                    </p>
-
-                    <div className="bg-slate-900/50 border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-sm">      
-                        <Accordion type="single" collapsible className="w-full">
-
-                            <AccordionItem value="item-1" className="border-white/5">
-                                <AccordionTrigger className="text-left text-base font-bold text-slate-200 hover:no-underline hover:text-indigo-400 transition-colors">
-                                    Why does image size affect token cost more than file size?
-                                </AccordionTrigger>
-                                <AccordionContent className="text-slate-400 leading-relaxed font-medium">        
-                                    LLM image pricing is based on the image&apos;s pixel dimensions (width x height), not the file size in bytes. A 10MB JPEG compressed at low quality and a 2MB PNG at high resolution will have very different token costs. This is because models process the actual visual information (pixels), not the compressed file format.
-                                </AccordionContent>
-                            </AccordionItem>
-
-                            <AccordionItem value="item-2" className="border-white/5">
-                                <AccordionTrigger className="text-left text-base font-bold text-slate-200 hover:no-underline hover:text-indigo-400 transition-colors">
-                                    What&apos;s the difference between "high detail" and "low detail" mode?
-                                </AccordionTrigger>
-                                <AccordionContent className="text-slate-400 leading-relaxed font-medium">        
-                                    GPT-4o offers two detail modes: &quot;low&quot; (fixed at 85 tokens) and &quot;high&quot;. High detail mode preserves resolution by tiling the image into 512px chunks. For high-res images, switching to &quot;low&quot; can save 90% in token costs if fine details aren&apos;t required for the analysis.
-                                </AccordionContent>
-                            </AccordionItem>
-
-                            <AccordionItem value="item-3" className="border-white/5">
-                                <AccordionTrigger className="text-left text-base font-bold text-slate-200 hover:no-underline hover:text-indigo-400 transition-colors">
-                                    Is my image data secure?
-                                </AccordionTrigger>
-                                <AccordionContent className="text-slate-400 leading-relaxed font-medium">        
-                                    Yes. This estimator processes your image entirely within your browser using local JavaScript. Your images are never uploaded to our servers or any third-party APIs. The pixel dimensions are extracted locally to perform the token math.
-                                </AccordionContent>
-                            </AccordionItem>
-
-                        </Accordion>
-                    </div>
-                </div>
-            </div>
-        </>
+        </div>
     );
 }

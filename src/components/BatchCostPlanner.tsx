@@ -14,19 +14,26 @@ import {
     ArrowRight,
     Search,
     Database,
-    FileSpreadsheet
+    FileSpreadsheet,
+    FileText,
+    ShieldAlert,
+    Printer,
+    Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { models, ModelConfig } from "@/lib/models";
 import NumberCounter from "@/components/NumberCounter";
+import BatchOptimizationSuite from "./BatchOptimizationSuite";
 
 export default function BatchCostPlanner() {
     const [promptTokens, setPromptTokens] = useState<number>(1000);
     const [outputTokens, setOutputTokens] = useState<number>(500);
     const [volume, setVolume] = useState<number>(50000);
     const [searchQuery, setSearchQuery] = useState("");
+    const [buffer, setBuffer] = useState(0);
+    const [isBatchMode, setIsBatchMode] = useState(false);
 
     const filteredModels = useMemo(() => {
         return models.filter(m => 
@@ -37,12 +44,19 @@ export default function BatchCostPlanner() {
 
     const calculations = useMemo(() => {
         return filteredModels.map(model => {
-            const inputCostPerRequest = (promptTokens / 1_000_000) * model.inputPricePer1M;
-            const outputCostPerRequest = (outputTokens / 1_000_000) * model.outputPricePer1M;
-            const costPerRequest = inputCostPerRequest + outputCostPerRequest;
-            
+            const discount = isBatchMode ? (model.batchDiscount || 1) : 1;
+            const inputPrice = model.inputPricePer1M * discount;
+            const outputPrice = model.outputPricePer1M * discount;
+
+            const inputCostPerRequest = (promptTokens / 1_000_000) * inputPrice;
+            const outputCostPerRequest = (outputTokens / 1_000_000) * outputPrice;
+            let costPerRequest = inputCostPerRequest + outputCostPerRequest;
+
+            // Add reliability buffer
+            costPerRequest = costPerRequest * (1 + (buffer / 100));
+
             const totalBatchCost = costPerRequest * volume;
-            const dailyCost = totalBatchCost; // Assuming batch runs daily, or just for comparison
+            const dailyCost = totalBatchCost;
             const monthlyCost = totalBatchCost * 30;
 
             return {
@@ -50,19 +64,23 @@ export default function BatchCostPlanner() {
                 costPerRequest,
                 totalBatchCost,
                 dailyCost,
-                monthlyCost
+                monthlyCost,
+                isDiscounted: discount < 1
             };
         }).sort((a, b) => a.totalBatchCost - b.totalBatchCost);
-    }, [filteredModels, promptTokens, outputTokens, volume]);
+    }, [filteredModels, promptTokens, outputTokens, volume, isBatchMode, buffer]);
+
+    const cheapestModel = calculations[0]?.model;
 
     const exportToCSV = () => {
-        const headers = ["Model", "Provider", "Cost Per Request", "Total Batch Cost", "Monthly Projection (30x)"];
+        const headers = ["Model", "Provider", "Cost Per Request", "Total Batch Cost", "Monthly Projection (30x)", "Batch Mode"];
         const rows = calculations.map(calc => [
             calc.model.name,
             calc.model.provider,
             calc.costPerRequest.toFixed(6),
             calc.totalBatchCost.toFixed(2),
-            calc.monthlyCost.toFixed(2)
+            calc.monthlyCost.toFixed(2),
+            calc.isDiscounted ? "Yes" : "No"
         ]);
 
         const csvContent = [
@@ -81,11 +99,15 @@ export default function BatchCostPlanner() {
         document.body.removeChild(link);
     };
 
+    const printReport = () => {
+        window.print();
+    };
+
     return (
-        <div className="space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="space-y-8 print:bg-white print:text-black">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 {/* Inputs Panel */}
-                <div className="lg:col-span-1 space-y-6">
+                <div className="lg:col-span-1 space-y-6 print:hidden">
                     <Card className="border-white/10 bg-slate-900/50 backdrop-blur-md shadow-xl">
                         <CardHeader className="pb-4 border-b border-white/5">
                             <CardTitle className="text-sm font-bold uppercase tracking-widest text-slate-400">Batch Parameters</CardTitle>
@@ -103,7 +125,6 @@ export default function BatchCostPlanner() {
                                     onChange={(e) => setVolume(parseInt(e.target.value) || 0)}
                                     className="bg-white/5 border-white/10 h-11 font-mono text-indigo-400 font-bold"
                                 />
-                                <p className="text-[10px] text-slate-500 italic">How many times will this prompt run?</p>
                             </div>
 
                             <div className="space-y-2">
@@ -138,6 +159,11 @@ export default function BatchCostPlanner() {
                                     <p className="text-2xl font-black text-white font-mono">
                                         {((promptTokens + outputTokens) * volume).toLocaleString()}
                                     </p>
+                                    {buffer > 0 && (
+                                        <p className="text-[9px] text-red-400 font-bold uppercase tracking-tight">
+                                            Inc. {buffer}% Reliability Buffer
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         </CardContent>
@@ -147,13 +173,21 @@ export default function BatchCostPlanner() {
                         <CardHeader className="pb-4">
                             <CardTitle className="text-xs font-bold uppercase tracking-widest text-slate-400">Actions</CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="space-y-3">
                             <Button 
                                 onClick={exportToCSV}
                                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-2 py-6 rounded-xl shadow-lg shadow-emerald-900/20"
                             >
                                 <FileSpreadsheet className="w-5 h-5" />
-                                Export Projection (CSV)
+                                Export CSV
+                            </Button>
+                            <Button 
+                                onClick={printReport}
+                                variant="outline"
+                                className="w-full border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold gap-2 py-6 rounded-xl"
+                            >
+                                <Printer className="w-5 h-5" />
+                                Print Executive Report
                             </Button>
                         </CardContent>
                     </Card>
@@ -161,7 +195,7 @@ export default function BatchCostPlanner() {
 
                 {/* Comparison Panel */}
                 <div className="lg:col-span-2 space-y-6">
-                    <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center justify-between gap-4 print:hidden">
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                             <Input 
@@ -173,33 +207,40 @@ export default function BatchCostPlanner() {
                         </div>
                     </div>
 
-                    <div className="space-y-4 max-h-[800px] overflow-y-auto pr-2 custom-scrollbar">
-                        {calculations.map(({ model, totalBatchCost, costPerRequest, monthlyCost }, idx) => (
-                            <Card key={model.id} className={`group border-white/10 bg-slate-900/50 backdrop-blur-md hover:border-indigo-500/30 transition-all duration-300 relative overflow-hidden ${idx === 0 ? "border-emerald-500/30 ring-1 ring-emerald-500/20" : ""}`}>
+                    <div className="space-y-4 max-h-[1200px] overflow-y-auto pr-2 custom-scrollbar print:max-h-none print:overflow-visible">
+                        {calculations.map(({ model, totalBatchCost, costPerRequest, monthlyCost, isDiscounted }, idx) => (
+                            <Card key={model.id} className={`group border-white/10 bg-slate-900/50 backdrop-blur-md hover:border-indigo-500/30 transition-all duration-300 relative overflow-hidden print:bg-white print:border-black/10 print:shadow-none ${idx === 0 ? "border-emerald-500/30 ring-1 ring-emerald-500/20" : ""}`}>
                                 {idx === 0 && (
                                     <div className="absolute top-0 right-0 p-2">
-                                        <div className="bg-emerald-500 text-black text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-tighter">Cheapest Batch</div>
+                                        <div className="bg-emerald-500 text-black text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-tighter">Best Value</div>
                                     </div>
                                 )}
                                 <CardContent className="p-6">
                                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                                         <div className="space-y-1">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-2 py-0.5 rounded">{model.provider}</span>
-                                                <span className="text-xs font-bold text-slate-500">
-                                                    In: ${model.inputPricePer1M}/M | Out: ${model.outputPricePer1M}/M
-                                                </span>
+                                                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-2 py-0.5 rounded print:text-indigo-600 print:bg-indigo-100">{model.provider}</span>
+                                                {isDiscounted && (
+                                                    <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded flex items-center gap-1">
+                                                        <Zap className="w-2.5 h-2.5" />
+                                                        Batch Price
+                                                    </span>
+                                                )}
                                             </div>
-                                            <h3 className="text-xl font-black text-white tracking-tight">{model.name}</h3>
+                                            <h3 className="text-xl font-black text-white tracking-tight print:text-black">{model.name}</h3>
+                                            <div className="flex gap-3 text-[9px] font-bold text-slate-500 uppercase tracking-tighter">
+                                                <span>TPM: {model.tpmLimit?.toLocaleString() || "N/A"}</span>
+                                                <span>RPM: {model.rpmLimit?.toLocaleString() || "N/A"}</span>
+                                            </div>
                                         </div>
 
                                         <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
                                             <div className="space-y-1">
                                                 <span className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] flex items-center gap-1">
-                                                    <Zap className="w-2.5 h-2.5" />
-                                                    Batch Cost
+                                                    <Database className="w-2.5 h-2.5" />
+                                                    Batch Total
                                                 </span>
-                                                <div className="text-2xl font-black text-white font-mono">
+                                                <div className="text-2xl font-black text-white font-mono print:text-black">
                                                     $<NumberCounter value={totalBatchCost} decimals={2} />
                                                 </div>
                                             </div>
@@ -208,16 +249,16 @@ export default function BatchCostPlanner() {
                                                     <Calendar className="w-2.5 h-2.5" />
                                                     Monthly (30x)
                                                 </span>
-                                                <div className="text-xl font-bold text-slate-300 font-mono">
+                                                <div className="text-xl font-bold text-slate-300 font-mono print:text-slate-700">
                                                     ${monthlyCost.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                                                 </div>
                                             </div>
                                             <div className="hidden md:block space-y-1 text-right">
                                                 <span className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] flex items-center justify-end gap-1">
                                                     <Clock className="w-2.5 h-2.5" />
-                                                    Per Request
+                                                    Unit Cost
                                                 </span>
-                                                <div className="text-sm font-bold text-indigo-400 font-mono">
+                                                <div className="text-sm font-bold text-indigo-400 font-mono print:text-indigo-700">
                                                     ${costPerRequest.toFixed(5)}
                                                 </div>
                                             </div>
@@ -228,10 +269,27 @@ export default function BatchCostPlanner() {
                         ))}
                     </div>
                 </div>
+
+                {/* Optimization Suite Panel */}
+                <div className="lg:col-span-1 print:hidden">
+                    <div className="sticky top-6">
+                        <div className="mb-4 flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-indigo-400" />
+                            <h2 className="text-xs font-black uppercase tracking-widest text-white">Optimization Suite</h2>
+                        </div>
+                        <BatchOptimizationSuite 
+                            volume={volume}
+                            selectedModel={cheapestModel}
+                            onBufferChange={setBuffer}
+                            onBatchModeChange={setIsBatchMode}
+                            onPromptTokensChange={setPromptTokens}
+                        />
+                    </div>
+                </div>
             </div>
 
             {/* Projections Section */}
-            <div className="pt-12 border-t border-white/5 mt-12">
+            <div className="pt-12 border-t border-white/5 mt-12 print:hidden">
                 <div className="max-w-4xl mx-auto space-y-8">
                     <div className="text-center space-y-2">
                         <h2 className="text-2xl font-black tracking-tight text-white uppercase">Understanding <span className="text-indigo-500">Batch Dynamics</span></h2>
@@ -247,7 +305,7 @@ export default function BatchCostPlanner() {
                                 <h3 className="font-black text-slate-200 uppercase tracking-tight">Batch APIs</h3>
                             </div>
                             <p className="text-xs text-slate-500 leading-relaxed">
-                                Many providers (OpenAI, Anthropic) offer a **Batch API** that provides a **50% discount** if you can wait up to 24 hours for results. The costs above reflect real-time pricing—if your workload can wait, you can likely halve your bill.
+                                Many providers (OpenAI, Anthropic) offer a **Batch API** that provides a **50% discount** if you can wait up to 24 hours for results. Toggle "Batch Mode" in the optimization suite to see these prices.
                             </p>
                         </div>
                         <div className="p-6 rounded-3xl bg-slate-900/50 border border-white/10 space-y-4">
@@ -258,7 +316,7 @@ export default function BatchCostPlanner() {
                                 <h3 className="font-black text-slate-200 uppercase tracking-tight">Output Variability</h3>
                             </div>
                             <p className="text-xs text-slate-500 leading-relaxed">
-                                Unlike input tokens which are static, output tokens vary per request. When planning a 50,000 row batch, always pad your output token estimate by **20-30%** to account for unexpected verbosity and outliers.
+                                Unlike input tokens which are static, output tokens vary per request. When planning a 50,000 row batch, use the **Reliability Buffer** to account for unexpected verbosity and outliers.
                             </p>
                         </div>
                     </div>

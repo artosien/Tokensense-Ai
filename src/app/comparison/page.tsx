@@ -43,6 +43,35 @@ function ComparisonSchema() {
           "price": "0",
           "priceCurrency": "USD"
         }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Which is cheaper: GPT-4o or Claude 3.5 Sonnet?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "As of early 2026, Claude 3.5 Sonnet is often more cost-effective for large-scale production, particularly when factoring in output token costs. However, GPT-4o offers competitive input token pricing and high rate limits."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Gemini 1.5 Pro offer the best value for long context?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, Gemini 1.5 Pro's 2M context window and free tier options for developers make it the top choice for long-document analysis, though its 'cost per token' on the paid tier is comparable to Claude 3.5 Opus."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Which LLM has the lowest output token price?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "For the lowest possible output cost, 'Flash' or 'Mini' models like GPT-4o mini, Gemini 1.5 Flash, and Claude 3.5 Haiku are the industry leaders, often priced at a fraction of a cent per 1M tokens."
+            }
+          }
+        ]
       }
     ]
   };
@@ -122,6 +151,33 @@ export default function ComparisonPage() {
                         <li>Grok 4</li>
                     </ul>
                 </div>
+
+                {/* ──── FAQ SECTION ──── */}
+                <section className="mt-16 border-t border-border/40 pt-16">
+                    <div className="max-w-4xl mx-auto space-y-8">
+                        <h2 className="text-3xl font-bold tracking-tight text-foreground">Model Comparison FAQ</h2>
+                        <div className="grid grid-cols-1 gap-8">
+                            <div className="space-y-2">
+                                <h3 className="text-xl font-bold text-foreground">Which is cheaper: GPT-4o or Claude 3.5 Sonnet?</h3>
+                                <p className="text-muted-foreground leading-relaxed">
+                                    As of early 2026, Claude 3.5 Sonnet is often more cost-effective for large-scale production, particularly when factoring in output token costs. However, GPT-4o offers competitive input token pricing and high rate limits.
+                                </p>
+                            </div>
+                            <div className="space-y-2">
+                                <h3 className="text-xl font-bold text-foreground">Does Gemini 1.5 Pro offer the best value for long context?</h3>
+                                <p className="text-muted-foreground leading-relaxed">
+                                    Yes, Gemini 1.5 Pro's 2M context window and free tier options for developers make it the top choice for long-document analysis, though its 'cost per token' on the paid tier is comparable to Claude 3.5 Opus.
+                                </p>
+                            </div>
+                            <div className="space-y-2">
+                                <h3 className="text-xl font-bold text-foreground">Which LLM has the lowest output token price?</h3>
+                                <p className="text-muted-foreground leading-relaxed">
+                                    For the lowest possible output cost, 'Flash' or 'Mini' models like GPT-4o mini, Gemini 1.5 Flash, and Claude 3.5 Haiku are the industry leaders, often priced at a fraction of a cent per 1M tokens.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </main>
 
         </div>

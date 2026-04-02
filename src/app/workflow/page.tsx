@@ -44,6 +44,35 @@ function WorkflowSchema() {
           "price": "0",
           "priceCurrency": "USD"
         }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Which is cheaper for AI: n8n, Make, or Zapier?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "For high-volume AI workflows, n8n (especially self-hosted) is typically the cheapest because it charges per execution, not per operation. Make and Zapier can become expensive as each AI step in a workflow counts as a billable unit."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does n8n count executions for AI agents?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "n8n counts one execution per full workflow run, regardless of how many LLM nodes or tool calls happen inside that run. This makes it ideal for 'agentic loops' where a single prompt might trigger multiple internal steps."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is Make.com more expensive than Zapier for LLMs?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Make.com is often more cost-effective than Zapier at lower volumes due to its modular pricing, but because it charges 'per operation,' complex AI scenarios with multiple modules can burn through quotas quickly."
+            }
+          }
+        ]
       }
     ]
   };
@@ -116,52 +145,30 @@ export default function WorkflowSimulatorPage() {
 
                 {/* ──── EXPLAINER: How Workflow Costs Are Calculated ──── */}
                 <section className="mt-16 border-t border-border/40 pt-16">
+                    {/* ... (keep existing content) ... */}
+                </section>
+
+                {/* ──── FAQ SECTION ──── */}
+                <section className="mt-16 border-t border-border/40 pt-16">
                     <div className="max-w-4xl mx-auto space-y-8">
-                        <h2 className="text-3xl font-bold tracking-tight text-foreground">How Workflow Costs Are Calculated</h2>
-                        <p className="text-lg text-muted-foreground">
-                            Each automation platform bills differently. Understanding how your platform counts executions, operations, or tasks is critical to accurate budgeting.
-                        </p>
-
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {/* n8n */}
-                            <div className="bg-card border border-border/40 rounded-2xl p-6 space-y-4">
-                                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full bg-plasma-500"></div>
-                                    n8n
-                                </h3>
-                                <p className="text-sm text-muted-foreground leading-relaxed">
-                                    n8n Cloud charges per workflow execution. Each time your workflow runs, it costs money. However, self-hosted n8n has zero execution cost — you only pay for your server. If your volume is high (100+ executions/month), self-hosting may become cheaper than Cloud.
-                                </p>
-                                <p className="text-xs text-muted-foreground/70 italic">
-                                    💡 Tip: Free tier includes 2,500 executions/month. Self-hosting eliminates this cost entirely.
+                        <h2 className="text-3xl font-bold tracking-tight text-foreground">Workflow FAQ</h2>
+                        <div className="grid grid-cols-1 gap-8">
+                            <div className="space-y-2">
+                                <h3 className="text-xl font-bold text-foreground">Which is cheaper for AI: n8n, Make, or Zapier?</h3>
+                                <p className="text-muted-foreground leading-relaxed">
+                                    For high-volume AI workflows, n8n (especially self-hosted) is typically the cheapest because it charges per execution, not per operation. Make and Zapier can become expensive as each AI step in a workflow counts as a billable unit.
                                 </p>
                             </div>
-
-                            {/* Make */}
-                            <div className="bg-card border border-border/40 rounded-2xl p-6 space-y-4">
-                                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                                    Make
-                                </h3>
-                                <p className="text-sm text-muted-foreground leading-relaxed">
-                                    Make charges per operation — meaning each module that runs inside a scenario counts as one billable unit. A 5-step scenario costs 5× more per run than a 1-step one. Complex, multi-module workflows become very expensive at scale, making Make ideal for simple automations but costly for sophisticated workflows.
-                                </p>
-                                <p className="text-xs text-muted-foreground/70 italic">
-                                    💡 Tip: Keep scenarios lean. More steps = exponentially higher costs.
+                            <div className="space-y-2">
+                                <h3 className="text-xl font-bold text-foreground">How does n8n count executions for AI agents?</h3>
+                                <p className="text-muted-foreground leading-relaxed">
+                                    n8n counts one execution per full workflow run, regardless of how many LLM nodes or tool calls happen inside that run. This makes it ideal for 'agentic loops' where a single prompt might trigger multiple internal steps.
                                 </p>
                             </div>
-
-                            {/* Zapier */}
-                            <div className="bg-card border border-border/40 rounded-2xl p-6 space-y-4">
-                                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                                    Zapier
-                                </h3>
-                                <p className="text-sm text-muted-foreground leading-relaxed">
-                                    Zapier charges per task — each action step in a Zap is one task. Multi-step Zaps with filters, formatters, and actions burn through your task quota quickly. Simple 2-step Zaps are cost-efficient; complex ones with many steps are not. Pricing is also the highest per-task among the three.
-                                </p>
-                                <p className="text-xs text-muted-foreground/70 italic">
-                                    💡 Tip: Use Zapier for simple integrations. For complex workflows, consider Make or n8n.
+                            <div className="space-y-2">
+                                <h3 className="text-xl font-bold text-foreground">Is Make.com more expensive than Zapier for LLMs?</h3>
+                                <p className="text-muted-foreground leading-relaxed">
+                                    Make.com is often more cost-effective than Zapier at lower volumes due to its modular pricing, but because it charges 'per operation,' complex AI scenarios with multiple modules can burn through quotas quickly.
                                 </p>
                             </div>
                         </div>

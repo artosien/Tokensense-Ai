@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { Sparkles } from "lucide-react";
 
 interface ConfigPanelProps {
   mode: Mode;
@@ -50,10 +51,20 @@ export function ConfigPanel({ mode, config, onChange }: ConfigPanelProps) {
   };
 
   return (
-    <div className="space-y-8 bg-card border border-border/40 rounded-3xl p-6">
+    <div className="space-y-8 bg-card border border-border/40 rounded-3xl p-6 transition-all duration-300">
       <div className="space-y-1">
-        <h3 className="text-sm font-bold text-white uppercase tracking-wider">{t("title")}</h3>
-        <p className="text-xs text-muted-foreground">{t("description")}</p>
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider">{t("title")}</h3>
+          {mode === "advanced" && (
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-bold text-indigo-400 animate-pulse">
+              <Sparkles className="w-3 h-3" />
+              {t("advanced_badge")}
+            </div>
+          )}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {mode === "advanced" ? t("advanced_description") : t("description")}
+        </p>
       </div>
 
       {mode === "simple" ? (

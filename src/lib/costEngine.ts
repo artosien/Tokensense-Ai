@@ -152,12 +152,13 @@ export function calculateCacheCost(
     const stdInputCost = (totalInputTokens / 1_000_000) * model.inputPricePer1M;
     const outCost = (outputTokens / 1_000_000) * model.outputPricePer1M;
 
-    // Check if caching is supported for this model
-    const isSupported = model.cacheReadPricePer1M !== undefined;
+    // Check if caching is supported for this model and meets minimum token threshold
+    const isBelowThreshold = model.minCacheTokens ? staticTokens < model.minCacheTokens : false;
+    const isSupported = model.cacheReadPricePer1M !== undefined && !isBelowThreshold;
 
     // 2. Cached calculation (after first run)
     // The static context is read from the cache, the dynamic is completely standard input
-    let cachedInputCost = stdInputCost; // default to standard if unsupported
+    let cachedInputCost = stdInputCost; // default to standard if unsupported or below threshold
     if (isSupported && model.cacheReadPricePer1M !== undefined) {
         const staticReadCost = (staticTokens / 1_000_000) * model.cacheReadPricePer1M;
         const dynamicCost = (dynamicTokens / 1_000_000) * model.inputPricePer1M;

@@ -6,7 +6,18 @@ export interface ModelConfig {
   outputPricePer1M: number;  // USD per 1M output tokens
   cacheWritePricePer1M?: number; // USD per 1M tokens written to cache
   cacheReadPricePer1M?: number;  // USD per 1M tokens read from cache
+  minCacheTokens?: number;       // Minimum tokens required to trigger caching
+  cacheTtlLimit?: number;        // Typical cache TTL in minutes
   maxContext: number;        // max context window in tokens
+  batchDiscount?: number;    // 0.5 for 50% discount
+  tpmLimit?: number;         // Typical Tokens Per Minute limit
+  rpmLimit?: number;         // Typical Requests Per Minute limit
+  benchmarks?: {
+    mmlu?: number;
+    humanEval?: number;
+    sweBench?: number;
+  };
+  latencyMs?: number; // average latency in ms
   visionPricing?: {
     strategy: "openai-tiles" | "anthropic-scale" | "gemini-flat";
     baseTokens?: number; // For OpenAI base
@@ -26,6 +37,11 @@ export const models: ModelConfig[] = [
     inputPricePer1M: 1.75,
     outputPricePer1M: 14.00,
     maxContext: 400_000,
+    batchDiscount: 0.5,
+    tpmLimit: 1_000_000,
+    rpmLimit: 5_000,
+    benchmarks: { mmlu: 91.2, humanEval: 89.5, sweBench: 45.2 },
+    latencyMs: 850,
   },
   {
     id: "gpt-5-mini",
@@ -34,6 +50,11 @@ export const models: ModelConfig[] = [
     inputPricePer1M: 0.25,
     outputPricePer1M: 2.00,
     maxContext: 400_000,
+    batchDiscount: 0.5,
+    tpmLimit: 5_000_000,
+    rpmLimit: 10_000,
+    benchmarks: { mmlu: 84.5, humanEval: 78.2 },
+    latencyMs: 320,
   },
   {
     id: "gpt-4o",
@@ -42,6 +63,11 @@ export const models: ModelConfig[] = [
     inputPricePer1M: 2.50,
     outputPricePer1M: 10.00,
     maxContext: 128_000,
+    batchDiscount: 0.5,
+    tpmLimit: 2_000_000,
+    rpmLimit: 10_000,
+    benchmarks: { mmlu: 88.7, humanEval: 82.4, sweBench: 32.1 },
+    latencyMs: 780,
     visionPricing: { strategy: "openai-tiles", baseTokens: 85, tileTokens: 170 },
   },
   {
@@ -51,6 +77,11 @@ export const models: ModelConfig[] = [
     inputPricePer1M: 15.00,
     outputPricePer1M: 60.00,
     maxContext: 200_000,
+    batchDiscount: 0.5,
+    tpmLimit: 500_000,
+    rpmLimit: 1_000,
+    benchmarks: { mmlu: 90.1, humanEval: 92.4, sweBench: 51.5 },
+    latencyMs: 2500,
   },
   // ── Anthropic ────────────────────────────────────────────────────────────
   {
@@ -61,7 +92,14 @@ export const models: ModelConfig[] = [
     outputPricePer1M: 25.00,
     cacheWritePricePer1M: 6.25,
     cacheReadPricePer1M: 0.50,
+    minCacheTokens: 1024,
+    cacheTtlLimit: 5,
     maxContext: 200_000,
+    batchDiscount: 0.5,
+    tpmLimit: 400_000,
+    rpmLimit: 4_000,
+    benchmarks: { mmlu: 90.8, humanEval: 88.2, sweBench: 43.1 },
+    latencyMs: 1200,
     visionPricing: { strategy: "anthropic-scale" },
   },
   {
@@ -72,7 +110,14 @@ export const models: ModelConfig[] = [
     outputPricePer1M: 15.00,
     cacheWritePricePer1M: 3.75,
     cacheReadPricePer1M: 0.30,
+    minCacheTokens: 1024,
+    cacheTtlLimit: 5,
     maxContext: 200_000,
+    batchDiscount: 0.5,
+    tpmLimit: 1_000_000,
+    rpmLimit: 5_000,
+    benchmarks: { mmlu: 89.2, humanEval: 84.5, sweBench: 38.5 },
+    latencyMs: 650,
     visionPricing: { strategy: "anthropic-scale" },
   },
   {
@@ -83,7 +128,14 @@ export const models: ModelConfig[] = [
     outputPricePer1M: 5.00,
     cacheWritePricePer1M: 1.25,
     cacheReadPricePer1M: 0.10,
+    minCacheTokens: 1024,
+    cacheTtlLimit: 5,
     maxContext: 200_000,
+    batchDiscount: 0.5,
+    tpmLimit: 2_000_000,
+    rpmLimit: 10_000,
+    benchmarks: { mmlu: 83.1, humanEval: 75.2 },
+    latencyMs: 280,
     visionPricing: { strategy: "anthropic-scale" },
   },
   {
@@ -94,7 +146,14 @@ export const models: ModelConfig[] = [
     outputPricePer1M: 15.00,
     cacheWritePricePer1M: 3.75,
     cacheReadPricePer1M: 0.30,
+    minCacheTokens: 1024,
+    cacheTtlLimit: 5,
     maxContext: 200_000,
+    batchDiscount: 0.5,
+    tpmLimit: 1_000_000,
+    rpmLimit: 5_000,
+    benchmarks: { mmlu: 88.7, humanEval: 81.6 },
+    latencyMs: 680,
     visionPricing: { strategy: "anthropic-scale" },
   },
   {
@@ -104,6 +163,8 @@ export const models: ModelConfig[] = [
     inputPricePer1M: 15.00,
     outputPricePer1M: 75.00,
     maxContext: 200_000,
+    benchmarks: { mmlu: 86.8, humanEval: 84.1 },
+    latencyMs: 2100,
     visionPricing: { strategy: "anthropic-scale" },
   },
   // ── Google ───────────────────────────────────────────────────────────────
@@ -113,7 +174,14 @@ export const models: ModelConfig[] = [
     provider: "Google",
     inputPricePer1M: 3.50,
     outputPricePer1M: 10.50,
+    minCacheTokens: 32768,
+    cacheTtlLimit: 60,
     maxContext: 2_000_000,
+    batchDiscount: 0.5,
+    tpmLimit: 2_000_000,
+    rpmLimit: 1_000,
+    benchmarks: { mmlu: 85.9, humanEval: 71.9 },
+    latencyMs: 1400,
     visionPricing: { strategy: "gemini-flat", flatTokens: 258 },
   },
   {
@@ -122,7 +190,14 @@ export const models: ModelConfig[] = [
     provider: "Google",
     inputPricePer1M: 0.075,
     outputPricePer1M: 0.30,
+    minCacheTokens: 32768,
+    cacheTtlLimit: 60,
     maxContext: 1_000_000,
+    batchDiscount: 0.5,
+    tpmLimit: 10_000_000,
+    rpmLimit: 2_000,
+    benchmarks: { mmlu: 78.9, humanEval: 54.9 },
+    latencyMs: 250,
     visionPricing: { strategy: "gemini-flat", flatTokens: 258 },
   },
   {
@@ -133,7 +208,14 @@ export const models: ModelConfig[] = [
     outputPricePer1M: 12.00,
     cacheWritePricePer1M: 2.00,
     cacheReadPricePer1M: 0.50,
+    minCacheTokens: 32768,
+    cacheTtlLimit: 60,
     maxContext: 2_000_000,
+    batchDiscount: 0.5,
+    tpmLimit: 4_000_000,
+    rpmLimit: 2_000,
+    benchmarks: { mmlu: 92.4, humanEval: 91.2, sweBench: 48.1 },
+    latencyMs: 1100,
     visionPricing: { strategy: "gemini-flat", flatTokens: 258 },
   },
   {
@@ -144,7 +226,14 @@ export const models: ModelConfig[] = [
     outputPricePer1M: 3.00,
     cacheWritePricePer1M: 0.50,
     cacheReadPricePer1M: 0.125,
+    minCacheTokens: 32768,
+    cacheTtlLimit: 60,
     maxContext: 1_000_000,
+    batchDiscount: 0.5,
+    tpmLimit: 15_000_000,
+    rpmLimit: 5_000,
+    benchmarks: { mmlu: 86.5, humanEval: 82.1 },
+    latencyMs: 310,
     visionPricing: { strategy: "gemini-flat", flatTokens: 258 },
   },
   {
@@ -155,7 +244,11 @@ export const models: ModelConfig[] = [
     outputPricePer1M: 10.00,
     cacheWritePricePer1M: 1.25,
     cacheReadPricePer1M: 0.3125,
+    minCacheTokens: 32768,
+    cacheTtlLimit: 60,
     maxContext: 2_000_000,
+    benchmarks: { mmlu: 88.1, humanEval: 83.5 },
+    latencyMs: 950,
     visionPricing: { strategy: "gemini-flat", flatTokens: 258 },
   },
   {
@@ -166,7 +259,11 @@ export const models: ModelConfig[] = [
     outputPricePer1M: 0.40,
     cacheWritePricePer1M: 0.10,
     cacheReadPricePer1M: 0.025,
+    minCacheTokens: 32768,
+    cacheTtlLimit: 60,
     maxContext: 1_000_000,
+    benchmarks: { mmlu: 81.2, humanEval: 72.1 },
+    latencyMs: 220,
     visionPricing: { strategy: "gemini-flat", flatTokens: 258 },
   },
   // ── Meta ─────────────────────────────────────────────────────────────────
@@ -177,6 +274,10 @@ export const models: ModelConfig[] = [
     inputPricePer1M: 0.23,
     outputPricePer1M: 0.40,
     maxContext: 128_000,
+    tpmLimit: 1_000_000,
+    rpmLimit: 2_000,
+    benchmarks: { mmlu: 86.2, humanEval: 81.3 },
+    latencyMs: 450,
   },
   // ── xAI ──────────────────────────────────────────────────────────────────
   {
@@ -186,6 +287,10 @@ export const models: ModelConfig[] = [
     inputPricePer1M: 3.00,
     outputPricePer1M: 15.00,
     maxContext: 256_000,
+    tpmLimit: 1_000_000,
+    rpmLimit: 2_000,
+    benchmarks: { mmlu: 89.5, humanEval: 85.1 },
+    latencyMs: 820,
   },
 ];
 

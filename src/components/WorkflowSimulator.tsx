@@ -1,7 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Copy, Check, Info, Sparkles, TrendingDown, LayoutGrid, FileDown, Zap, Shield, Rocket, ChevronDown } from "lucide-react";
+import { 
+  Copy, Check, Info, Sparkles, TrendingDown, LayoutGrid, FileDown, 
+  Zap, Shield, Rocket, ChevronDown, BarChart3, Clock, DollarSign, 
+  RefreshCcw, AlertTriangle, Gauge, Globe
+} from "lucide-react";
 import CostDisclaimer from "./CostDisclaimer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,11 +13,13 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 // ─── Pricing Data ───────────────────────────────────────────────────────────
 
 const PLATFORM_PRICING = {
   n8n: {
+    id: "n8n",
     name: "n8n Cloud",
     pricePerExecution: 0.004,
     freeExecs: 2500,
@@ -28,6 +34,7 @@ const PLATFORM_PRICING = {
     ],
   },
   make: {
+    id: "make",
     name: "Make",
     pricePerOp: 0.001,
     freeOps: 1000,
@@ -42,6 +49,7 @@ const PLATFORM_PRICING = {
     ],
   },
   zapier: {
+    id: "zapier",
     name: "Zapier",
     pricePerTask: 0.025,
     freeTasks: 100,
@@ -88,29 +96,15 @@ const TEMPLATES = [
 ];
 
 const AI_MODELS = [
-  { id: "none", label: "None", inputCost: 0, outputCost: 0 },
-  { id: "gpt4o", label: "GPT-4o", inputCost: 5, outputCost: 15 }, // Per 1M
-  { id: "gpt4o-mini", label: "GPT-4o mini", inputCost: 0.15, outputCost: 0.6 },
-  { id: "claude-sonnet", label: "Claude Sonnet", inputCost: 3, outputCost: 15 },
-  { id: "claude-haiku", label: "Claude Haiku", inputCost: 0.25, outputCost: 1.25 },
-  { id: "gemini-flash", label: "Gemini Flash", inputCost: 0.05, outputCost: 0.15 },
+  { id: "none", label: "None", inputCost: 0, outputCost: 0, limit: 0 },
+  { id: "gpt4o", label: "GPT-4o", inputCost: 5, outputCost: 15, limit: 128000 }, // Per 1M
+  { id: "gpt4o-mini", label: "GPT-4o mini", inputCost: 0.15, outputCost: 0.6, limit: 128000 },
+  { id: "claude-sonnet", label: "Claude Sonnet", inputCost: 3, outputCost: 15, limit: 200000 },
+  { id: "claude-haiku", label: "Claude Haiku", inputCost: 0.25, outputCost: 1.25, limit: 200000 },
+  { id: "gemini-flash", label: "Gemini Flash", inputCost: 0.05, outputCost: 0.15, limit: 1000000 },
 ];
 
-// ─── Helper Functions ───────────────────────────────────────────────────────
-
-function fmtK(n: number): string {
-  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
-  return n.toString();
-}
-
-function fmtTok(n: number): string {
-  return `${fmtK(n)} tok`;
-}
-
-function fmt(n: number): string {
-  return `$${n.toFixed(2)}`;
-}
+const PHP_RATE = 56.5; // Example rate
 
 // ─── Sub-Components ─────────────────────────────────────────────────────────
 
@@ -122,18 +116,19 @@ interface SliderProps {
   step?: number;
   onChange: (v: number) => void;
   unit?: string;
+  color?: string;
 }
 
-function Slider({ label, value, min, max, step = 1, onChange, unit = "" }: SliderProps) {
+function Slider({ label, value, min, max, step = 1, onChange, unit = "", color = "#00c6ff" }: SliderProps) {
   const range = max - min;
   const percent = ((value - min) / range) * 100;
 
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-xs font-semibold text-slate-300 uppercase">{label}</label>
-        <span className="text-sm font-bold text-plasma-400 font-mono">
-          {fmtK(value)} {unit}
+        <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">{label}</label>
+        <span className="text-sm font-bold font-mono" style={{ color }}>
+          {value.toLocaleString()} {unit}
         </span>
       </div>
       <div className="relative">
@@ -146,48 +141,9 @@ function Slider({ label, value, min, max, step = 1, onChange, unit = "" }: Slide
           onChange={(e) => onChange(Number(e.target.value))}
           className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
           style={{
-            background: `linear-gradient(to right, #00c6ff 0%, #00c6ff ${percent}%, #1e293b ${percent}%, #1e293b 100%)`,
+            background: `linear-gradient(to right, ${color} 0%, ${color} ${percent}%, #1e293b ${percent}%, #1e293b 100%)`,
           }}
         />
-      </div>
-    </div>
-  );
-}
-
-interface LineItemProps {
-  label: string;
-  value: string | number;
-  sublabel?: string;
-  highlight?: boolean;
-}
-
-function LineItem({ label, value, sublabel, highlight }: LineItemProps) {
-  return (
-    <div className={`flex items-center justify-between py-2 px-3 rounded-lg ${highlight ? "bg-plasma-500/10 border border-plasma-500/30" : ""}`}>
-      <div>
-        <div className="text-xs font-medium text-slate-300">{label}</div>
-        {sublabel && <div className="text-[10px] text-slate-500 mt-0.5">{sublabel}</div>}
-      </div>
-      <div className={`font-mono font-bold ${highlight ? "text-plasma-400" : "text-slate-200"}`}>
-        {value}
-      </div>
-    </div>
-  );
-}
-
-interface StatBoxProps {
-  label: string;
-  value: string;
-  unit?: string;
-}
-
-function StatBox({ label, value, unit }: StatBoxProps) {
-  return (
-    <div className="rounded-lg border border-white/10 bg-white/5 p-4 text-center">
-      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">{label}</div>
-      <div className="flex items-baseline justify-center gap-1">
-        <span className="text-2xl font-black text-white">{value}</span>
-        {unit && <span className="text-xs text-slate-400">{unit}</span>}
       </div>
     </div>
   );
@@ -197,49 +153,76 @@ function StatBox({ label, value, unit }: StatBoxProps) {
 
 export default function WorkflowSimulator() {
   const [platform, setPlatform] = useState<keyof typeof PLATFORM_PRICING>("n8n");
-  const [executions, setExecutions] = useState(10000); // Default to 10k
-  const [stepsPerExec, setStepsPerExec] = useState(5); // Default to 5
-  const [aiModel, setAiModel] = useState("gpt4o-mini"); // Default to gpt4o-mini
-  const [aiCalls, setAiCalls] = useState(1); // Default to 1 call per exec
+  const [executions, setExecutions] = useState(10000); 
+  const [stepsPerExec, setStepsPerExec] = useState(5); 
+  const [aiModel, setAiModel] = useState("gpt4o-mini"); 
+  const [aiCalls, setAiCalls] = useState(1); 
   const [tokensPerCall, setTokensPerCall] = useState(1000);
   const [isAnnual, setIsAnnual] = useState(false);
-  const [compareMode, setCompareMode] = useState(true); // Default to true
+  const [isSelfHosted, setIsSelfHosted] = useState(false);
+  const [currency, setCurrency] = useState<"USD" | "PHP">("USD");
+  const [highFreqPolling, setHighFreqPolling] = useState(false);
+  const [failureRate, setFailureRate] = useState(5); // %
+  const [agentDepth, setAgentDepth] = useState(1); // loops
+  const [manualMinutesPerTask, setManualMinutesPerTask] = useState(15);
+  const [hourlyLaborRate, setHourlyLaborRate] = useState(25);
+
   const [copied, setCopied] = useState(false);
   const [displayCost, setDisplayCost] = useState(0);
   const animationRef = useRef<number | null>(null);
 
   const model = AI_MODELS.find((m) => m.id === aiModel) || AI_MODELS[0];
 
+  const fmt = (n: number) => {
+    const val = currency === "PHP" ? n * PHP_RATE : n;
+    const symbol = currency === "PHP" ? "₱" : "$";
+    return `${symbol}${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
+  const fmtK = (n: number): string => {
+    if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
+    if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+    return n.toString();
+  };
+
   // Calculate costs for a specific platform
   const getCostsForPlatform = useCallback((p: keyof typeof PLATFORM_PRICING) => {
     let baseCost = 0;
+    const pollingMultiplier = highFreqPolling ? 2 : 1;
+    const effectiveExecs = executions * pollingMultiplier;
 
     if (p === "n8n") {
-      const config = PLATFORM_PRICING.n8n;
-      baseCost = Math.max(0, (executions - config.freeExecs) * config.pricePerExecution);
+      if (isSelfHosted) {
+        baseCost = 10; // VPS server cost estimate
+      } else {
+        const config = PLATFORM_PRICING.n8n;
+        baseCost = Math.max(0, (effectiveExecs - config.freeExecs) * config.pricePerExecution);
+      }
     } else if (p === "make") {
       const config = PLATFORM_PRICING.make;
-      const ops = executions * stepsPerExec;
+      const ops = effectiveExecs * stepsPerExec;
       baseCost = Math.max(0, (ops - config.freeOps) * config.pricePerOp);
     } else if (p === "zapier") {
       const config = PLATFORM_PRICING.zapier;
-      baseCost = Math.max(0, (executions - config.freeTasks) * config.pricePerTask);
+      baseCost = Math.max(0, (effectiveExecs - config.freeTasks) * config.pricePerTask);
     }
 
     const platformConfig = PLATFORM_PRICING[p];
-    if (isAnnual) {
+    if (isAnnual && !(p === "n8n" && isSelfHosted)) {
         baseCost = baseCost * (1 - platformConfig.annualDiscount);
     }
 
     let aiCost = 0;
     if (aiModel !== "none" && aiCalls > 0) {
-      const inputTokens = (executions * aiCalls) * tokensPerCall;
-      const outputTokens = inputTokens * 0.3; // Assume 30% of input for output
+      const stabilityBuffer = 1 + (failureRate / 100);
+      const totalCalls = aiCalls * agentDepth * stabilityBuffer;
+      const inputTokens = (executions * totalCalls) * tokensPerCall;
+      const outputTokens = inputTokens * 0.3; 
       aiCost = inputTokens * (model.inputCost / 1000000) + outputTokens * (model.outputCost / 1000000);
     }
 
     return { baseCost, aiCost, total: baseCost + aiCost };
-  }, [executions, stepsPerExec, aiModel, aiCalls, tokensPerCall, model, isAnnual]);
+  }, [executions, stepsPerExec, aiModel, aiCalls, tokensPerCall, model, isAnnual, isSelfHosted, highFreqPolling, failureRate, agentDepth]);
 
   const costs = getCostsForPlatform(platform);
 
@@ -260,11 +243,37 @@ export default function WorkflowSimulator() {
         cheapest,
         savings: diff,
         scalable: "n8n" as const,
-        aiHeavy: "n8n" as const, // n8n is generally better for complex AI flows due to execution-based pricing
+        aiHeavy: "n8n" as const,
     };
   }, [allPlatformCosts]);
 
-  // Template handler
+  const roiData = useMemo(() => {
+    const totalManualHours = (executions * manualMinutesPerTask) / 60;
+    const grossHumanCost = totalManualHours * hourlyLaborRate;
+    const netSavings = grossHumanCost - costs.total;
+    const roiPercent = costs.total > 0 ? (netSavings / costs.total) * 100 : 0;
+
+    return {
+      hoursSaved: totalManualHours.toFixed(1),
+      humanCost: grossHumanCost,
+      savings: netSavings,
+      roi: roiPercent.toFixed(0)
+    };
+  }, [executions, manualMinutesPerTask, hourlyLaborRate, costs.total]);
+
+  // Context Window Traffic Light
+  const contextUsage = useMemo(() => {
+    if (aiModel === "none") return { percent: 0, status: "safe", total: 0 };
+    // Estimate growth: tokens grow with steps if history is passed
+    const estimatedHistory = tokensPerCall * (stepsPerExec / 2); 
+    const totalEstimatedContext = tokensPerCall + estimatedHistory;
+    const percent = (totalEstimatedContext / model.limit) * 100;
+    let status = "safe";
+    if (percent > 80) status = "danger";
+    else if (percent > 50) status = "warning";
+    return { percent, status, total: totalEstimatedContext };
+  }, [tokensPerCall, stepsPerExec, model, aiModel]);
+
   const applyTemplate = (templateId: string) => {
     const t = TEMPLATES.find(tmp => tmp.id === templateId);
     if (t) {
@@ -276,12 +285,11 @@ export default function WorkflowSimulator() {
     }
   };
 
-  // Animate cost display
   useEffect(() => {
     let startValue = displayCost;
     const targetValue = costs.total;
     const startTime = Date.now();
-    const duration = 400; // ms
+    const duration = 400; 
 
     const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
 
@@ -303,21 +311,24 @@ export default function WorkflowSimulator() {
     };
   }, [costs.total]);
 
-  // Copy summary functionality
   const copySummary = useCallback(async () => {
     const summary = `FlowCost Summary — A TokenSense-AI Tool
 -----------------------------------------
-Platform: ${PLATFORM_PRICING[platform].name}
+Platform: ${PLATFORM_PRICING[platform].name}${platform === 'n8n' && isSelfHosted ? ' (Self-Hosted)' : ''}
+Currency: ${currency}
 Billing: ${isAnnual ? 'Annual (Monthly Avg)' : 'Monthly'}
 Executions: ${fmtK(executions)}
 Steps per Execution: ${stepsPerExec}
 AI Model: ${model.label}
 AI Calls: ${fmtK(executions * aiCalls)} total/mo
+Agent Depth: ${agentDepth}x
+Failure Rate: ${failureRate}%
 Tokens per Call: ${fmtK(tokensPerCall)}
 
 Base Platform Cost: ${fmt(costs.baseCost)}
 AI Model Cost: ${fmt(costs.aiCost)}
 Total Monthly: ${fmt(costs.total)}
+Net Savings (ROI): ${fmt(roiData.savings)}
 -----------------------------------------
 Calculated at: tokensense-ai.com/workflow`;
 
@@ -328,7 +339,7 @@ Calculated at: tokensense-ai.com/workflow`;
     } catch (err) {
       console.error("Failed to copy:", err);
     }
-  }, [platform, executions, stepsPerExec, aiModel, aiCalls, tokensPerCall, costs, model.label, isAnnual]);
+  }, [platform, isSelfHosted, currency, executions, stepsPerExec, aiModel, aiCalls, agentDepth, failureRate, tokensPerCall, costs, model.label, isAnnual, roiData.savings]);
 
   const platformConfig = PLATFORM_PRICING[platform];
   const annualBase = costs.total * 12;
@@ -353,6 +364,17 @@ Calculated at: tokensense-ai.com/workflow`;
 
             <div className="flex flex-wrap items-center gap-4">
                 <div className="flex items-center space-x-2 bg-white/5 rounded-full px-4 py-2 border border-white/10">
+                    <button 
+                      onClick={() => setCurrency("USD")}
+                      className={cn("text-xs font-bold px-2 py-1 rounded-md transition-all", currency === "USD" ? "bg-indigo-500 text-white" : "text-slate-500 hover:text-slate-300")}
+                    >USD</button>
+                    <button 
+                      onClick={() => setCurrency("PHP")}
+                      className={cn("text-xs font-bold px-2 py-1 rounded-md transition-all", currency === "PHP" ? "bg-indigo-500 text-white" : "text-slate-500 hover:text-slate-300")}
+                    >PHP</button>
+                </div>
+
+                <div className="flex items-center space-x-2 bg-white/5 rounded-full px-4 py-2 border border-white/10">
                     <Label htmlFor="billing-toggle" className={`text-xs font-bold uppercase tracking-wider ${!isAnnual ? 'text-indigo-400' : 'text-slate-500'}`}>Monthly</Label>
                     <Switch 
                         id="billing-toggle" 
@@ -360,7 +382,6 @@ Calculated at: tokensense-ai.com/workflow`;
                         onCheckedChange={setIsAnnual}
                     />
                     <Label htmlFor="billing-toggle" className={`text-xs font-bold uppercase tracking-wider ${isAnnual ? 'text-indigo-400' : 'text-slate-500'}`}>Annual</Label>
-                    {isAnnual && <span className="ml-2 text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded-md font-bold">SAVING UP TO 33%</span>}
                 </div>
 
                 <Select onValueChange={applyTemplate}>
@@ -377,7 +398,7 @@ Calculated at: tokensense-ai.com/workflow`;
             </div>
           </div>
 
-          {/* ── Side-by-Side Comparison Row (New Default) ── */}
+          {/* ── Side-by-Side Comparison Row ── */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {Object.entries(allPlatformCosts).map(([key, pCosts]) => {
               const p = key as keyof typeof PLATFORM_PRICING;
@@ -389,11 +410,12 @@ Calculated at: tokensense-ai.com/workflow`;
                 <div 
                     key={p}
                     onClick={() => setPlatform(p)}
-                    className={`relative cursor-pointer group rounded-2xl border-2 p-5 transition-all duration-300 ${
-                        isSelected 
+                    className={cn(
+                      "relative cursor-pointer group rounded-2xl border-2 p-5 transition-all duration-300",
+                      isSelected 
                         ? 'bg-white/10 border-indigo-500/50 shadow-2xl shadow-indigo-500/10' 
                         : 'bg-white/5 border-white/5 hover:border-white/20'
-                    }`}
+                    )}
                 >
                     {isCheapest && (
                         <div className="absolute -top-3 left-4 bg-green-500 text-black text-[10px] font-black px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
@@ -401,13 +423,6 @@ Calculated at: tokensense-ai.com/workflow`;
                             CHEAPEST
                         </div>
                     )}
-                    {p === recommendations.scalable && (
-                        <div className="absolute -top-3 right-4 bg-indigo-500 text-white text-[10px] font-black px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
-                            <Shield className="w-3 h-3" />
-                            MOST SCALABLE
-                        </div>
-                    )}
-
                     <div className="flex items-center justify-between mb-4">
                         <div className="text-sm font-black uppercase tracking-widest" style={{ color: config.brandColor }}>{config.name}</div>
                         <div className={`p-1 rounded-full transition-colors ${isSelected ? 'bg-indigo-500 text-white' : 'bg-white/10 text-slate-500'}`}>
@@ -418,16 +433,9 @@ Calculated at: tokensense-ai.com/workflow`;
                     <div className="space-y-1">
                         <div className="text-3xl font-black text-white font-mono">{fmt(pCosts.total)}<span className="text-xs text-slate-500 ml-1">/mo</span></div>
                         <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-                            ${pCosts.baseCost.toFixed(2)} Base + ${pCosts.aiCost.toFixed(2)} AI
+                            {fmt(pCosts.baseCost)} Base + {fmt(pCosts.aiCost)} AI
                         </div>
                     </div>
-
-                    {isCheapest && platform !== p && (
-                        <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-2 text-[11px] text-green-400 font-bold">
-                            <Sparkles className="w-3.5 h-3.5" />
-                            Save {fmt(recommendations.savings)}/mo
-                        </div>
-                    )}
                 </div>
               );
             })}
@@ -443,48 +451,63 @@ Calculated at: tokensense-ai.com/workflow`;
                         <Zap className="w-5 h-5 text-indigo-400" />
                         Workflow Parameters
                     </h2>
-                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Adjust to your scale</div>
+                    <div className="flex items-center gap-4">
+                      {platform === 'n8n' && (
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="self-hosted" className="text-[10px] font-bold text-slate-500 uppercase">Self-Hosted</Label>
+                          <Switch id="self-hosted" checked={isSelfHosted} onCheckedChange={setIsSelfHosted} />
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="high-freq" className="text-[10px] font-bold text-slate-500 uppercase">High Polling</Label>
+                        <Switch id="high-freq" checked={highFreqPolling} onCheckedChange={setHighFreqPolling} />
+                      </div>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
-                    <div className="space-y-6">
-                        <div className="flex items-center gap-2">
-                            <Slider
-                                label="Monthly Executions"
-                                value={executions}
-                                min={100}
-                                max={100000}
-                                step={100}
-                                onChange={setExecutions}
-                                unit="runs"
-                            />
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Info className="w-3.5 h-3.5 text-slate-600 hover:text-slate-400 cursor-help mt-6" />
-                                </TooltipTrigger>
-                                <TooltipContent className="bg-slate-900 border-white/10 text-xs p-3 max-w-[200px]">
-                                    How many times the entire workflow runs in a single month.
-                                </TooltipContent>
-                            </Tooltip>
-                        </div>
+                    <div className="space-y-8">
+                        <Slider
+                            label="Monthly Executions"
+                            value={executions}
+                            min={100}
+                            max={100000}
+                            step={100}
+                            onChange={setExecutions}
+                            unit="runs"
+                        />
 
-                        <div className="flex items-center gap-2">
-                            <Slider
-                                label="Steps Per Execution"
-                                value={stepsPerExec}
-                                min={1}
-                                max={30}
-                                onChange={setStepsPerExec}
-                            />
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Info className="w-3.5 h-3.5 text-slate-600 hover:text-slate-400 cursor-help mt-6" />
-                                </TooltipTrigger>
-                                <TooltipContent className="bg-slate-900 border-white/10 text-xs p-3 max-w-[200px]">
-                                    <p className="font-bold mb-1">What counts as a step?</p>
-                                    {platformConfig.tooltip}
-                                </TooltipContent>
-                            </Tooltip>
+                        <div className="space-y-4">
+                          <Slider
+                              label="Steps Per Execution"
+                              value={stepsPerExec}
+                              min={1}
+                              max={50}
+                              onChange={setStepsPerExec}
+                              color="#a855f7"
+                          />
+                          {/* Context Light System */}
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-[10px] uppercase font-bold tracking-widest">
+                              <span className="text-slate-500">Context Growth Buffer</span>
+                              <span className={cn(
+                                contextUsage.status === 'danger' ? 'text-red-400' : 
+                                contextUsage.status === 'warning' ? 'text-amber-400' : 'text-green-400'
+                              )}>
+                                {fmtK(contextUsage.total)} / {fmtK(model.limit)}
+                              </span>
+                            </div>
+                            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                              <div 
+                                className={cn(
+                                  "h-full transition-all duration-500",
+                                  contextUsage.status === 'danger' ? 'bg-red-500' : 
+                                  contextUsage.status === 'warning' ? 'bg-amber-500' : 'bg-green-500'
+                                )}
+                                style={{ width: `${Math.min(100, contextUsage.percent)}%` }}
+                              />
+                            </div>
+                          </div>
                         </div>
                     </div>
 
@@ -504,28 +527,103 @@ Calculated at: tokensense-ai.com/workflow`;
                         </div>
 
                         {aiModel !== "none" && (
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">AI Calls / Run</label>
-                                    <Input 
-                                        type="number" 
-                                        value={aiCalls} 
-                                        onChange={(e) => setAiCalls(Number(e.target.value))}
-                                        className="bg-white/5 border-white/10 h-10 text-sm font-mono"
-                                    />
+                            <div className="space-y-6 animate-in fade-in duration-300">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">AI Calls / Run</label>
+                                        <Input 
+                                            type="number" 
+                                            value={aiCalls} 
+                                            onChange={(e) => setAiCalls(Number(e.target.value))}
+                                            className="bg-white/5 border-white/10 h-10 text-sm font-mono"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Tokens / Call</label>
+                                        <Input 
+                                            type="number" 
+                                            value={tokensPerCall} 
+                                            onChange={(e) => setTokensPerCall(Number(e.target.value))}
+                                            className="bg-white/5 border-white/10 h-10 text-sm font-mono"
+                                        />
+                                    </div>
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Tokens / Call</label>
-                                    <Input 
-                                        type="number" 
-                                        value={tokensPerCall} 
-                                        onChange={(e) => setTokensPerCall(Number(e.target.value))}
-                                        className="bg-white/5 border-white/10 h-10 text-sm font-mono"
-                                    />
+
+                                <div className="space-y-6 pt-4 border-t border-white/5">
+                                  <Slider 
+                                    label="Agentic Stability Buffer (Failure %)"
+                                    value={failureRate}
+                                    min={0}
+                                    max={50}
+                                    onChange={setFailureRate}
+                                    unit="%"
+                                    color="#f43f5e"
+                                  />
+                                  <Slider 
+                                    label="Multi-Turn Agent Depth"
+                                    value={agentDepth}
+                                    min={1}
+                                    max={10}
+                                    onChange={setAgentDepth}
+                                    unit="loops"
+                                    color="#8b5cf6"
+                                  />
                                 </div>
                             </div>
                         )}
                     </div>
+                </div>
+              </div>
+
+              {/* ROI & Business Case Section */}
+              <div className="bg-indigo-500/5 border border-indigo-500/20 rounded-3xl p-8 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-indigo-500/20 rounded-xl text-indigo-400 shadow-lg shadow-indigo-500/10">
+                    <BarChart3 className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white">ROI & Business Case</h3>
+                    <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">Manual Labor vs. AI Automation</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  <Slider 
+                    label="Manual Time per Task"
+                    value={manualMinutesPerTask}
+                    min={1}
+                    max={120}
+                    onChange={setManualMinutesPerTask}
+                    unit="min"
+                    color="#6366f1"
+                  />
+                  <Slider 
+                    label="Employee Hourly Rate"
+                    value={hourlyLaborRate}
+                    min={10}
+                    max={250}
+                    onChange={setHourlyLaborRate}
+                    unit={currency === 'PHP' ? '₱/hr' : '$/hr'}
+                    color="#6366f1"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-8 border-t border-indigo-500/10">
+                  <div className="bg-white/5 rounded-2xl p-5 border border-white/5 text-center group hover:border-indigo-500/30 transition-all">
+                    <div className="text-[10px] uppercase font-black text-slate-500 tracking-widest mb-2">Hours Saved</div>
+                    <div className="text-2xl font-black text-white font-mono">{roiData.hoursSaved}h</div>
+                    <div className="text-[9px] text-slate-600 mt-1 font-bold">PER MONTH</div>
+                  </div>
+                  <div className="bg-white/5 rounded-2xl p-5 border border-white/5 text-center group hover:border-indigo-500/30 transition-all">
+                    <div className="text-[10px] uppercase font-black text-slate-500 tracking-widest mb-2">Human Cost</div>
+                    <div className="text-2xl font-black text-white font-mono">{fmt(roiData.humanCost)}</div>
+                    <div className="text-[9px] text-slate-600 mt-1 font-bold">REPLACEMENT VALUE</div>
+                  </div>
+                  <div className="bg-green-500/10 rounded-2xl p-5 border border-green-500/20 text-center shadow-2xl shadow-green-500/5">
+                    <div className="text-[10px] uppercase font-black text-green-400 tracking-widest mb-2">Net Savings</div>
+                    <div className="text-2xl font-black text-green-400 font-mono">{fmt(roiData.savings)}</div>
+                    <div className="text-[10px] text-green-500/60 mt-1 font-bold">{roiData.roi}% RETURN ON SPEND</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -535,51 +633,59 @@ Calculated at: tokensense-ai.com/workflow`;
                 <div className="bg-slate-900 border-2 rounded-3xl p-8 sticky top-6 shadow-2xl transition-all duration-500" style={{ borderColor: platformConfig.brandColor }}>
                     <div className="space-y-6">
                         <div className="flex items-center justify-between">
-                            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{platformConfig.name} Estimate</div>
-                            <div className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[9px] font-bold text-slate-400">MARCH 2026</div>
+                            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                              {platformConfig.name} {platform === 'n8n' && isSelfHosted ? '(Self-Hosted)' : 'Estimate'}
+                            </div>
+                            <div className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[9px] font-bold text-slate-400">APRIL 2026</div>
                         </div>
 
                         <div className="space-y-1">
-                            <div className="text-5xl font-black text-white font-mono tracking-tighter">${displayCost.toFixed(2)}</div>
-                            <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Per Month (Avg)</div>
+                            <div className="text-5xl font-black text-white font-mono tracking-tighter">{fmt(costs.total)}</div>
+                            <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Total Monthly Cost</div>
                         </div>
 
-                        <div className="space-y-4 pt-6 border-t border-white/5">
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-slate-400 font-medium">Platform Fees</span>
-                                <span className="text-white font-mono font-bold">{fmt(costs.baseCost)}</span>
+                        <div className="space-y-4 pt-6 border-t border-white/5 text-sm font-bold">
+                            <div className="flex items-center justify-between">
+                                <span className="text-slate-400">Platform Fees</span>
+                                <span className="text-white font-mono">{fmt(costs.baseCost)}</span>
                             </div>
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-slate-400 font-medium">AI Token Cost</span>
-                                <span className="text-white font-mono font-bold">{fmt(costs.aiCost)}</span>
+                            <div className="flex items-center justify-between">
+                                <span className="text-slate-400">AI Token Cost</span>
+                                <span className="text-white font-mono">{fmt(costs.aiCost)}</span>
                             </div>
-                            <div className="flex items-center justify-between text-lg font-bold pt-4 border-t border-white/10">
+                            <div className="flex items-center justify-between text-lg pt-4 border-t border-white/10">
                                 <span className="text-white">Annual Total</span>
                                 <span className="text-indigo-400 font-mono">{fmt(annualBase)}</span>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3 pt-6">
+                        {/* Token Efficiency Badge */}
+                        {roiData.roi !== '0' && (
+                          <div className={cn(
+                            "rounded-xl p-3 border text-center transition-all animate-pulse",
+                            Number(roiData.roi) > 500 ? "bg-green-500/10 border-green-500/20 text-green-400" : "bg-indigo-500/10 border-indigo-500/20 text-indigo-400"
+                          )}>
+                            <div className="text-[10px] font-black uppercase tracking-tighter">Efficiency Score</div>
+                            <div className="text-lg font-black">{Number(roiData.roi) > 500 ? 'Extreme Value' : 'Highly Efficient'}</div>
+                          </div>
+                        )}
+
+                        <div className="grid grid-cols-2 gap-3 pt-2">
                             <Button 
                                 onClick={copySummary}
-                                className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-wider py-6"
+                                className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-wider py-6 h-auto flex flex-col gap-1"
                             >
-                                {copied ? <Check className="w-4 h-4 mr-2 text-green-400" /> : <Copy className="w-4 h-4 mr-2 text-slate-400" />}
-                                {copied ? "Copied" : "Copy Summary"}
+                                {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4 text-slate-400" />}
+                                <span>{copied ? "Copied" : "Copy"}</span>
                             </Button>
                             <Button 
                                 variant="outline"
-                                className="border-indigo-500/30 bg-indigo-500/5 hover:bg-indigo-500/10 text-indigo-400 font-bold text-xs uppercase tracking-wider py-6"
+                                className="border-indigo-500/30 bg-indigo-500/5 hover:bg-indigo-500/10 text-indigo-400 font-bold text-xs uppercase tracking-wider py-6 h-auto flex flex-col gap-1"
                             >
-                                <FileDown className="w-4 h-4 mr-2" />
-                                PDF
+                                <FileDown className="w-4 h-4" />
+                                <span>PDF Report</span>
                             </Button>
                         </div>
-
-                        <p className="text-[9px] text-slate-600 leading-relaxed text-center">
-                            * {platformConfig.name} billing unit: {platformConfig.billingUnit}s. AI costs estimated on typical input/output ratios. 
-                            {isAnnual ? ' Annual pricing includes standard platform prepay discounts.' : ''}
-                        </p>
                     </div>
                 </div>
                 
@@ -594,6 +700,7 @@ Calculated at: tokensense-ai.com/workflow`;
                             💡 {platform === "zapier" ? "Zapier is great for simple connections, but at this volume, n8n Cloud would save you significant platform fees." : ""}
                             {platform === "make" ? "Your multi-step workflow uses many operations. Monitor your Make usage closely as it can scale costs faster than executions." : ""}
                             {platform === "n8n" ? "Your workflow is well-optimized for n8n's execution-based billing. High step counts don't increase your platform bill here." : ""}
+                            {isSelfHosted && " Self-hosting n8n on a $10/mo VPS provides the absolute lowest TCO for production workflows."}
                         </div>
                     </div>
                 </div>
@@ -605,4 +712,3 @@ Calculated at: tokensense-ai.com/workflow`;
     </div>
   );
 }
-

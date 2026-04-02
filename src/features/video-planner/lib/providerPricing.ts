@@ -68,6 +68,28 @@ export const PROVIDER_MODELS: ProviderModel[] = [
     contextWindowTokens: 128_000,
     apiDocsUrl: "https://openai.com/pricing",
   },
+  {
+    id: "openai-sora",
+    provider: "OpenAI",
+    modelName: "sora-v1",
+    displayName: "Sora (Estimate)",
+    inputPricePerKToken: 0.015, // Higher estimated cost for video generation/processing
+    supportsNativeVideo: true,
+    supportsAudio: true,
+    contextWindowTokens: 500_000,
+    apiDocsUrl: "https://openai.com/sora",
+  },
+  {
+    id: "kling-1-5",
+    provider: "Kling AI",
+    modelName: "kling-1.5",
+    displayName: "Kling 1.5",
+    inputPricePerKToken: 0.008,
+    supportsNativeVideo: true,
+    supportsAudio: true,
+    contextWindowTokens: 300_000,
+    apiDocsUrl: "https://klingai.com/",
+  },
 ];
 
 export interface CostEstimate {

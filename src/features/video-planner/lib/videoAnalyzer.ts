@@ -6,8 +6,9 @@ export interface VideoMetadata {
   hasAudio: boolean;
   audioDurationSeconds: number;
   fileSizeMb?: number;
-  source: "file" | "url";
+  source: "file" | "url" | "batch";
   originalUrl?: string;
+  name?: string;
 }
 
 // Client-side: works for uploaded files only
