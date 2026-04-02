@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "Tokensense-Ai FAQ | Understanding AI Tokens & API Costs",
   description: "Find answers to common questions about AI tokens, LLM API pricing, and how Tokensense-Ai calculates costs privately for GPT-4, Claude, and Gemini.",
   alternates: {
-    canonical: 'https://www.tokensense-ai.com/faq',
+    canonical: '/faq',
   },
   openGraph: {
     title: "Frequently Asked Questions | Tokensense-Ai",

@@ -15,12 +15,12 @@ export const metadata: Metadata = {
   description: "Calculate AI prompt costs instantly. Estimate token usage and API pricing for GPT-5, Claude 3.5, and Gemini. 100% client-side, private, and no sign-up required.",
   keywords: ["LLM token counter", "prompt cost calculator", "GPT-5 pricing", "AI developer tools", "Claude token count", "Gemini API cost"],
   alternates: {
-    canonical: 'https://www.tokensense-ai.com/',
+    canonical: '/',
   },
   openGraph: {
     title: "Tokensense-Ai | AI Prompt Cost Calculator",
     description: "Know your API costs before you hit send. 100% private, client-side token counting.",
-    url: 'https://www.tokensense-ai.com/',
+    url: 'https://www.tokensense-ai.com',
     siteName: 'Tokensense-Ai',
     images: [
       {

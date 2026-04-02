@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { countTokensSync } from "@/lib/tokenizer";
 import { models, ModelConfig, getModelById } from "@/lib/models";
+import { useTokenSenseStore } from "@/lib/store";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -113,6 +114,7 @@ function AnimatedCostBar({ ratio }: { ratio: number }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function ModelComparisonTable() {
+    const { setMissionStep } = useTokenSenseStore();
     // Live token sliders state
     const [inputTokens, setInputTokens] = useState(10000);
     const [outputTokens, setOutputTokens] = useState(2000);
@@ -590,13 +592,20 @@ export default function ModelComparisonTable() {
             </div>
 
             {/* ── Call to Action ── */}
-            <div className="bg-white/[0.02] border border-white/5 p-8 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="bg-indigo-500/5 border border-indigo-500/10 p-8 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="space-y-2">
-                    <h3 className="text-xl font-bold text-white">Need a custom enterprise estimate?</h3>
-                    <p className="text-sm text-slate-400">We can help you calculate tokens for millions of requests with volume discounts.</p>
+                    <h3 className="text-xl font-bold text-white uppercase tracking-tighter">Ready to complete the mission?</h3>
+                    <p className="text-sm text-slate-400">Review your final optimization report and manifest.</p>
                 </div>
-                <Button className="bg-white text-black hover:bg-slate-200 font-bold px-8 h-12 rounded-xl">
-                    Contact Sales Engineering
+                <Button 
+                    asChild
+                    onClick={() => setMissionStep(6)}
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-black px-8 h-14 rounded-2xl shadow-lg shadow-indigo-500/20 gap-3 group"
+                >
+                    <Link href="/workflow">
+                        <Sparkles className="w-5 h-5 fill-white group-hover:animate-spin-slow" />
+                        Generate Final Report ➔
+                    </Link>
                 </Button>
             </div>
         </div>

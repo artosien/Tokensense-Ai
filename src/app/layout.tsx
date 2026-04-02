@@ -1,6 +1,6 @@
 import type { Viewport, Metadata } from "next";
 import Script from "next/script";
-import { Inter } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import BackToTop from "@/components/BackToTop";
 import Footer from "@/components/Footer";
@@ -13,6 +13,11 @@ import { getMessages } from 'next-intl/server';
 
 const inter = Inter({
   variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
   subsets: ["latin"],
 });
 
@@ -108,7 +113,7 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
         <AuthProvider>
           <ThemeProvider>
             <NextIntlClientProvider messages={messages} locale="en">

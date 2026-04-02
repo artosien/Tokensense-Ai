@@ -1,6 +1,8 @@
 import ModelComparisonTable from "@/components/ModelComparisonTable";
 import SiteHeader from "@/components/SiteHeader";
 import SocialShareBar from "@/components/SocialShareBar";
+import { Button } from "@/components/ui/button";
+import { Sparkles } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 import { useTranslations } from "next-intl";
 import type { Metadata } from "next";
@@ -11,7 +13,7 @@ export const metadata: Metadata = {
   title: "LLM Model Pricing Comparison | GPT-4o vs Claude 3.5 vs Gemini",
   description: "Side-by-side cost comparison of top AI models. Analyze input/output token pricing and find the most cost-effective LLM for your scale.",
   alternates: {
-    canonical: 'https://www.tokensense-ai.com/comparison',
+    canonical: '/comparison',
   },
   openGraph: {
     title: "LLM Price Comparison Tool | Tokensense",
@@ -138,6 +140,19 @@ export default function ComparisonPage() {
                 </p>
 
                 <SocialShareBar variant="bottom" />
+
+                {/* Next Step CTA */}
+                <div className="mt-12 pt-8 border-t border-border/40">
+                    <Button 
+                        asChild
+                        className="w-full h-16 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-lg shadow-xl shadow-indigo-500/20 gap-4 group"
+                    >
+                        <Link href="/workflow">
+                            <Sparkles className="w-6 h-6 fill-white group-hover:animate-spin-slow" />
+                            Comms Review Complete. Generate Final Flight Report ➔
+                        </Link>
+                    </Button>
+                </div>
 
                 {/* ACCESSIBILITY TIP / SEO DATA */}
                 <div className="sr-only">

@@ -7,9 +7,8 @@ export const metadata: Metadata = {
   title: "Terms of Service | Tokensense-Ai",
   description: "Please read the Terms of Service for Tokensense-Ai. Understand the guidelines, permitted uses, and disclaimers for our free browser-based LLM cost estimation tool.",
   alternates: {
-    canonical: 'https://www.tokensense-ai.com/terms',
-  },
-  openGraph: {
+      canonical: '/terms',
+  },  openGraph: {
     title: "Terms of Service | Tokensense-Ai",
     description: "Usage policies and legal guidelines for our privacy-first AI token calculator.",
     url: 'https://www.tokensense-ai.com/terms',

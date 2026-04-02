@@ -9,6 +9,9 @@ export const metadata: Metadata = {
     title: "Contact Us | Tokensense-Ai",
     description:
         "Get in touch with the Tokensense-Ai team. Have a question, feedback, or a feature request? We would love to hear from you.",
+    alternates: {
+        canonical: '/contact',
+    },
 };
 
 export const dynamic = 'force-static';

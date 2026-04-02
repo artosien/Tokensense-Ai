@@ -10,9 +10,8 @@ export const metadata: Metadata = {
   title: "LLM Batch Cost Planner | Predict Large-Scale AI API Expenses",
   description: "Estimate total investment for large-scale AI batches. Calculate costs per batch, daily runs, and monthly projections across OpenAI, Google Gemini, and Llama models.",
   alternates: {
-    canonical: 'https://www.tokensense-ai.com/tools/batch',
-  },
-  openGraph: {
+      canonical: '/tools/batch',
+  },  openGraph: {
     title: "LLM Batch Cost Planner | Tokensense",
     description: "Scale from one prompt to millions. Predict your AI budget for massive data workloads instantly.",
     url: 'https://www.tokensense-ai.com/tools/batch',

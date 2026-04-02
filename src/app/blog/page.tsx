@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: "Tokensense-Ai Blog | LLM Economics, Prompt Engineering & Cost Optimization",
   description: "Expert insights on reducing AI API costs, mastering prompt engineering, and staying ahead of LLM pricing trends. Learn how to optimize GPT-5, Claude, and Gemini usage.",
   alternates: {
-    canonical: 'https://www.tokensense-ai.com/blog',
+    canonical: '/blog',
   },
   openGraph: {
     title: "Tokensense-Ai Blog | Intelligence on AI Costs",

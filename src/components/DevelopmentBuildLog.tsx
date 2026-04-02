@@ -58,6 +58,13 @@ const buildLogItems = [
   "[2026-03-17] Fix 7 — Verified mobile responsiveness: Headlines scale gracefully (5xl→6xl→7xl), badges wrap cleanly, CTA full-width on mobile, min-height preserved at 85vh.",
   "[2026-03-17] Fix hydration error: Moved scroll handler to component level, added typeof check for client-side DOM access.",
   "[2026-03-17] Fix missing imports: Added TrustMessage imports to workflow, caching, and contact pages.",
+  "[2026-04-02] Comprehensive Tool Overhaul: Transform static dashboards into interactive developer workbases.",
+  "[2026-04-02] Update Batch Cost Planner: Add 'Optimization Suite' with Throughput Forecaster, Reliability Buffer, and Print-ready Executive Reports.",
+  "[2026-04-02] Enhance Pricing History: Implement 'Deflation Index', 'Model Migration ROI' forecaster, and 'Value Outlier' benchmark scatter plots.",
+  "[2026-04-02] Upgrade Prompt Compression: Add Lossless vs. Extreme modes, Semantic Fidelity Scoring, Visual Diffing, and Data Minification.",
+  "[2026-04-02] Refactor Context Visualizer: Add 'Needle-in-a-Haystack' simulator, interactive history pruning, and TTFT latency estimates.",
+  "[2026-04-02] Rebuild Caching Tool: Integrate 'Break-Even' logic, TTL strategy planning, and multi-turn conversation growth simulations.",
+  "[2026-04-02] System-wide Update: Synchronize Tokenizer Sync across all tools; update Sitemap and metadata for new tool discovery.",
 ];
 
 const RECENT_COUNT = 8;

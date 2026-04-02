@@ -22,6 +22,7 @@ import { SamplePromptSelection } from "@/components/SamplePromptSelection";
 import { TermTooltip } from "@/components/TermTooltip";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 
 export default function PromptEditor() {
     const t = useTranslations("calculator");
@@ -38,6 +39,9 @@ export default function PromptEditor() {
         setInputTokenCount,
         selectedModelId,
         setActiveTab,
+        setRawPrompt,
+        setOptimizedPrompt,
+        setMissionStep
     } = useTokenSenseStore();
 
     const [savingsMessage, setSavingsMessage] = useState<string | null>(null);
@@ -49,6 +53,11 @@ export default function PromptEditor() {
     const systemPromptRef = useRef(systemPrompt);
     const userPromptRef = useRef(userPrompt);
     const userPromptInputRef = useRef<HTMLTextAreaElement>(null);
+
+    // Sync store rawPrompt
+    useEffect(() => {
+        setRawPrompt(userPrompt);
+    }, [userPrompt, setRawPrompt]);
 
     // Auto-focus on mount
     useEffect(() => {
@@ -185,6 +194,7 @@ export default function PromptEditor() {
         if (tokensSaved > 0) {
             setSystemPrompt(newSystem);
             setUserPrompt(newUser);
+            setOptimizedPrompt(newUser);
 
             import("@/lib/models").then(({ models }) => {
                 const model = models.find(m => m.id === selectedModelId) || models[0];
@@ -213,6 +223,8 @@ export default function PromptEditor() {
       // Switch to results tab
       setActiveTab("results");
     };
+
+    const totalTkn = countTokensSync(userPrompt) + countTokensSync(systemPrompt) + countTokensSync(fileText);
 
     return (
         <div className="space-y-6">
@@ -427,6 +439,20 @@ export default function PromptEditor() {
                       <span>32k</span>
                   </div>
                 </div>
+            </div>
+
+            {/* Next Step CTA */}
+            <div className="pt-6 border-t border-border/40">
+                <Button 
+                    asChild
+                    onClick={() => setMissionStep(2)}
+                    className="w-full h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-base shadow-lg shadow-indigo-500/20 gap-3 group"
+                >
+                    <Link href="/tools/context">
+                        <Zap className="w-5 h-5 fill-white group-hover:animate-pulse" />
+                        Payload Loaded: {totalTkn.toLocaleString()} Tokens. Proceed to Stress Test ➔
+                    </Link>
+                </Button>
             </div>
 
             {/* Calculate Button (Mobile Only - M7) */}

@@ -1,20 +1,31 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
+export type DeliveryMode = "real-time" | "batch";
+
+interface TokenMetrics {
+    input: number;
+    output: number;
+    static: number;
+}
 
 interface TokenSenseState {
-    // Prompt text
-    systemPrompt: string;
+    // Mission Context (Persistent Payload)
+    rawPrompt: string;
+    optimizedPrompt: string;
+    systemPrompt: string; // The "Rules of the House"
     userPrompt: string;
     fileText: string;
 
-    // Model selection
+    // Model & Delivery
     selectedModelId: string;
+    deliveryMode: DeliveryMode;
 
-    // Output estimation
+    // Token Metrics
     expectedOutputTokens: number;
-
-    // Tokenisation results (calculated)
-    inputTokenCount: number; // Tokens from the typed text prompts
-    fileTokenCount: number;  // Tokens extracted from attached files
+    inputTokenCount: number; 
+    fileTokenCount: number;
+    staticTokenCount: number; // For caching
 
     // Agent loop
     agentLoopEnabled: boolean;
@@ -23,48 +34,70 @@ interface TokenSenseState {
 
     // UI state
     activeTab: "calculate" | "results";
+    missionStep: number; // 1-5 for progress tracking
 
     // Actions
+    setRawPrompt: (text: string) => void;
+    setOptimizedPrompt: (text: string) => void;
     setSystemPrompt: (text: string) => void;
     setUserPrompt: (text: string) => void;
     setFileText: (text: string) => void;
     setSelectedModelId: (id: string) => void;
+    setDeliveryMode: (mode: DeliveryMode) => void;
     setExpectedOutputTokens: (n: number) => void;
     setInputTokenCount: (n: number) => void;
     setFileTokenCount: (n: number) => void;
+    setStaticTokenCount: (n: number) => void;
     setAgentLoopEnabled: (b: boolean) => void;
     setAgentIterations: (n: number) => void;
     setAvgNewInputTokensPerTurn: (n: number) => void;
     setActiveTab: (tab: "calculate" | "results") => void;
+    setMissionStep: (step: number) => void;
 }
 
-export const useTokenSenseStore = create<TokenSenseState>((set) => ({
-    systemPrompt: "",
-    userPrompt: "",
-    fileText: "",
+export const useTokenSenseStore = create<TokenSenseState>()(
+    persist(
+        (set) => ({
+            rawPrompt: "",
+            optimizedPrompt: "",
+            systemPrompt: "",
+            userPrompt: "",
+            fileText: "",
 
-    selectedModelId: "",
+            selectedModelId: "gpt-5.2",
+            deliveryMode: "real-time",
 
-    expectedOutputTokens: 1000,
+            expectedOutputTokens: 1000,
+            inputTokenCount: 0,
+            fileTokenCount: 0,
+            staticTokenCount: 0,
 
-    inputTokenCount: 0,
-    fileTokenCount: 0,
+            agentLoopEnabled: false,
+            agentIterations: 5,
+            avgNewInputTokensPerTurn: 500,
 
-    agentLoopEnabled: false,
-    agentIterations: 5,
-    avgNewInputTokensPerTurn: 500,
+            activeTab: "calculate",
+            missionStep: 1,
 
-    activeTab: "calculate",
-
-    setSystemPrompt: (text) => set({ systemPrompt: text }),
-    setUserPrompt: (text) => set({ userPrompt: text }),
-    setFileText: (text) => set({ fileText: text }),
-    setSelectedModelId: (id) => set({ selectedModelId: id }),
-    setExpectedOutputTokens: (n) => set({ expectedOutputTokens: n }),
-    setInputTokenCount: (n) => set({ inputTokenCount: n }),
-    setFileTokenCount: (n) => set({ fileTokenCount: n }),
-    setAgentLoopEnabled: (b) => set({ agentLoopEnabled: b }),
-    setAgentIterations: (n) => set({ agentIterations: n }),
-    setAvgNewInputTokensPerTurn: (n) => set({ avgNewInputTokensPerTurn: n }),
-    setActiveTab: (tab) => set({ activeTab: tab }),
-}));
+            setRawPrompt: (text) => set({ rawPrompt: text }),
+            setOptimizedPrompt: (text) => set({ optimizedPrompt: text }),
+            setSystemPrompt: (text) => set({ systemPrompt: text }),
+            setUserPrompt: (text) => set({ userPrompt: text }),
+            setFileText: (text) => set({ fileText: text }),
+            setSelectedModelId: (id) => set({ selectedModelId: id }),
+            setDeliveryMode: (mode) => set({ deliveryMode: mode }),
+            setExpectedOutputTokens: (n) => set({ expectedOutputTokens: n }),
+            setInputTokenCount: (n) => set({ inputTokenCount: n }),
+            setFileTokenCount: (n) => set({ fileTokenCount: n }),
+            setStaticTokenCount: (n) => set({ staticTokenCount: n }),
+            setAgentLoopEnabled: (b) => set({ agentLoopEnabled: b }),
+            setAgentIterations: (n) => set({ agentIterations: n }),
+            setAvgNewInputTokensPerTurn: (n) => set({ avgNewInputTokensPerTurn: n }),
+            setActiveTab: (tab) => set({ activeTab: tab }),
+            setMissionStep: (step) => set({ missionStep: step }),
+        }),
+        {
+            name: "tokensense-mission-payload",
+        }
+    )
+);

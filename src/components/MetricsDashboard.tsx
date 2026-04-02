@@ -114,7 +114,6 @@ export default function MetricsDashboard() {
         : 0;
 
     const handleShare = async () => {
-        // M12: Use Web Share API if available on mobile
         if (typeof navigator !== "undefined" && navigator.share && window.innerWidth < 768) {
           try {
             const url = buildUrl({
@@ -130,7 +129,6 @@ export default function MetricsDashboard() {
             triggerHaptic(30);
             return;
           } catch (e) {
-            // If user cancels or it fails, fallback to clipboard
             console.warn("Share failed", e);
           }
         }
@@ -141,13 +139,12 @@ export default function MetricsDashboard() {
             outputTokens: expectedOutputTokens,
         });
         if (result !== "failed") {
-            triggerHaptic([20, 10, 20]); // M14: double tap feel
+            triggerHaptic([20, 10, 20]);
             setShareCopied(true);
             setTimeout(() => setShareCopied(false), 2500);
         }
     };
 
-    // -- Compare Mode UI ---------------------------------------------------------
     if (compareMode) {
         return (
             <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
@@ -159,13 +156,13 @@ export default function MetricsDashboard() {
     }
 
     return (
-        <div className="space-y-5 pb-8 md:pb-0">
+        <div className="space-y-5 pb-8 md:pb-0 font-mono">
             {/* Hero Cost Display */}
             <Card className="border-[#00dcb4]/30 bg-gradient-to-b from-[#00dcb4]/10 to-[#00dcb4]/5 backdrop-blur-md md:hidden rounded-2xl p-2 shadow-[0_0_30px_rgba(0,220,180,0.1)]">
               <CardContent className="pt-8 pb-6 text-center">
-                <span className="text-[10px] font-bold text-[#00dcb4] uppercase tracking-widest block mb-2">{tMetrics("estimated_cost")}</span>
+                <span className="text-[10px] font-black text-[#00dcb4] uppercase tracking-widest block mb-2">{tMetrics("estimated_cost")}</span>
                 <div 
-                  className="text-[2.2rem] font-bold font-mono text-[#00dcb4] tabular-nums tracking-tighter mb-2 leading-none"
+                  className="text-[2.2rem] font-black font-mono text-[#00dcb4] tabular-nums tracking-tighter mb-2 leading-none"
                   style={{ textShadow: '0 0 24px rgba(0,220,180,0.35)' }}
                 >
                   {formatCost(totalCost)}
@@ -180,16 +177,16 @@ export default function MetricsDashboard() {
 
             {/* Model Selector */}
             <div>
-              <div className="text-xs font-mono text-[#00dcb4] uppercase tracking-wider mb-2">{tCalc("step2_label")}</div>
+              <div className="text-xs font-black font-mono text-[#00dcb4] uppercase tracking-wider mb-2">{tCalc("step2_label")}</div>
               <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
                   <CardHeader className="pb-2">
                       <div className="flex items-center justify-between">
-                          <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{tMetrics("model")}</CardTitle>      
+                          <CardTitle className="text-xs font-black text-muted-foreground uppercase tracking-widest">{tMetrics("model")}</CardTitle>      
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => { triggerHaptic(15); setCompareMode(true); }}
-                            className="h-9 md:h-7 text-xs gap-1.5 text-muted-foreground hover:text-plasma-400 hover:bg-plasma-500/10 border border-border/40 md:border-transparent hover:border-plasma-500/30 transition-all px-3"
+                            className="h-9 md:h-7 text-xs gap-1.5 text-muted-foreground hover:text-plasma-400 hover:bg-plasma-500/10 border border-border/40 md:border-transparent hover:border-plasma-500/30 transition-all px-3 font-black"
                         >
                             <Layers className="w-3.5 h-3.5" />
                             {tMetrics("compare")}
@@ -206,14 +203,14 @@ export default function MetricsDashboard() {
                                     <span className="flex items-center">
                                         <TermTooltip termKey="contextWindow">{tMetrics("context_window")}</TermTooltip>:
                                     </span>
-                                    <span className="font-mono">{(model.maxContext / 1000).toFixed(0)}k {tCalc("output_tokens")}</span>   
+                                    <span className="font-black text-white">{(model.maxContext / 1000).toFixed(0)}k</span>   
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="flex items-center gap-1">
                                         {tMetrics("price")}
                                         <TermTooltip termKey="inputCost" iconOnly />/<TermTooltip termKey="outputCost" iconOnly />:
                                     </span>
-                                    <span className="font-mono">${model.inputPricePer1M} / ${model.outputPricePer1M} {tMetrics("per_1m")}</span>
+                                    <span className="font-black text-white">${model.inputPricePer1M} / ${model.outputPricePer1M}</span>
                                 </div>
                             </div>
                         </>
@@ -222,24 +219,22 @@ export default function MetricsDashboard() {
             </Card>
             </div>
 
-            <div className="text-xs font-mono text-[#00dcb4] uppercase tracking-wider mb-2 mt-6">{tCalc("step3_label")}</div>
+            <div className="text-xs font-black font-mono text-[#00dcb4] uppercase tracking-wider mb-2 mt-6">{tCalc("step3_label")}</div>
             {!hasModel ? (
                 <div className="rounded-2xl border border-dashed border-border/40 bg-card/10 backdrop-blur-sm p-8 text-center flex flex-col items-center justify-center min-h-[300px]">
-                    <p className="text-sm text-muted-foreground font-medium">
+                    <p className="text-sm text-muted-foreground font-black uppercase">
                         {tCalc("choose_model")}
                     </p>
                 </div>
             ) : (
                 <>
-                {/* Hero Cost Display */}
-
             {/* Cost Gauge (Desktop Only) */}
             <div className="hidden md:block">
               <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
                   <CardContent className="pt-6 pb-4 flex flex-col items-center space-y-4">
                       <CostGauge totalCost={totalCost} />
                       {agentLoopEnabled && agentIterations > 1 && (
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-muted-foreground font-black uppercase">
                               {tMetrics("total_turns", { turns: agentIterations })}
                           </p>
                       )}
@@ -262,17 +257,17 @@ export default function MetricsDashboard() {
                 <Card className="border-indigo-500/30 bg-indigo-500/5 backdrop-blur-sm overflow-hidden animate-in fade-in slide-in-from-bottom-2">
                     <div className="bg-indigo-500/10 px-4 py-2 flex items-center gap-2 border-b border-indigo-500/20">
                         <Lightbulb className="w-4 h-4 text-indigo-400" />
-                        <span className="text-[10px] font-bold text-indigo-300 tracking-widest uppercase">{tSmart("title")}</span>
+                        <span className="text-[10px] font-black text-indigo-300 tracking-widest uppercase">{tSmart("title")}</span>
                     </div>
                     <CardContent className="pt-4 pb-4">
-                        <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                        <p className="text-sm text-muted-foreground mb-4 leading-relaxed font-medium">
                             {tSmart("desc", { multiplier, model: recommendedModel.name })}
                         </p>
                         <Button
                             onClick={handleApplyRecommendation}
                             variant="secondary"
                             size="lg"
-                            className="w-full bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/20 transition-all font-semibold h-11 md:h-9"
+                            className="w-full bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/20 transition-all font-black h-11 md:h-9 uppercase tracking-widest"
                         >
                             <Zap className="w-4 h-4 mr-2 fill-indigo-400 text-indigo-400" />
                             {tSmart("switch_save")}
@@ -321,12 +316,11 @@ export default function MetricsDashboard() {
                 <div className="space-y-3">
                     <ResultActions tokenCount={totalInputTokens + expectedOutputTokens} cost={singleCost.totalCost} />
 
-                    {/* Share button */}
                     <button
                         type="button"
                         onClick={handleShare}
                         className={cn(
-                            "w-full inline-flex items-center justify-center gap-2 px-4 h-12 md:h-10 rounded-xl text-xs font-bold uppercase tracking-widest",
+                            "w-full inline-flex items-center justify-center gap-2 px-4 h-12 md:h-10 rounded-xl text-[10px] font-black uppercase tracking-widest",
                             "border transition-all duration-200",
                             shareCopied
                                 ? "border-green-500/50 bg-green-500/10 text-green-400"
@@ -348,28 +342,6 @@ export default function MetricsDashboard() {
                 </div>
             )}
 
-            {/* Pricing reference (Mobile friendly version) */}
-            <div className="md:hidden space-y-3">
-                <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
-                    <CardContent className="pt-4 pb-3">
-                        <div className="text-[11px] text-muted-foreground/60 space-y-2">
-                            <div className="flex justify-between">
-                                <TermTooltip termKey="inputCost">{tMetrics("input_price")}</TermTooltip>
-                                <span className="font-mono">${model.inputPricePer1M} / 1M</span>
-                            </div>
-                            <Separator className="opacity-20" />
-                            <div className="flex justify-between">
-                                <TermTooltip termKey="outputCost">{tMetrics("output_price")}</TermTooltip>
-                                <span className="font-mono">${model.outputPricePer1M} / 1M</span>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-                <div className="px-2">
-                  <PriceTimestamp />
-                </div>
-            </div>
-
             {/* Pricing reference (Desktop Only) */}
             <div className="hidden md:block space-y-4">
               <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
@@ -380,21 +352,21 @@ export default function MetricsDashboard() {
 
               <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
                   <CardContent className="pt-4 pb-3">
-                      <div className="text-xs text-muted-foreground/60 space-y-1">
+                      <div className="text-[10px] text-muted-foreground/60 space-y-1 font-black uppercase tracking-widest">
                           <div className="flex justify-between">
                               <TermTooltip termKey="inputCost">{tMetrics("input_price")}</TermTooltip>
-                              <span className="font-mono">${model.inputPricePer1M} / 1M {tCalc("output_tokens")}</span>
+                              <span className="text-white">${model.inputPricePer1M} / 1M</span>
                           </div>
                           <Separator className="opacity-30" />
                           <div className="flex justify-between">
                               <TermTooltip termKey="outputCost">{tMetrics("output_price")}</TermTooltip>
-                              <span className="font-mono">${model.outputPricePer1M} / 1M {tCalc("output_tokens")}</span>
+                              <span className="text-white">${model.outputPricePer1M} / 1M</span>
                           </div>
                           <Separator className="opacity-30" />
                           <div className="flex justify-between items-center">
                               <span>{tMetrics("prices_updated")}</span>
-                              <Link href="/changelog" className="text-plasma-500/70 hover:text-plasma-400 font-mono transition-colors underline underline-offset-2">
-                                  March 2026 ?
+                              <Link href="/changelog" className="text-plasma-500/70 hover:text-plasma-400 transition-colors underline underline-offset-2">
+                                  March 2026
                               </Link>
                           </div>
                       </div>
@@ -430,23 +402,23 @@ function MetricCard({
     return (
         <Card className={cn(
           "border-border/40 bg-card/50 backdrop-blur-sm transition-all duration-300 rounded-2xl",
-          highlight ? "ring-1 ring-plasma-500/30 bg-plasma-500/5" : ""
+          highlight ? "ring-1 ring-plasma-500/30 bg-plasma-500/5 shadow-[0_0_20px_rgba(0,220,180,0.05)]" : ""
         )}>
             <CardContent className="pt-5 pb-4 px-4">
                 <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-1">
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{label}</span>
+                        <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">{label}</span>
                         {tooltipKey && <TermTooltip termKey={tooltipKey} iconOnly />}
                     </div>
-                    <span className="text-sm">{icon}</span>
+                    <span className="text-sm opacity-50">{icon}</span>
                 </div>
                 <div className={cn(
-                  "text-xl md:text-lg font-bold font-mono tabular-nums tracking-tight transition-all duration-200",
+                  "text-xl md:text-lg font-black font-mono tabular-nums tracking-tighter transition-all duration-200",
                   highlight ? "text-plasma-400" : "text-foreground"
                 )}>
                     {value}
                 </div>
-                <div className="text-[10px] text-muted-foreground/50 mt-1 line-clamp-1">{sublabel}</div>
+                <div className="text-[9px] font-bold text-muted-foreground/40 mt-1 line-clamp-1 uppercase">{sublabel}</div>
                 {showDisclaimer && <CostDisclaimer className="mt-2" />}
             </CardContent>
         </Card>

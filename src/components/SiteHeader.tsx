@@ -14,6 +14,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import MissionControlHUD from "@/components/MissionControlHUD";
 
 export default function SiteHeader() {
     const tHeader = useTranslations("header");
@@ -471,6 +472,7 @@ export default function SiteHeader() {
                 </nav>
             </div>
         </header>
+        <MissionControlHUD />
         {session?.user && (
             <BioUpdateModal 
                 userId={(session.user as any).id || session.user.email || "default"}

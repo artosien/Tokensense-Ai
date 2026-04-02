@@ -40,6 +40,8 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { useTokenSenseStore } from "@/lib/store";
+import Link from "next/link";
 
 interface ChatTurn {
     id: string;
@@ -55,6 +57,7 @@ const SYSTEM_PRESETS = [
 ];
 
 export default function ContextWindowVisualizer() {
+    const { setMissionStep } = useTokenSenseStore();
     const [selectedModelId, setSelectedModelId] = useState(models[0].id);
     const [systemPromptText, setSystemPromptText] = useState("You are a helpful AI assistant tasked with analyzing complex data structures. Please provide concise and accurate summaries.");
     const [systemTokens, setSystemTokens] = useState<number>(0);
@@ -455,6 +458,20 @@ export default function ContextWindowVisualizer() {
                             ))}
                         </CardContent>
                     </Card>
+
+                    {/* Proceed CTA */}
+                    <div className="pt-2">
+                        <Button 
+                            asChild
+                            onClick={() => setMissionStep(3)}
+                            className="w-full h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-base shadow-lg shadow-indigo-500/20 gap-3 group"
+                        >
+                            <Link href="/tools/compression">
+                                <Zap className="w-5 h-5 fill-white group-hover:animate-pulse" />
+                                Stress Test Passed. Proceed to Weight Reduction ➔
+                            </Link>
+                        </Button>
+                    </div>
 
                     <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-3xl p-6 relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-4 opacity-10">

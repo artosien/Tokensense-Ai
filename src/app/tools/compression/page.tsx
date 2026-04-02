@@ -10,9 +10,8 @@ export const metadata: Metadata = {
   title: "AI Prompt Compression Tool | Reduce Token Usage & Save Costs",
   description: "Identify token-wasteful patterns and redundancies in your AI prompts. Reduce your token payload by 10-30% without losing instruction quality. Optimize for GPT-5.2, Claude, and Gemini.",
   alternates: {
-    canonical: 'https://www.tokensense-ai.com/tools/compression',
-  },
-  openGraph: {
+      canonical: '/tools/compression',
+  },  openGraph: {
     title: "AI Prompt Compression Analyzer | Tokensense",
     description: "Cut the fluff, keep the intelligence. Paste your prompt to save on API costs instantly.",
     url: 'https://www.tokensense-ai.com/tools/compression',

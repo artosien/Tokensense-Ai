@@ -6,9 +6,8 @@ export const metadata: Metadata = {
   title: "LLM Pricing Tracker | Historical AI Token Cost Trends",
   description: "Track the deflation of intelligence. Monitor historical API price cuts for OpenAI, Anthropic, and Google from 2023 to 2026. View our frontier intelligence cost index.",
   alternates: {
-    canonical: 'https://www.tokensense-ai.com/pricing-history',
-  },
-  openGraph: {
+      canonical: '/pricing-history',
+  },  openGraph: {
     title: "LLM Pricing Tracker & Historical Index | Tokensense",
     description: "Average cost per 1M tokens has dropped by 65%. See the full timeline of LLM price cuts and model releases.",
     url: 'https://www.tokensense-ai.com/pricing-history',

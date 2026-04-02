@@ -11,9 +11,8 @@ export const metadata: Metadata = {
   title: "LLM Context Caching Calculator | Anthropic & Gemini Cost Savings",
   description: "Calculate your savings with Prompt Caching. Compare standard vs. cached input costs for Anthropic Claude and Google Gemini. Reduce long-context API bills by up to 90%.",
   alternates: {
-    canonical: 'https://www.tokensense-ai.com/caching',
-  },
-  openGraph: {
+      canonical: '/caching',
+  },  openGraph: {
     title: "LLM Context Caching Calculator | Tokensense",
     description: "Estimate savings for reused long-context prompts on Anthropic and Google Gemini.",
     url: 'https://www.tokensense-ai.com/caching',

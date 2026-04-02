@@ -22,7 +22,8 @@ import {
     Link as LinkIcon,
     ChevronLeft,
     ChevronRight,
-    Braces
+    Braces,
+    PlaneTakeoff
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +34,7 @@ import { models } from "@/lib/models";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
+import { useTokenSenseStore } from "@/lib/store";
 import Link from "next/link";
 
 // Wasteful patterns definitions
@@ -68,6 +70,7 @@ const PRO_TIPS = [
 ];
 
 export default function PromptCompressionAnalyzer() {
+    const { setMissionStep } = useTokenSenseStore();
     const [prompt, setPrompt] = useState("");
     const [selectedModelId, setSelectedModelId] = useState(models[0].id);
     const [mode, setMode] = useState<"lossless" | "extreme">("lossless");
@@ -116,8 +119,6 @@ export default function PromptCompressionAnalyzer() {
         const percentSaved = beforeTokens > 0 ? (savedTokens / beforeTokens) * 100 : 0;
 
         // Fidelity Score Calculation (Mock Logic)
-        // In reality, this would use a semantic similarity model. 
-        // Here we use a heuristic based on the ratio of removed content that was "filler" vs "unknown".
         const fidelityScore = mode === "lossless" ? 98 : Math.max(75, 100 - (percentSaved * 0.8));
 
         const beforeCost = (beforeTokens / 1_000_000) * model.inputPricePer1M;
@@ -126,9 +127,10 @@ export default function PromptCompressionAnalyzer() {
         const totalVolumeSavings = costSavingsPerCall * volume;
 
         // Diff Generation
-        const diffMarkup = detections.reduce((acc, det) => {
-            return acc.replace(det.original, `<del class="bg-red-500/20 text-red-400 no-underline px-1 rounded">${det.original}</del><ins class="bg-emerald-500/20 text-emerald-400 no-underline px-1 rounded mx-1">${det.suggested}</ins>`);
-        }, prompt);
+        let diffMarkup = prompt;
+        detections.forEach(det => {
+            diffMarkup = diffMarkup.replace(det.original, `<del class="bg-red-500/20 text-red-400 no-underline px-1 rounded">${det.original}</del><ins class="bg-emerald-500/20 text-emerald-400 no-underline px-1 rounded mx-1">${det.suggested}</ins>`);
+        });
 
         return {
             compressed,
@@ -150,7 +152,7 @@ export default function PromptCompressionAnalyzer() {
             const json = JSON.parse(prompt);
             setPrompt(JSON.stringify(json));
         } catch (e) {
-            // If not JSON, try simple whitespace/newline stripping for structured-like text
+            // If not JSON, try simple whitespace/newline stripping
             setPrompt(prompt.replace(/\n\s*/g, ' ').trim());
         }
     };
@@ -432,6 +434,20 @@ export default function PromptCompressionAnalyzer() {
                                     </Button>
                                 </Link>
                             )}
+
+                            {/* Proceed CTA */}
+                            <div className="pt-4 border-t border-white/5">
+                                <Button 
+                                    asChild
+                                    onClick={() => setMissionStep(4)}
+                                    className="w-full h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-base shadow-lg shadow-indigo-500/20 gap-3 group"
+                                >
+                                    <Link href="/tools/batch">
+                                        <PlaneTakeoff className="w-5 h-5 fill-white group-hover:animate-pulse" />
+                                        Weight Reduced. Proceed to Flight Plan ➔
+                                    </Link>
+                                </Button>
+                            </div>
                         </CardContent>
                     </Card>
 

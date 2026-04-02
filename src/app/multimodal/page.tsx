@@ -9,9 +9,8 @@ export const metadata: Metadata = {
   title: "AI Vision Cost Estimator | GPT-4o & Claude Image Token Calculator",
   description: "Calculate image token costs based on pixel scaling, resolution, and tile counts for GPT-4o, Claude 3.5, and Gemini. 100% private and local processing.",
   alternates: {
-    canonical: 'https://www.tokensense-ai.com/multimodal',
-  },
-  openGraph: {
+      canonical: '/multimodal',
+  },  openGraph: {
     title: "AI Vision Cost Estimator | Tokensense",
     description: "Analyze image tokenization and costs for GPT-4o and Claude.",
     url: 'https://www.tokensense-ai.com/multimodal',

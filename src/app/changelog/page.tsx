@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Pricing Changelog — TokenSense AI",
   description:
     "A reverse-chronological log of pricing data updates for all AI models supported by TokenSense AI, including OpenAI, Anthropic, Google, and more.",
+  alternates: {
+    canonical: '/changelog',
+  },
 };
 
 interface ChangeEntry {

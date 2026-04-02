@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
+import React, { useState, useMemo } from "react";
 import { useTokenSenseStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { Leaf, Activity, Weight } from "lucide-react";
+import { Leaf, Activity, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export function SamplePromptSelection() {
@@ -12,7 +11,7 @@ export function SamplePromptSelection() {
   const { setUserPrompt } = useTokenSenseStore();
   const [activeType, setActiveType] = useState<string | null>(null);
 
-  const SAMPLE_PROMPTS = {
+  const SAMPLE_PROMPTS = useMemo(() => ({
     light: {
       label: t("light_label"),
       icon: <Leaf className="w-3.5 h-3.5" />,
@@ -27,15 +26,22 @@ export function SamplePromptSelection() {
     },
     heavy: {
       label: t("heavy_label"),
-      icon: <Weight className="w-3.5 h-3.5" />,
+      icon: <Zap className="w-3.5 h-3.5" />,
       description: t("heavy_desc"),
       text: t("heavy_text"),
     },
-  };
+  }), [t]);
 
   const applySample = (type: keyof typeof SAMPLE_PROMPTS) => {
-    setActiveType(type);
-    setUserPrompt(SAMPLE_PROMPTS[type].text);
+    try {
+      const sample = SAMPLE_PROMPTS[type];
+      if (sample && typeof sample.text === "string") {
+        setActiveType(type);
+        setUserPrompt(sample.text);
+      }
+    } catch (e) {
+      console.error("Failed to apply sample prompt:", e);
+    }
   };
 
   return (
@@ -77,3 +83,4 @@ export function SamplePromptSelection() {
     </div>
   );
 }
+

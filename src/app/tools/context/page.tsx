@@ -6,9 +6,8 @@ export const metadata: Metadata = {
   title: "LLM Context Window Visualizer | RAG & Agent Token Manager",
   description: "Visualize how system instructions and long-term history compete for space in an LLM's context window. Perfect for RAG developers and agent builders optimizing GPT-5.2 and Claude 3.5 limits.",
   alternates: {
-    canonical: 'https://www.tokensense-ai.com/tools/context',
-  },
-  openGraph: {
+      canonical: '/tools/context',
+  },  openGraph: {
     title: "Context Window Visualizer | Tokensense-Ai",
     description: "Don't hit the wall. Visualize your AI model's finite memory and capacity in real-time.",
     url: 'https://www.tokensense-ai.com/tools/context',

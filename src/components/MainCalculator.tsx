@@ -6,6 +6,9 @@ import { RestoredSessionBanner } from "@/components/RestoredSessionBanner";
 import { usePersistedCalculator } from "@/hooks/usePersistedCalculator";
 import { useTokenSenseStore } from "@/lib/store";
 import { useShareableUrl } from "@/hooks/useShareableUrl";
+import { Button } from "@/components/ui/button";
+import { Zap } from "lucide-react";
+import Link from "next/link";
 
 const PromptEditor = dynamic(() => import("@/components/PromptEditor"), { 
   ssr: false,
@@ -24,11 +27,15 @@ export function MainCalculator() {
     userPrompt, 
     setUserPrompt, 
     setSelectedModelId, 
-    setExpectedOutputTokens
+    setExpectedOutputTokens,
+    inputTokenCount,
+    fileTokenCount,
+    setMissionStep
   } = useTokenSenseStore();
   const { parseUrlState } = useShareableUrl();
 
   const hasPromptContent = userPrompt.trim().length > 0;
+  const totalTkn = inputTokenCount + fileTokenCount;
 
   useEffect(() => {
     const urlState = parseUrlState();
@@ -44,9 +51,9 @@ export function MainCalculator() {
 
   return (
     <div id="calculate-section" className="relative scroll-mt-20">
-      <div className="flex flex-col md:flex-row gap-6 text-left">
+      <div className="flex flex-col lg:flex-row gap-8 text-left">
         {/* Left Panel - 60% */}
-        <div className="w-full lg:w-[60%] space-y-6">
+        <div className="w-full lg:w-[60%] xl:w-[65%] space-y-6">
           {mounted && restored && (
             <RestoredSessionBanner onClear={() => setRestored(false)} />
           )}
@@ -54,12 +61,29 @@ export function MainCalculator() {
         </div>
 
         {/* Right Panel - 40%, sticky */}
-        <div className="w-full lg:w-[40%]">
-          <div className="lg:sticky lg:top-[72px]">
-            <div className="space-y-6">
-              <MetricsDashboard />
-              {hasPromptContent && <ConversationSimulator />}
-            </div>
+        <div className="w-full lg:w-[40%] xl:w-[35%]">
+          <div className="sticky top-20 lg:top-[72px] space-y-6">
+            <MetricsDashboard />
+
+            {hasPromptContent && (
+              <div className="animate-in fade-in slide-in-from-right-4 duration-700">
+                <Button 
+                    asChild
+                    onClick={() => setMissionStep(2)}
+                    className="w-full h-20 rounded-3xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xl shadow-2xl shadow-indigo-500/20 gap-4 group uppercase tracking-tighter"
+                >
+                    <Link href="/tools/context">
+                        <Zap className="w-6 h-6 fill-white group-hover:animate-pulse" />
+                        Launch Analysis
+                    </Link>
+                </Button>
+                <p className="text-center text-[10px] font-black text-slate-500 uppercase tracking-widest mt-4">
+                    Trajectory Locked: {totalTkn.toLocaleString()} Tokens
+                </p>
+              </div>
+            )}
+
+            {hasPromptContent && <ConversationSimulator />}
           </div>
         </div>
       </div>

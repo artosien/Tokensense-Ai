@@ -18,7 +18,8 @@ import {
     FileText,
     ShieldAlert,
     Printer,
-    Sparkles
+    Sparkles,
+    Activity
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,14 +27,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { models, ModelConfig } from "@/lib/models";
 import NumberCounter from "@/components/NumberCounter";
 import BatchOptimizationSuite from "./BatchOptimizationSuite";
+import { useTokenSenseStore } from "@/lib/store";
+import Link from "next/link";
 
 export default function BatchCostPlanner() {
+    const { setMissionStep, deliveryMode, setDeliveryMode } = useTokenSenseStore();
     const [promptTokens, setPromptTokens] = useState<number>(1000);
     const [outputTokens, setOutputTokens] = useState<number>(500);
     const [volume, setVolume] = useState<number>(50000);
     const [searchQuery, setSearchQuery] = useState("");
     const [buffer, setBuffer] = useState(0);
-    const [isBatchMode, setIsBatchMode] = useState(false);
+    const [isBatchMode, setIsBatchMode] = useState(deliveryMode === "batch");
 
     const filteredModels = useMemo(() => {
         return models.filter(m => 
@@ -51,10 +55,10 @@ export default function BatchCostPlanner() {
             const inputCostPerRequest = (promptTokens / 1_000_000) * inputPrice;
             const outputCostPerRequest = (outputTokens / 1_000_000) * outputPrice;
             let costPerRequest = inputCostPerRequest + outputCostPerRequest;
-
+            
             // Add reliability buffer
             costPerRequest = costPerRequest * (1 + (buffer / 100));
-
+            
             const totalBatchCost = costPerRequest * volume;
             const dailyCost = totalBatchCost;
             const monthlyCost = totalBatchCost * 30;
@@ -281,9 +285,26 @@ export default function BatchCostPlanner() {
                             volume={volume}
                             selectedModel={cheapestModel}
                             onBufferChange={setBuffer}
-                            onBatchModeChange={setIsBatchMode}
+                            onBatchModeChange={(val) => {
+                                setIsBatchMode(val);
+                                setDeliveryMode(val ? "batch" : "real-time");
+                            }}
                             onPromptTokensChange={setPromptTokens}
                         />
+                        
+                        {/* Proceed CTA */}
+                        <div className="mt-6 pt-6 border-t border-white/5">
+                            <Button 
+                                asChild
+                                onClick={() => setMissionStep(5)}
+                                className="w-full h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-base shadow-lg shadow-indigo-500/20 gap-3 group"
+                            >
+                                <Link href="/comparison">
+                                    <Activity className="w-5 h-5 text-white group-hover:animate-pulse" />
+                                    Plan Optimized. Proceed to Comms Review ➔
+                                </Link>
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>

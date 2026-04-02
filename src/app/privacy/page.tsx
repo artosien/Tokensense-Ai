@@ -7,9 +7,8 @@ export const metadata: Metadata = {
   title: "Privacy Policy | Tokensense-Ai",
   description: "Tokensense-Ai is built on the principle that your prompts are yours. We process all LLM token counts and costs 100% client-side. No servers, no tracking, no data collection.",
   alternates: {
-    canonical: 'https://www.tokensense-ai.com/privacy',
-  },
-  openGraph: {
+      canonical: '/privacy',
+  },  openGraph: {
     title: "Privacy Policy | Tokensense-Ai",
     description: "Your prompts never leave your browser. Read our commitment to 100% private, client-side AI cost estimation.",
     url: 'https://www.tokensense-ai.com/privacy',

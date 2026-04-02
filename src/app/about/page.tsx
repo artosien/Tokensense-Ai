@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: "About Tokensense-Ai | Precision AI Cost Intelligence",
   description: "Learn how Tokensense-Ai helps developers master LLM API costs. Count tokens, estimate multi-modal vision costs, and calculate context caching savings for GPT-4o, Claude, and Gemini—100% client-side.",
   alternates: {
-    canonical: 'https://www.tokensense-ai.com/about',
+    canonical: '/about',
   },
   openGraph: {
     title: "About Tokensense-Ai | Mastering LLM Economics",

@@ -10,9 +10,8 @@ export const metadata: Metadata = {
   description: PAGE_DESCRIPTION,
   keywords: ["AI video cost calculator", "Sora pricing", "Gemini 1.5 Pro video tokens", "Runway Gen-3 cost", "Kling AI video", "Seedance AI price", "video AI tokenization", "AI video budgeting"],
   alternates: {
-    canonical: 'https://www.tokensense-ai.com/video-planner',
-  },
-  openGraph: {
+      canonical: '/video-planner',
+  },  openGraph: {
     title: "AI Video Cost Planner: Sora, Gemini 1.5, Runway, Kling & Seedance",
     description: PAGE_DESCRIPTION,
     url: 'https://www.tokensense-ai.com/video-planner',

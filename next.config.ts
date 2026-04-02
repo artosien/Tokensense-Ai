@@ -10,9 +10,9 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        // Matches /en, /zh, /tl, etc. and any sub-paths
-        // But NOT /api routes
-        source: '/:lang([a-z]{2})/:path((?!api/).*)',
+        // Redirect /{lang}/{path} to /{path}
+        // Matches /en/about, /es/blog/foo, etc.
+        source: '/:lang([a-z]{2})/:path*',
         destination: '/:path*',
         permanent: true,
       },
