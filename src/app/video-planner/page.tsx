@@ -120,6 +120,30 @@ export default function VideoPlannerPage() {
       </div>
 
       <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+        {/* SEMANTIC SEO SHELL: Visible to bots immediately */}
+        <section className="sr-only">
+          <h1>AI Video API Cost & Token Planner</h1>
+          <p>
+            Estimate and compare costs for state-of-the-art AI video generation models. 
+            Our planner supports <strong>OpenAI Sora spacetime patches</strong>, 
+            <strong> Google Gemini 1.5 Pro video tokens</strong>, <strong>Runway Gen-3</strong>, 
+            <strong> Kling AI</strong>, and <strong>Seedance</strong>. Calculate your 
+            multimodal budget based on duration, resolution, and frame rate.
+          </p>
+          <ul>
+            <li>Temporal & Spatial Video Tokenization Analysis</li>
+            <li>Cost-per-second Benchmarking for Sora vs Gemini</li>
+            <li>Video Resolution Scaling Impact (720p vs 1080p vs 4K)</li>
+          </ul>
+          <nav>
+            <ul>
+              <li><Link href="/">Text Token Counter</Link></li>
+              <li><Link href="/multimodal">Image Vision Estimator</Link></li>
+              <li><Link href="/comparison">LLM Pricing Comparison</Link></li>
+            </ul>
+          </nav>
+        </section>
+
         <SocialShareBar variant="top" />
         
         <VideoPlanner />

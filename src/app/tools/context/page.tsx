@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import SiteHeader from "@/components/SiteHeader";
 import ContextWindowVisualizer from "@/components/ContextWindowVisualizer";
+import { Link } from "@/lib/i18n/navigation";
 
 export const metadata: Metadata = {
   title: "LLM Context Window Visualizer | RAG & Agent Token Manager",
@@ -57,6 +58,28 @@ export default function ContextVisualizerPage() {
       <SiteHeader />
 
       <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-16">
+        {/* SEMANTIC SEO SHELL: Visible to bots immediately */}
+        <section className="sr-only">
+            <h1>LLM Context Window Visualization Tool</h1>
+            <p>
+                Manage <strong>token competition</strong> within Large Language Model 
+                context windows. Our visualizer analyzes <strong>GPT-4o (128k)</strong>, 
+                <strong> Claude 3.5 (200k)</strong>, and <strong>Gemini 1.5 Pro (2M)</strong> 
+                memory utilization for RAG pipelines and AI agents.
+            </p>
+            <ul>
+                <li>Visualizing System Prompt vs History Overhead</li>
+                <li>Real-time Capacity Alerts for Context Overflow</li>
+                <li>Optimization for Large-Context Window Models</li>
+            </ul>
+            <nav>
+                <ul>
+                    <li><Link href="/">Main Token Calculator</Link></li>
+                    <li><Link href="/workflow">Workflow Simulator</Link></li>
+                </ul>
+            </nav>
+        </section>
+
         {/* Semantic H1 and Description from your UI */}
         <section className="text-center mb-12">
           <h1 className="text-4xl font-black text-white sm:text-6xl uppercase tracking-tight">
@@ -69,18 +92,25 @@ export default function ContextVisualizerPage() {
 
         <ContextWindowVisualizer />
 
-        {/* SEMANTIC CONTENT FOR CRAWLERS */}
-        <div className="sr-only">
-          <h2>Optimizing Context Window Utilization</h2>
-          <p>Perfect for RAG developers and agent builders who need to balance prompt complexity with remaining capacity.</p>
-          <ul>
-            <li><strong>Live Visualization:</strong> Track real-time token counts against model limits (e.g., 400k for GPT-5.2).</li>
-            <li><strong>Resource Breakdown:</strong> See exactly what percentage of the window is used by system prompts vs. user input.</li>
-            <li><strong>Capacity Alerts:</strong> Visual indicators show "Capacity Left" to prevent API overflow errors.</li>
-          </ul>
-          <h3>Supported Target Environments:</h3>
-          <p>Analyze context windows for GPT-5.2 (400k), Claude 3.5 (200k), and Gemini 1.5 Pro (2M).</p>
-        </div>
+        {/* Educational Content / SEO Section */}
+        <section className="mt-20 border-t border-border/40 pt-16">
+            <div className="max-w-4xl mx-auto space-y-8 text-muted-foreground leading-relaxed">
+                <h2 className="text-2xl font-bold text-white uppercase tracking-tight">Optimizing Context Window Utilization</h2>
+                <p>
+                    As context windows expand, managing the "inner" token economy becomes a primary challenge for AI engineers. Every token allocated to a system instruction is one less token available for the model's actual reasoning or retrieval-augmented generation (RAG) context.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+                    <div className="space-y-2">
+                        <h3 className="font-bold text-white">Preventing "Lost in the Middle"</h3>
+                        <p className="text-sm">Large context windows like Gemini's 2M tokens are powerful, but models can lose track of details buried in the middle of long prompts. Visualizing your density helps you place critical data at the "Head" or "Tail" for better recall.</p>
+                    </div>
+                    <div className="space-y-2">
+                        <h3 className="font-bold text-white">Budgeting for Agentic Loops</h3>
+                        <p className="text-sm">Autonomous agents build context with every turn. Tracking the growth of your window in real-time allows you to implement sliding-window or summary-based pruning before hitting the API limits.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
       </main>
     </div>
   );

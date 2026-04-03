@@ -2,7 +2,7 @@ import SiteHeader from "@/components/SiteHeader";
 import SocialShareBar from "@/components/SocialShareBar";
 import MissionSummary from "@/components/MissionSummary";
 import { Link } from "@/lib/i18n/navigation";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 
 export const dynamic = 'force-static';
@@ -20,9 +20,15 @@ export const metadata: Metadata = {
     type: 'website',
     images: [{ url: '/workflow-og.png', width: 1200, height: 630 }],
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: "Mission Flight Report",
+    description: "Final optimization summary for your AI mission.",
+    images: ['/workflow-og.png'],
+  },
 };
 
-export default function WorkflowSimulatorPage() {
+export default async function WorkflowSimulatorPage() {
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <SiteHeader />
@@ -53,6 +59,27 @@ export default function WorkflowSimulatorPage() {
 
             {/* Main Content */}
             <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+                {/* SEMANTIC SEO SHELL: Visible to bots immediately */}
+                <section className="sr-only">
+                    <h1>LLM Agent Workflow & Cost Analysis Report</h1>
+                    <p>
+                        Review your optimized AI agent workflow manifest. This report analyzes the 
+                        <strong> multi-turn token usage</strong>, <strong>recursive cost compounding</strong>, 
+                        and <strong>payload optimization strategies</strong> for your specific AI mission.
+                    </p>
+                    <ul>
+                        <li>Turn-by-turn Token Allocation Breakdown</li>
+                        <li>Estimated Total Mission Cost across GPT-4o and Claude 3.5</li>
+                        <li>Optimization Recommendations for Long-running Agent Loops</li>
+                    </ul>
+                    <nav>
+                        <ul>
+                            <li><Link href="/">Reset to Main Calculator</Link></li>
+                            <li><Link href="/comparison">Compare Model Prices</Link></li>
+                        </ul>
+                    </nav>
+                </section>
+
                 <SocialShareBar variant="top" />
 
                 <MissionSummary />

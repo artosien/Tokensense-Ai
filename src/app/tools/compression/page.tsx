@@ -3,6 +3,8 @@ import PromptCompressionAnalyzer from "@/components/PromptCompressionAnalyzer";
 import SocialShareBar from "@/components/SocialShareBar";
 import { Sparkles } from "lucide-react";
 import { Metadata } from 'next';
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/lib/i18n/navigation";
 
 export const dynamic = 'force-static';
 
@@ -54,7 +56,7 @@ function CompressionSchema() {
   );
 }
 
-export default function PromptCompressionPage() {
+export default async function PromptCompressionPage() {
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <CompressionSchema />
@@ -62,6 +64,29 @@ export default function PromptCompressionPage() {
 
             {/* Main Content */}
             <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-16">
+                {/* SEMANTIC SEO SHELL: Visible to bots immediately */}
+                <section className="sr-only">
+                    <h1>LLM Prompt Compression & Optimization Tool</h1>
+                    <p>
+                        Analyze and optimize your AI prompts for <strong>GPT-4o, Claude 3.5, 
+                        and Gemini</strong>. Our compression tool identifies <strong>token-wasteful 
+                        patterns</strong>, removes <strong>natural language redundancies</strong>, 
+                        and suggests <strong>shorter alternatives</strong> to reduce your API 
+                        bill by 10-30%.
+                    </p>
+                    <ul>
+                        <li>Redundancy Detection & Token Reduction</li>
+                        <li>Instruction Quality Preservation Analysis</li>
+                        <li>Cost-per-call Savings Calculator</li>
+                    </ul>
+                    <nav>
+                        <ul>
+                            <li><Link href="/">Token Counter</Link></li>
+                            <li><Link href="/workflow">Workflow Optimizer</Link></li>
+                        </ul>
+                    </nav>
+                </section>
+
                 <SocialShareBar variant="top" />
 
                 <div className="space-y-4 mb-10 text-center md:text-left relative">
@@ -81,16 +106,25 @@ export default function PromptCompressionPage() {
 
                 <SocialShareBar variant="bottom" />
 
-                {/* SEMANTIC CONTENT FOR CRAWLERS */}
-                <div className="sr-only">
-                    <h2>The Art of Prompt Compression</h2>
-                    <ul>
-                        <li><strong>Remove Fluff:</strong> Strip away phrases like "I'm looking for" or "It would be great if."</li>
-                        <li><strong>Structure Data:</strong> Use symbols like "#" for headers or "-" for lists instead of full sentences.</li>
-                        <li><strong>Direct Action:</strong> Start prompts with strong verbs like "Analyze," "Rewrite," or "Extract."</li>
-                    </ul>
-                    <p>Pro Tip: LLMs don't need excessive politeness. "Write a summary" costs only 3 tokens compared to 14 tokens for polite meta-talk.</p>
-                </div>
+                {/* Educational Content / SEO Section */}
+                <section className="mt-20 border-t border-border/40 pt-16">
+                    <div className="max-w-4xl mx-auto space-y-8 text-muted-foreground leading-relaxed">
+                        <h2 className="text-2xl font-bold text-white uppercase tracking-tight">The Art of Prompt Compression</h2>
+                        <p>
+                            Prompt compression is the process of reducing the number of tokens in an LLM request without altering the core instructions or desired output quality. Every token saved directly reduces your API expenditure.
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+                            <div className="space-y-2">
+                                <h3 className="font-bold text-white">Remove Politeness & Meta-Talk</h3>
+                                <p className="text-sm">LLMs do not require "Please" or "I would like you to." Starting a prompt with "Analyze this" is 11 tokens cheaper than "Could you please take a look at this and analyze it for me?"</p>
+                            </div>
+                            <div className="space-y-2">
+                                <h3 className="font-bold text-white">Use Structural Symbols</h3>
+                                <p className="text-sm">Replace long descriptive sentences with Markdown or YAML structures. Symbols like "#" or "-" convey hierarchy more efficiently than "The following section is a list of items."</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </main>
         </div>
     );

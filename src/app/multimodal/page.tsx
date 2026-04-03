@@ -2,8 +2,9 @@ import SiteHeader from "@/components/SiteHeader";
 import MultimodalEstimator from "@/components/MultimodalEstimator";
 import SocialShareBar from "@/components/SocialShareBar";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Metadata } from 'next';
+import { Link } from "@/lib/i18n/navigation";
 
 export const metadata: Metadata = {
   title: "AI Vision Cost Estimator | GPT-4o & Claude Image Token Calculator",
@@ -55,8 +56,8 @@ function MultimodalSchema() {
   );
 }
 
-export default function MultimodalPage() {
-    const tTools = useTranslations("tools");
+export default async function MultimodalPage() {
+    const tTools = await getTranslations("tools");
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
@@ -65,6 +66,28 @@ export default function MultimodalPage() {
 
             {/* Main Content */}
             <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-16">
+                {/* SEMANTIC SEO SHELL: Visible to bots immediately */}
+                <section className="sr-only">
+                    <h1>Multimodal & Vision AI Token Cost Estimator</h1>
+                    <p>
+                        Analyze <strong>image-to-token conversion</strong> for leading multimodal models. 
+                        Our tool calculates <strong>GPT-4o vision tokens</strong>, 
+                        <strong> Claude 3.5 Sonnet image costs</strong>, and <strong>Gemini 1.5 Pro 
+                        multimodal payloads</strong> based on resolution, tiling, and pixel density.
+                    </p>
+                    <ul>
+                        <li>Image Tiling & Patch Grid Analysis</li>
+                        <li>High vs Low Detail Mode Cost Comparison</li>
+                        <li>Pixel-to-Token Ratio Benchmarking</li>
+                    </ul>
+                    <nav>
+                        <ul>
+                            <li><Link href="/">Main Text Calculator</Link></li>
+                            <li><Link href="/video-planner">Video API Planner</Link></li>
+                        </ul>
+                    </nav>
+                </section>
+
                 <SocialShareBar variant="top" />
 
                 {/* HERO SECTION */}
@@ -149,16 +172,6 @@ export default function MultimodalPage() {
                         </div>
                     </div>
                 </section>
-
-                {/* SEMANTIC DATA FOR CRAWLERS */}
-                <div className="sr-only">
-                    <h3>Vision Parameters supported:</h3>
-                    <ul>
-                        <li>Model Selection (GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro)</li>
-                        <li>Detail Level (High vs Low)</li>
-                        <li>Tokenization Breakdown (Effective resolution, Tile Count)</li>
-                    </ul>
-                </div>
             </main>
         </div>
     );

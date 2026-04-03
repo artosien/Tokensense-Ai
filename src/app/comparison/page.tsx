@@ -4,7 +4,7 @@ import SocialShareBar from "@/components/SocialShareBar";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 
 export const dynamic = 'force-static';
@@ -29,6 +29,7 @@ export const metadata: Metadata = {
     images: ['/comparison-og.png'],
   },
 };
+
 function ComparisonSchema() {
   const jsonLd = {
     "@context": "https://schema.org",
@@ -86,9 +87,8 @@ function ComparisonSchema() {
   );
 }
 
-export default function ComparisonPage() {
-    const tCompare = useTranslations("compare");
-    const tCommon = useTranslations("common");
+export default async function ComparisonPage() {
+    const tCompare = await getTranslations("compare");
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
@@ -128,6 +128,28 @@ export default function ComparisonPage() {
 
             {/* Main Content */}
             <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+                {/* SEMANTIC SEO SHELL: Visible to bots immediately */}
+                <section className="sr-only">
+                    <h1>LLM API Price Comparison Tool 2026</h1>
+                    <p>
+                        Comprehensive real-time comparison of API token pricing for Large Language Models. 
+                        We track <strong>OpenAI GPT-4o, GPT-5, Anthropic Claude 3.5 Sonnet, 
+                        Google Gemini 1.5 Pro, Meta Llama 3</strong> and more. Use our tool to find the 
+                        best price-to-performance ratio for your AI application scale.
+                    </p>
+                    <ul>
+                        <li>Compare Input Token vs Output Token Costs</li>
+                        <li>Analyze Model Performance Tiers</li>
+                        <li>Find the Cheapest High-Reasoning LLMs</li>
+                    </ul>
+                    <nav>
+                        <ul>
+                            <li><Link href="/">Main Calculator</Link></li>
+                            <li><Link href="/workflow">Workflow Simulator</Link></li>
+                        </ul>
+                    </nav>
+                </section>
+
                 <SocialShareBar variant="top" />
 
                 <ModelComparisonTable />

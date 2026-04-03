@@ -2,8 +2,9 @@ import SiteHeader from "@/components/SiteHeader";
 import { Zap } from "lucide-react";
 import ContextCachingCalculator from "@/components/ContextCachingCalculator";
 import SocialShareBar from "@/components/SocialShareBar";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from 'next';
+import { Link } from "@/lib/i18n/navigation";
 
 export const dynamic = 'force-static';
 
@@ -55,8 +56,8 @@ function CachingSchema() {
   );
 }
 
-export default function CachingCalculatorPage() {
-    const tTools = useTranslations("tools");
+export default async function CachingCalculatorPage() {
+    const tTools = await getTranslations("tools");
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
@@ -66,6 +67,29 @@ export default function CachingCalculatorPage() {
 
             {/* Main Content */}
             <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-16">
+                {/* SEMANTIC SEO SHELL: Visible to bots immediately */}
+                <section className="sr-only">
+                    <h1>LLM Prompt & Context Caching Savings Calculator</h1>
+                    <p>
+                        Calculate the ROI of <strong>Anthropic Prompt Caching</strong> and 
+                        <strong> Google Gemini Context Caching</strong>. Our tool helps you 
+                        determine the <strong>break-even point</strong> for long-context 
+                        reusability, analyzing TTL (Time To Live) and cached vs. non-cached 
+                        input token pricing.
+                    </p>
+                    <ul>
+                        <li>Claude 3.5 Sonnet Cache Write vs Cache Read Costs</li>
+                        <li>Gemini 1.5 Pro Context Caching TTL Analysis</li>
+                        <li>Optimizing RAG Pipelines with Caching</li>
+                    </ul>
+                    <nav>
+                        <ul>
+                            <li><Link href="/">Main Token Counter</Link></li>
+                            <li><Link href="/workflow">Workflow Simulator</Link></li>
+                        </ul>
+                    </nav>
+                </section>
+
                 <SocialShareBar variant="top" />
 
                 <div className="space-y-4 mb-10 text-center md:text-left relative">
@@ -85,15 +109,25 @@ export default function CachingCalculatorPage() {
 
                 <SocialShareBar variant="bottom" />
 
-                {/* HIDDEN SEMANTIC CONTENT FOR GOOGLE */}
-                <div className="sr-only">
-                    <h2>Caching Intelligence: Frequently Asked Questions</h2>
-                    <ul>
-                        <li>How long does a cached prompt stay cached before it expires?</li>
-                        <li>Does context caching work for image inputs, or just text?</li>
-                        <li>Is there a minimum token threshold to qualify for cache pricing?</li>
-                    </ul>
-                </div>
+                {/* Educational Content / FAQ Section */}
+                <section className="mt-20 border-t border-border/40 pt-16">
+                    <div className="max-w-4xl mx-auto space-y-8 text-muted-foreground leading-relaxed">
+                        <h2 className="text-2xl font-bold text-white uppercase tracking-tight">How Does Context Caching Save Money?</h2>
+                        <p>
+                            In traditional LLM calls, you are billed for every token in your input, every single time. With prompt caching, you pay a one-time "Cache Write" fee to store a massive block of static content (like a knowledge base or system prompt). Subsequent calls then pay a significantly lower "Cache Read" fee for that same content.
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+                            <div className="space-y-2">
+                                <h3 className="font-bold text-white">Anthropic Caching</h3>
+                                <p className="text-sm">Claude 3.5 Sonnet requires a minimum of 1,024 tokens to trigger caching. The cache remains active for 5 minutes, but the TTL is refreshed with every hit.</p>
+                            </div>
+                            <div className="space-y-2">
+                                <h3 className="font-bold text-white">Google Gemini Caching</h3>
+                                <p className="text-sm">Gemini 1.5 Pro allows for multi-gigabyte context caching with a user-defined TTL. It is ideal for large codebases or hour-long video files.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </main>
         </div>
     );

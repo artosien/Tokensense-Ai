@@ -3,6 +3,8 @@ import BatchCostPlanner from "@/components/BatchCostPlanner";
 import SocialShareBar from "@/components/SocialShareBar";
 import { Database } from "lucide-react";
 import { Metadata } from 'next';
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/lib/i18n/navigation";
 
 export const dynamic = 'force-static';
 
@@ -54,7 +56,7 @@ function BatchSchema() {
   );
 }
 
-export default function BatchCostPage() {
+export default async function BatchCostPage() {
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <BatchSchema />
@@ -62,6 +64,28 @@ export default function BatchCostPage() {
 
             {/* Main Content */}
             <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-16">
+                {/* SEMANTIC SEO SHELL: Visible to bots immediately */}
+                <section className="sr-only">
+                    <h1>High-Volume LLM Batch API Cost Planner</h1>
+                    <p>
+                        Scale your AI infrastructure from single prompts to <strong>million-token 
+                        batches</strong>. Our planner calculates <strong>daily, weekly, 
+                        and monthly LLM spend</strong> for high-volume data processing pipelines using 
+                        OpenAI Batch API, Google Gemini, and Anthropic.
+                    </p>
+                    <ul>
+                        <li>Cost Projections for 50k+ Prompt Batches</li>
+                        <li>Batch API Discount Analysis (50% Off Strategies)</li>
+                        <li>High-Scale Output Token Variance Estimator</li>
+                    </ul>
+                    <nav>
+                        <ul>
+                            <li><Link href="/">Main Calculator</Link></li>
+                            <li><Link href="/comparison">Price Index</Link></li>
+                        </ul>
+                    </nav>
+                </section>
+
                 <SocialShareBar variant="top" />
 
                 <div className="space-y-4 mb-10 text-center md:text-left relative">
@@ -82,21 +106,23 @@ export default function BatchCostPage() {
 
                 <SocialShareBar variant="bottom" />
 
-                {/* SEMANTIC CONTENT FOR CRAWLERS */}
-                <div className="sr-only">
-                    <h2>Understanding Batch Dynamics</h2>
-                    <p>Scaling from one prompt to millions requires different strategies.</p>
-                    <ul>
-                        <li><strong>Batch APIs:</strong> Many providers (OpenAI, Anthropic) offer a "Batch API" that provides a ~50% discount if you can wait up to 24 hours for results.</li>
-                        <li><strong>Output Variability:</strong> Unlike input tokens, output tokens vary per request. Always pad your output token estimate by 20-30% to account for unexpected verbosity.</li>
-                    </ul>
-                    <h3>Supported Models for Batching:</h3>
-                    <ul>
-                        <li>Gemini 1.5 Flash & Flash-Lite</li>
-                        <li>Llama 3.3 70B (MSTA/DeepInfra)</li>
-                        <li>GPT-5 Mini</li>
-                    </ul>
-                </div>
+                {/* Educational Content / SEO Section */}
+                <section className="mt-20 border-t border-border/40 pt-16">
+                    <div className="max-w-4xl mx-auto space-y-8 text-muted-foreground leading-relaxed">
+                        <h2 className="text-2xl font-bold text-white uppercase tracking-tight">Understanding Batch Dynamics</h2>
+                        <p>Scaling from one prompt to millions requires different strategies. High-volume processing is often more about latency-cost tradeoffs than raw speed.</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+                            <div className="space-y-2">
+                                <h3 className="font-bold text-white">The Batch API Advantage</h3>
+                                <p className="text-sm">Many providers like OpenAI offer a "Batch API" which provides a 50% discount on standard token rates. This is ideal for asynchronous tasks like summarizing an entire database where immediate response isn't required.</p>
+                            </div>
+                            <div className="space-y-2">
+                                <h3 className="font-bold text-white">Output Variability at Scale</h3>
+                                <p className="text-sm">Unlike input tokens, output tokens vary per request. When planning a 100,000 prompt batch, always pad your output token estimate by 20-30% to account for unexpected LLM verbosity and maintain your margins.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </main>
         </div>
     );

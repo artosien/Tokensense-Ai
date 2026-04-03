@@ -3,7 +3,8 @@ import Script from "next/script";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import BackToTop from "@/components/BackToTop";
-import Footer from "@/components/Footer";
+import Footer from "@/components/Footer"; // Still keep for non-blog if needed, but we'll use BlogFooter globally for now
+import BlogFooter from "@/components/BlogFooter";
 import LoadingScreen from "@/components/LoadingScreen";
 import ThemeProvider from "@/components/ThemeProvider";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
@@ -120,7 +121,7 @@ export default async function RootLayout({
               <LoadingScreen />
               <PWAInstallPrompt />
               {children}
-              <Footer />
+              <BlogFooter />
               <BackToTop />
             </NextIntlClientProvider>
           </ThemeProvider>

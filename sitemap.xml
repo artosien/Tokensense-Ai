@@ -19,11 +19,37 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://www.tokensense-ai.com/comparison</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.tokensense-ai.com/multimodal</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.tokensense-ai.com/caching</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.tokensense-ai.com/video-planner</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://www.tokensense-ai.com/blog</loc>
     <lastmod>2026-05-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
+
+  <!-- BLOG POSTS -->
   <url>
     <loc>https://www.tokensense-ai.com/blog/deflation-of-intelligence-llm-pricing</loc>
     <lastmod>2026-03-15</lastmod>
@@ -43,6 +69,12 @@
     <priority>0.85</priority>
   </url>
   <url>
+    <loc>https://www.tokensense-ai.com/blog/ai-surveillance-costs-24-7-visual-monitoring</loc>
+    <lastmod>2026-04-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
     <loc>https://www.tokensense-ai.com/blog/why-1-fps-magic-number-video-ai</loc>
     <lastmod>2026-04-05</lastmod>
     <changefreq>monthly</changefreq>
@@ -55,6 +87,12 @@
     <priority>0.85</priority>
   </url>
   <url>
+    <loc>https://www.tokensense-ai.com/blog/chunking-vs-streaming-video-llm-best-practices</loc>
+    <lastmod>2026-04-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
     <loc>https://www.tokensense-ai.com/blog/context-windows-2026-gemini-video-capacity</loc>
     <lastmod>2026-04-12</lastmod>
     <changefreq>monthly</changefreq>
@@ -62,6 +100,12 @@
   </url>
   <url>
     <loc>https://www.tokensense-ai.com/blog/video-tokenization-101-sora-runway-pricing</loc>
+    <lastmod>2026-04-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.tokensense-ai.com/blog/prompt-engineering-video-reduce-token-overhead</loc>
     <lastmod>2026-04-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
@@ -91,18 +135,6 @@
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://www.tokensense-ai.com/blog/chunking-vs-streaming-video-llm-best-practices</loc>
-    <lastmod>2026-04-10</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://www.tokensense-ai.com/blog/prompt-engineering-video-reduce-token-overhead</loc>
-    <lastmod>2026-04-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
     <loc>https://www.tokensense-ai.com/blog/sora-vs-kling-ai-video-generation-costs</loc>
     <lastmod>2026-05-15</lastmod>
     <changefreq>monthly</changefreq>
@@ -114,36 +146,8 @@
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
-  <url>
-    <loc>https://www.tokensense-ai.com/comparison</loc>
-    <lastmod>2026-05-10</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://www.tokensense-ai.com/multimodal</loc>
-    <lastmod>2026-05-10</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://www.tokensense-ai.com/caching</loc>
-    <lastmod>2026-05-10</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://www.tokensense-ai.com/video-planner</loc>
-    <lastmod>2026-05-10</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://www.tokensense-ai.com/account</loc>
-    <lastmod>2026-05-10</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
+
+  <!-- TOOLS -->
   <url>
     <loc>https://www.tokensense-ai.com/tools/batch</loc>
     <lastmod>2026-05-10</lastmod>
@@ -160,6 +164,14 @@
     <loc>https://www.tokensense-ai.com/tools/context</loc>
     <lastmod>2026-05-10</lastmod>
     <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- UTILITY PAGES -->
+  <url>
+    <loc>https://www.tokensense-ai.com/account</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>

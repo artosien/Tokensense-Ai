@@ -47,6 +47,25 @@ export default function Home() {
       <SiteHeader />
       
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* SEMANTIC SEO SHELL: Visible to bots immediately */}
+        <section className="sr-only">
+          <h1>Tokensense-Ai | Free LLM Token Counter & Cost Estimator</h1>
+          <p>
+            Tokensense-Ai is the definitive tool for AI developers to calculate API costs 
+            for GPT-4o, Claude 3.5, and Gemini 1.5. Our 100% client-side calculator 
+            provides instant token counts and pricing estimates to help you optimize 
+            your LLM budget and architectural decisions.
+          </p>
+          <nav>
+            <ul>
+              <li><Link href="/workflow">AI Workflow Loop Simulator</Link></li>
+              <li><Link href="/comparison">LLM Pricing Comparison Table</Link></li>
+              <li><Link href="/multimodal">Vision & Multimodal Token Estimator</Link></li>
+              <li><Link href="/video-planner">Sora & Runway Video API Planner</Link></li>
+            </ul>
+          </nav>
+        </section>
+
         <SocialShareBar variant="top" />
 
         {/* Hero Section */}

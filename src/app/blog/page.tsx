@@ -6,6 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Calendar, Clock, ArrowRight } from "lucide-react";
 import { getPublishedPosts } from "@/lib/blog-service";
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import BlogFooter from '@/components/BlogFooter';
 
 export const metadata: Metadata = {
   title: "Tokensense-Ai Blog | LLM Economics, Prompt Engineering & Cost Optimization",
@@ -78,6 +79,22 @@ export default async function BlogPage() {
       <SiteHeader />
 
       <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-16">
+        {/* SEMANTIC SEO SHELL: Visible to bots immediately */}
+        <section className="sr-only">
+          <h2>LLM Economics and Token Optimization Resource Center</h2>
+          <p>
+            Welcome to the Tokensense-Ai blog, the definitive resource for developers and AI engineers 
+            looking to optimize their LLM API usage. We cover critical topics including 
+            tokenization mechanics, API cost forecasting for GPT-4o and Claude 3.5, 
+            and strategies for reducing multimodal video processing overhead.
+          </p>
+          <ul>
+            <li>Mastering Prompt Engineering for Cost Reduction</li>
+            <li>Analyzing Historical LLM Price Trends</li>
+            <li>Technical Guides for Gemini 1.5 Pro Context Windows</li>
+          </ul>
+        </section>
+
         {/* Hero Section */}
         <section className="text-center mb-16 space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-widest mb-2">
