@@ -224,7 +224,7 @@ export default function PostEditor({ post }: PostEditorProps) {
                   name="image" 
                   value={formData.image} 
                   onChange={handleChange} 
-                  placeholder="/images/blog/hero.png"
+                  placeholder="/images/blog/hero.webp"
                 />
                 <div className="relative">
                   <Input 
