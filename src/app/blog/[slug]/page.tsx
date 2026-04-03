@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { Link } from "@/lib/i18n/navigation";
 import { notFound } from "next/navigation";
 import SiteHeader from "@/components/SiteHeader";
-import { getBlogPostBySlug, getPublishedPosts } from "@/lib/blog-service";
+import { getBlogPostBySlug, getPublishedPosts, BlogPost } from "@/lib/blog-service";
 import { Calendar, Clock, ArrowLeft, Share2, Twitter, Linkedin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getTranslations, setRequestLocale } from 'next-intl/server';
@@ -40,6 +40,41 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+async function BlogPostingSchema({ post }: { post: BlogPost }) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "description": post.description,
+    "image": `https://www.tokensense-ai.com${post.image}`,
+    "datePublished": post.publishDate,
+    "author": {
+      "@type": "Organization",
+      "name": "Tokensense-Ai Editorial",
+      "url": "https://www.tokensense-ai.com"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Tokensense-Ai",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://www.tokensense-ai.com/logo.png"
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `https://www.tokensense-ai.com/blog/${post.slug}`
+    }
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
+}
+
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
   const locale = 'en';
@@ -53,6 +88,7 @@ export default async function BlogPostPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <BlogPostingSchema post={post} />
       <SiteHeader />
 
       <main className="flex-1 mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8 py-10 md:py-16">

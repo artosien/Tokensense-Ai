@@ -18,13 +18,13 @@ export const metadata: Metadata = {
     description: "Master the economics of LLMs. Strategies for cost-effective AI development.",
     url: 'https://www.tokensense-ai.com/blog',
     type: 'website',
-    images: [{ url: '/blog-og.png', width: 1200, height: 630 }],
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
     title: "Tokensense-Ai | AI Cost & Prompt Engineering Blog",
     description: "Insights into the deflation of intelligence and AI cost optimization.",
-    images: ['/blog-og.png'],
+    images: ['/og-image.png'],
   },
 };
 

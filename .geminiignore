@@ -1,0 +1,14 @@
+# Ignore the heavy dependencies
+node_modules/
+
+# Ignore local environment variables (security)
+.env
+*.local
+
+# Ignore git history
+.git/
+
+# Ignore compiled code/logs
+dist/
+build/
+*.log

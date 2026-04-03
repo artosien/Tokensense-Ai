@@ -1,6 +1,7 @@
 import { VideoPlanner } from "@/features/video-planner";
 import SiteHeader from "@/components/SiteHeader";
 import SocialShareBar from "@/components/SocialShareBar";
+import { Link } from "@/lib/i18n/navigation";
 import type { Metadata } from "next";
 
 const PAGE_DESCRIPTION = "Estimate AI video generation and processing costs for Sora, Gemini 1.5, Runway Gen-3, Kling, and Seedance. Compare tokenization models and budget your video workflows.";
@@ -176,6 +177,27 @@ export default function VideoPlannerPage() {
               <p className="text-muted-foreground text-center max-w-2xl mx-auto">
                 To keep costs low, consider downsampling for initial analysis, using keyframe extraction to reduce token usage, and leveraging context caching for repeated queries.
               </p>
+            </div>
+
+            <div className="space-y-8 pt-12">
+              <h2 className="text-3xl font-bold tracking-tight text-foreground text-center">Video AI Deep Dives</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="p-6 rounded-2xl border border-border/40 bg-card hover:border-indigo-500/50 transition-colors">
+                  <h3 className="font-bold text-white mb-2">Video Tokenization 101</h3>
+                  <p className="text-sm text-muted-foreground mb-4">A developer's guide to Sora and Runway Gen-3 pricing philosophies.</p>
+                  <Link href="/blog/video-tokenization-101-sora-runway-pricing" className="text-indigo-400 text-sm font-medium hover:underline">Read Article →</Link>
+                </div>
+                <div className="p-6 rounded-2xl border border-border/40 bg-card hover:border-indigo-500/50 transition-colors">
+                  <h3 className="font-bold text-white mb-2">The Math of Sight</h3>
+                  <p className="text-sm text-muted-foreground mb-4">Explore the mechanics of how AI models turn pixels into tokens.</p>
+                  <Link href="/blog/math-of-sight-ai-vision-tokens" className="text-indigo-400 text-sm font-medium hover:underline">Read Article →</Link>
+                </div>
+                <div className="p-6 rounded-2xl border border-border/40 bg-card hover:border-indigo-500/50 transition-colors">
+                  <h3 className="font-bold text-white mb-2">The 1 FPS Magic Number</h3>
+                  <p className="text-sm text-muted-foreground mb-4">Learn why 1 FPS is the optimal frame rate for most AI video tasks.</p>
+                  <Link href="/blog/why-1-fps-magic-number-video-ai" className="text-indigo-400 text-sm font-medium hover:underline">Read Article →</Link>
+                </div>
+              </div>
             </div>
           </div>
         </section>
