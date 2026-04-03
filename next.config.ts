@@ -4,8 +4,14 @@ import type { NextConfig } from "next";
 const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   trailingSlash: false,
-  serverExternalPackages: ["@ffprobe-installer/ffprobe", "fluent-ffmpeg"],
+  serverExternalPackages: [
+    "@ffprobe-installer/ffprobe",
+    "fluent-ffmpeg",
+    "tiktoken",
+    "pdfjs-dist",
+  ],
 
   async redirects() {
     return [
