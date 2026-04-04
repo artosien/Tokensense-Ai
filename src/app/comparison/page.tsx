@@ -4,7 +4,7 @@ import SocialShareBar from "@/components/SocialShareBar";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 
 export const dynamic = 'force-static';
@@ -88,6 +88,8 @@ function ComparisonSchema() {
 }
 
 export default async function ComparisonPage() {
+    const locale = 'en';
+    setRequestLocale(locale);
     const tCompare = await getTranslations("compare");
 
     return (

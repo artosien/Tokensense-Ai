@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import SiteHeader from "@/components/SiteHeader";
+import { setRequestLocale } from 'next-intl/server';
 
 export const metadata: Metadata = {
   title: "Pricing Changelog — TokenSense AI",
@@ -135,6 +136,9 @@ function ChangelogSchema() {
 }
 
 export default function ChangelogPage() {
+    const locale = 'en';
+    setRequestLocale(locale);
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <ChangelogSchema />
@@ -185,7 +189,7 @@ export default function ChangelogPage() {
                 </div>
 
                 <div className="rounded-xl border border-border/40 bg-card/40 divide-y divide-border/20 overflow-hidden">
-                  {group.entries.map((entry, ei) => {
+                  {CHANGELOG[gi].entries.map((entry, ei) => {
                     const style = TYPE_STYLES[entry.type];
                     return (
                       <div key={ei} className="flex items-start gap-3 px-4 py-3">
@@ -232,4 +236,3 @@ export default function ChangelogPage() {
     </div>
   );
 }
-

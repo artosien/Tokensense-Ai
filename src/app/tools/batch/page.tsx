@@ -3,7 +3,7 @@ import BatchCostPlanner from "@/components/BatchCostPlanner";
 import SocialShareBar from "@/components/SocialShareBar";
 import { Database } from "lucide-react";
 import { Metadata } from 'next';
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 
 export const dynamic = 'force-static';
@@ -57,6 +57,9 @@ function BatchSchema() {
 }
 
 export default async function BatchCostPage() {
+    const locale = 'en';
+    setRequestLocale(locale);
+    
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <BatchSchema />

@@ -2,7 +2,7 @@ import SiteHeader from "@/components/SiteHeader";
 import { Zap } from "lucide-react";
 import ContextCachingCalculator from "@/components/ContextCachingCalculator";
 import SocialShareBar from "@/components/SocialShareBar";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from 'next';
 import { Link } from "@/lib/i18n/navigation";
 
@@ -57,6 +57,8 @@ function CachingSchema() {
 }
 
 export default async function CachingCalculatorPage() {
+    const locale = 'en';
+    setRequestLocale(locale);
     const tTools = await getTranslations("tools");
 
     return (

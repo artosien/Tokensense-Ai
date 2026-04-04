@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
+import { setRequestLocale } from 'next-intl/server';
 
 export const metadata: Metadata = {
   title: "Terms of Service | Tokensense-Ai",
@@ -82,6 +83,9 @@ function TermsSchema() {
 export const dynamic = 'force-static';
 
 export default function TermsOfServicePage() {
+    const locale = 'en';
+    setRequestLocale(locale);
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <TermsSchema />

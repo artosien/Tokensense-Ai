@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import PricingHistoryClient from "@/components/PricingHistoryClient";
 import SiteHeader from "@/components/SiteHeader";
+import { setRequestLocale } from 'next-intl/server';
 
 export const metadata: Metadata = {
   title: "LLM Pricing Tracker | Historical AI Token Cost Trends",
@@ -61,6 +62,9 @@ function PricingSchema() {
 }
 
 export default function PricingHistoryPage() {
+  const locale = 'en';
+  setRequestLocale(locale);
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <PricingSchema />

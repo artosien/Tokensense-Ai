@@ -2,7 +2,7 @@ import SiteHeader from "@/components/SiteHeader";
 import MultimodalEstimator from "@/components/MultimodalEstimator";
 import SocialShareBar from "@/components/SocialShareBar";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Metadata } from 'next';
 import { Link } from "@/lib/i18n/navigation";
 
@@ -57,6 +57,8 @@ function MultimodalSchema() {
 }
 
 export default async function MultimodalPage() {
+    const locale = 'en';
+    setRequestLocale(locale);
     const tTools = await getTranslations("tools");
 
     return (

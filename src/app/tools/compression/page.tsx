@@ -3,7 +3,7 @@ import PromptCompressionAnalyzer from "@/components/PromptCompressionAnalyzer";
 import SocialShareBar from "@/components/SocialShareBar";
 import { Sparkles } from "lucide-react";
 import { Metadata } from 'next';
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 
 export const dynamic = 'force-static';
@@ -57,6 +57,9 @@ function CompressionSchema() {
 }
 
 export default async function PromptCompressionPage() {
+    const locale = 'en';
+    setRequestLocale(locale);
+    
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <CompressionSchema />

@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import BugReportForm from "@/components/BugReportForm";
+import { setRequestLocale } from 'next-intl/server';
 
 export const metadata: Metadata = {
   title: "About Tokensense-Ai | Precision AI Cost Intelligence",
@@ -84,6 +85,8 @@ function AboutSchema() {
 export const dynamic = 'force-static';
 
 export default function AboutPage() {
+    const locale = 'en';
+    setRequestLocale(locale);
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
@@ -257,5 +260,3 @@ export default function AboutPage() {
         </div>
     );
 }
-
-

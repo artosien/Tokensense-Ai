@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
+import { setRequestLocale } from 'next-intl/server';
 
 export const metadata: Metadata = {
   title: "Privacy Policy | Tokensense-Ai",
@@ -90,6 +91,9 @@ function PrivacySchema() {
 export const dynamic = 'force-static';
 
 export default function PrivacyPolicyPage() {
+    const locale = 'en';
+    setRequestLocale(locale);
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <PrivacySchema />

@@ -3,6 +3,7 @@ import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { setRequestLocale } from 'next-intl/server';
 
 export const metadata: Metadata = {
   title: "Tokensense-Ai FAQ | Understanding AI Tokens & API Costs",
@@ -91,6 +92,9 @@ function FAQSchema() {
 export const dynamic = 'force-static';
 
 export default function FAQPage() {
+    const locale = 'en';
+    setRequestLocale(locale);
+
     return (
         <div className="min-h-screen bg-background">
             <FAQSchema />
@@ -325,8 +329,6 @@ export default function FAQPage() {
                     </div>
                 </section>
             </main>
-
         </div>
     );
 }
-

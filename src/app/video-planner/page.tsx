@@ -3,6 +3,7 @@ import SiteHeader from "@/components/SiteHeader";
 import SocialShareBar from "@/components/SocialShareBar";
 import { Link } from "@/lib/i18n/navigation";
 import type { Metadata } from "next";
+import { setRequestLocale } from 'next-intl/server';
 
 const PAGE_DESCRIPTION = "Estimate AI video generation and processing costs for Sora, Gemini 1.5, Runway Gen-3, Kling, and Seedance. Compare tokenization models and budget your video workflows.";
 
@@ -94,6 +95,9 @@ function VideoPlannerSchema() {
 }
 
 export default function VideoPlannerPage() {
+  const locale = 'en';
+  setRequestLocale(locale);
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <VideoPlannerSchema />

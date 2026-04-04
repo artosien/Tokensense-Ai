@@ -9,6 +9,7 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import HomeClient from "@/app/HomeClient";
 import SocialShareBar from "@/components/SocialShareBar";
 import SiteHeader from "@/components/SiteHeader";
+import { setRequestLocale } from 'next-intl/server';
 
 export const metadata: Metadata = {
   title: "Tokensense-Ai | Free LLM Token Counter & Prompt Cost Calculator",
@@ -42,6 +43,9 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
+  const locale = 'en';
+  setRequestLocale(locale);
+
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
       <SiteHeader />
@@ -72,14 +76,14 @@ export default function Home() {
         <section className="relative pt-10 pb-16 text-center lg:text-left flex flex-col lg:flex-row items-center justify-between gap-12">
           <GradientOrbs />
           
-          <div className="max-w-3xl space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#00dcb4]/30 bg-[#00dcb4]/10 text-[#00dcb4] text-xs font-mono font-bold tracking-wide mb-2">
+          <div className="max-w-3xl space-y-6 mx-auto lg:mx-0">
+            <div className="inline-flex items-center text-center justify-center gap-2 px-3 py-1 rounded-full border border-[#00dcb4]/30 bg-[#00dcb4]/10 text-[#00dcb4] text-[10px] sm:text-xs font-mono font-bold tracking-wide mb-2 max-w-full">
               {"The only calculator that simulates agent loop costs"}
             </div>
 
             <HeroHeadline />
 
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium">
+            <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium text-center lg:text-left text-balance">
               {"Know your token counts and pricing across GPT-4o, Claude 3.5, Gemini 1.5, and 50+ other major models before you hit send."}
             </p>
             

@@ -160,6 +160,32 @@ export default function LoginPage() {
                                         <Github className="w-5 h-5" />
                                         Continue with GitHub
                                     </Button>
+
+                                    <Button 
+                                        type="button"
+                                        onClick={async (e) => {
+                                            e.preventDefault();
+                                            try {
+                                                const result = await signIn("reddit", { 
+                                                    callbackUrl: "/account",
+                                                    redirect: false 
+                                                });
+                                                if (result?.url) {
+                                                    window.location.href = result.url;
+                                                } else if (result?.error) {
+                                                    alert("Authentication Error: " + result.error);
+                                                }
+                                            } catch (e) {
+                                                console.error("signIn function threw error:", e);
+                                            }
+                                        }}
+                                        className="w-full h-14 bg-[#FF4500] hover:bg-[#FF4500]/90 text-white font-bold flex items-center justify-center gap-3 rounded-2xl shadow-lg transition-all active:scale-[0.98]"
+                                    >
+                                        <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                            <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.05l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.305.744-.495 1.228-.495.969 0 1.758.787 1.758 1.755 0 .712-.425 1.328-1.035 1.605.012.16.02.32.02.483 0 2.948-3.337 5.347-7.452 5.347-4.115 0-7.452-2.399-7.452-5.347 0-.163.008-.323.02-.483a1.734 1.734 0 0 1-1.035-1.605c0-.968.789-1.755 1.758-1.755.484 0 .92.19 1.228.495 1.194-.856 2.85-1.417 4.674-1.488l.896-4.195c.03-.143.19-.23.323-.197l2.812.602c.004-.012.012-.02.016-.033.05-.285.3-.505.6-.505zM8.748 13.545c-.692 0-1.253.561-1.253 1.249 0 .688.561 1.249 1.253 1.249.691 0 1.252-.561 1.252-1.249 0-.688-.561-1.249-1.252-1.249zm6.504 0c-.692 0-1.252.561-1.252 1.249 0 .688.561 1.249 1.252 1.249.692 0 1.253-.561 1.253-1.249 0-.688-.561-1.249-1.253-1.249zm-3.252 3.925c-.033 0-.066.001-.1.002-1.018.005-2.02.26-2.73.693-.065.04-.085.123-.045.188.04.065.123.085.188.045.642-.39 1.558-.636 2.51-.64a13.344 13.344 0 0 1 2.51.64.125.125 0 0 0 .143-.233c-.71-.433-1.712-.688-2.73-.693z"/>
+                                        </svg>
+                                        Continue with Reddit
+                                    </Button>
                                     
                                     <div className="relative py-4">
                                         <div className="absolute inset-0 flex items-center">

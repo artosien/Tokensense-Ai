@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
+import RedditProvider from "next-auth/providers/reddit";
 import { AuthOptions } from "next-auth";
 
 /**
@@ -10,7 +11,7 @@ import { AuthOptions } from "next-auth";
  * the authentication system.
  */
 export const authOptions: AuthOptions = {
-  // Use Google and GitHub as authentication providers
+  // Use Google, GitHub, and Reddit as authentication providers
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
@@ -20,6 +21,10 @@ export const authOptions: AuthOptions = {
       // Supporting both GITHUB_ID (guide) and GITHUB_CLIENT_ID (common practice)
       clientId: (process.env.GITHUB_ID || process.env.GITHUB_CLIENT_ID) as string,
       clientSecret: (process.env.GITHUB_SECRET || process.env.GITHUB_CLIENT_SECRET) as string,
+    }),
+    RedditProvider({
+      clientId: process.env.REDDIT_CLIENT_ID as string,
+      clientSecret: process.env.REDDIT_CLIENT_SECRET as string,
     }),
   ],
   

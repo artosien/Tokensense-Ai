@@ -2,7 +2,7 @@ import SiteHeader from "@/components/SiteHeader";
 import SocialShareBar from "@/components/SocialShareBar";
 import MissionSummary from "@/components/MissionSummary";
 import { Link } from "@/lib/i18n/navigation";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 
 export const dynamic = 'force-static';
@@ -29,6 +29,9 @@ export const metadata: Metadata = {
 };
 
 export default async function WorkflowSimulatorPage() {
+    const locale = 'en';
+    setRequestLocale(locale);
+    
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <SiteHeader />

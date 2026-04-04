@@ -100,15 +100,43 @@ export default async function BlogFooter() {
           </div>
         </div>
 
-        {/* Semantic SEO Text Block */}
-        <div className="border-t border-border/40 pt-8 mb-8">
-            <p className="text-[10px] text-muted-foreground/50 leading-loose max-w-4xl">
+        {/* Support & Badges */}
+        <div className="border-t border-border/40 pt-8 mb-8 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="flex flex-col items-center md:items-start gap-3">
+            <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest">
+              Support Development
+            </p>
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+              <iframe
+                src="https://github.com/sponsors/artosien/button"
+                title="Sponsor artosien"
+                height="32"
+                width="114"
+                style={{ border: 0, borderRadius: "6px" }}
+              />
+              <a
+                href="https://www.producthunt.com/products/tokensense-2?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-tokensense-2"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block"
+              >
+                <img
+                  alt="Tokensense - See exactly what your LLM calls cost – instantly | Product Hunt"
+                  width="148"
+                  height="32"
+                  src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1102621&theme=dark&t=1774570421882"
+                />
+              </a>
+            </div>
+          </div>
+
+          <div className="max-w-md text-center md:text-right">
+            <p className="text-[10px] text-muted-foreground/50 leading-loose">
                 Tokensense-Ai provides real-time token count estimation for Large Language Models (LLMs) including 
-                <strong> GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro, and Llama 3</strong>. Our tools help engineers calculate 
-                <strong> API input/output costs</strong>, optimize <strong>prompt compression</strong>, and plan 
-                <strong> multimodal video token budgets</strong>. All calculations are performed 100% client-side 
+                <strong> GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro, and Llama 3</strong>. All calculations are performed 100% client-side 
                 for maximum privacy and security.
             </p>
+          </div>
         </div>
 
         {/* Footer Bottom */}

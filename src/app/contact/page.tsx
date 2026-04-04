@@ -2,7 +2,7 @@ import { Link } from "@/lib/i18n/navigation";
 import SiteHeader from "@/components/SiteHeader";
 import ContactForm from "@/components/ContactForm";
 import { Send, MessageSquare } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -54,8 +54,10 @@ function ContactSchema() {
   );
 }
 
-export default function ContactPage() {
-    const tMobile = useTranslations("mobile");
+export default async function ContactPage() {
+    const locale = 'en';
+    setRequestLocale(locale);
+    const tMobile = await getTranslations("mobile");
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
