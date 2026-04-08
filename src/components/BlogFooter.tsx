@@ -52,16 +52,11 @@ export default async function BlogFooter() {
 
           {/* SEO Content Categories */}
           <div className="space-y-4">
-            <h4 className="text-white font-bold text-sm uppercase tracking-widest">Resources</h4>
+            <h4 className="text-white font-bold text-sm uppercase tracking-widest">{t("learn") || "Learn"}</h4>
             <ul className="space-y-3">
               <li>
-                <Link href="/blog" className="text-muted-foreground hover:text-indigo-400 transition text-sm">
-                  AI Economics Blog
-                </Link>
-              </li>
-              <li>
-                <Link href="/pricing-history" className="text-muted-foreground hover:text-indigo-400 transition text-sm">
-                  Model Price History
+                <Link href="/tokenomics" className="text-muted-foreground hover:text-indigo-400 transition text-sm">
+                  Tokenomics
                 </Link>
               </li>
               <li>
@@ -74,10 +69,15 @@ export default async function BlogFooter() {
                   About the Project
                 </Link>
               </li>
+              <li>
+                <Link href="/blog" className="text-muted-foreground hover:text-indigo-400 transition text-sm">
+                  AI Economics Blog
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Knowledge Base */}
+          {/* Legal & Support */}
           <div className="space-y-4">
             <h4 className="text-white font-bold text-sm uppercase tracking-widest">Legal & Support</h4>
             <ul className="space-y-3">
@@ -95,6 +95,16 @@ export default async function BlogFooter() {
                 <Link href="/contact" className="text-muted-foreground hover:text-indigo-400 transition text-sm">
                   Contact Editorial
                 </Link>
+              </li>
+              <li>
+                <a href="/sitemap.xml" className="text-muted-foreground hover:text-indigo-400 transition text-sm">
+                  Sitemap
+                </a>
+              </li>
+              <li>
+                <a href="/robots.txt" className="text-muted-foreground hover:text-indigo-400 transition text-sm">
+                  Robots Configuration
+                </a>
               </li>
             </ul>
           </div>

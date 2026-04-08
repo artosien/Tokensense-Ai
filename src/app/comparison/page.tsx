@@ -73,6 +73,14 @@ function ComparisonSchema() {
               "@type": "Answer",
               "text": "For the lowest possible output cost, 'Flash' or 'Mini' models like GPT-4o mini, Gemini 1.5 Flash, and Claude 3.5 Haiku are the industry leaders, often priced at a fraction of a cent per 1M tokens."
             }
+          },
+          {
+            "@type": "Question",
+            "name": "How often is AI pricing updated?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "We track and update model pricing weekly to ensure accuracy. Our comparison tool reflects the latest 2026 API price drops for OpenAI, Anthropic, Google, and DeepSeek."
+            }
           }
         ]
       }
@@ -165,18 +173,32 @@ export default async function ComparisonPage() {
 
                 <SocialShareBar variant="bottom" />
 
-                {/* Next Step CTA */}
-                <div className="mt-12 pt-8 border-t border-border/40">
-                    <Button 
-                        asChild
-                        className="w-full h-16 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-lg shadow-xl shadow-indigo-500/20 gap-4 group"
-                    >
-                        <Link href="/workflow">
-                            <Sparkles className="w-6 h-6 fill-white group-hover:animate-spin-slow" />
-                            Comms Review Complete. Generate Final Flight Report ➔
-                        </Link>
-                    </Button>
-                </div>
+                {/* Server-Rendered Capabilities Summary */}
+                <section className="mt-20 border-t border-border/40 pt-16 max-w-4xl mx-auto">
+                    <div className="space-y-12">
+                        <div className="text-center space-y-4">
+                            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase">Tool Capabilities</h2>
+                            <p className="text-muted-foreground text-lg">Detailed benchmarking for LLM infrastructure decision-making.</p>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div className="space-y-3">
+                                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 font-bold">01</div>
+                                <h4 className="text-lg font-bold text-white">Multi-Provider Benchmarking</h4>
+                                <p className="text-sm text-muted-foreground leading-relaxed">Side-by-side comparison of input and output costs for OpenAI, Anthropic, Google, and Meta. No more jumping between documentation pages.</p>
+                            </div>
+                            <div className="space-y-3">
+                                <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 font-bold">02</div>
+                                <h4 className="text-lg font-bold text-white">Performance-to-Price Index</h4>
+                                <p className="text-sm text-muted-foreground leading-relaxed">Identify which models offer the highest reasoning scores per dollar. Optimize your architecture by choosing the right model tier for every task.</p>
+                            </div>
+                            <div className="space-y-3">
+                                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold">03</div>
+                                <h4 className="text-lg font-bold text-white">Live Market Tracking</h4>
+                                <p className="text-sm text-muted-foreground leading-relaxed">Stay updated with the 2026 'token deflation' trend. We track weekly price cuts and model updates across the entire LLM ecosystem automatically.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
                 {/* ACCESSIBILITY TIP / SEO DATA */}
                 <div className="sr-only">
@@ -192,25 +214,25 @@ export default async function ComparisonPage() {
                 </div>
 
                 {/* ──── FAQ SECTION ──── */}
-                <section className="mt-16 border-t border-border/40 pt-16">
+                <section className="mt-16">
                     <div className="max-w-4xl mx-auto space-y-8">
                         <h2 className="text-3xl font-bold tracking-tight text-foreground">Model Comparison FAQ</h2>
                         <div className="grid grid-cols-1 gap-8">
                             <div className="space-y-2">
-                                <h3 className="text-xl font-bold text-foreground">Which is cheaper: GPT-4o or Claude 3.5 Sonnet?</h3>
-                                <p className="text-muted-foreground leading-relaxed">
+                                <h3 className="text-xl font-bold text-white">Which is cheaper: GPT-4o or Claude 3.5 Sonnet?</h3>
+                                <p className="text-muted-foreground leading-relaxed text-sm">
                                     As of early 2026, Claude 3.5 Sonnet is often more cost-effective for large-scale production, particularly when factoring in output token costs. However, GPT-4o offers competitive input token pricing and high rate limits.
                                 </p>
                             </div>
                             <div className="space-y-2">
-                                <h3 className="text-xl font-bold text-foreground">Does Gemini 1.5 Pro offer the best value for long context?</h3>
-                                <p className="text-muted-foreground leading-relaxed">
+                                <h3 className="text-xl font-bold text-white">Does Gemini 1.5 Pro offer the best value for long context?</h3>
+                                <p className="text-muted-foreground leading-relaxed text-sm">
                                     Yes, Gemini 1.5 Pro's 2M context window and free tier options for developers make it the top choice for long-document analysis, though its 'cost per token' on the paid tier is comparable to Claude 3.5 Opus.
                                 </p>
                             </div>
                             <div className="space-y-2">
-                                <h3 className="text-xl font-bold text-foreground">Which LLM has the lowest output token price?</h3>
-                                <p className="text-muted-foreground leading-relaxed">
+                                <h3 className="text-xl font-bold text-white">Which LLM has the lowest output token price?</h3>
+                                <p className="text-muted-foreground leading-relaxed text-sm">
                                     For the lowest possible output cost, 'Flash' or 'Mini' models like GPT-4o mini, Gemini 1.5 Flash, and Claude 3.5 Haiku are the industry leaders, often priced at a fraction of a cent per 1M tokens.
                                 </p>
                             </div>

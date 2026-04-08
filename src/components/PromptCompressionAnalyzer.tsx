@@ -70,7 +70,7 @@ const PRO_TIPS = [
 ];
 
 export default function PromptCompressionAnalyzer() {
-    const { setMissionStep } = useTokenSenseStore();
+    const { setOptimizationStep } = useTokenSenseStore();
     const [prompt, setPrompt] = useState("");
     const [selectedModelId, setSelectedModelId] = useState(models[0].id);
     const [mode, setMode] = useState<"lossless" | "extreme">("lossless");
@@ -436,15 +436,18 @@ export default function PromptCompressionAnalyzer() {
                             )}
 
                             {/* Proceed CTA */}
-                            <div className="pt-4 border-t border-white/5">
+                            <div className="pt-6 border-t border-white/5 space-y-4">
+                                <p className="text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                                    Weight Reduced. Ready for deployment.
+                                </p>
                                 <Button 
                                     asChild
-                                    onClick={() => setMissionStep(4)}
+                                    onClick={() => setOptimizationStep(4)}
                                     className="w-full h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-base shadow-lg shadow-indigo-500/20 gap-3 group"
                                 >
                                     <Link href="/tools/batch">
                                         <PlaneTakeoff className="w-5 h-5 fill-white group-hover:animate-pulse" />
-                                        Weight Reduced. Proceed to Flight Plan ➔
+                                        Finalize Batch Plan ➔
                                     </Link>
                                 </Button>
                             </div>

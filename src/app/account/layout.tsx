@@ -3,6 +3,10 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: "Your Account | Tokensense-Ai",
   description: "Manage your Tokensense-Ai account, view your calculation history, and customize your model presets.",
+  robots: {
+    index: false,
+    follow: false,
+  },
   alternates: {
     canonical: '/account',
   },

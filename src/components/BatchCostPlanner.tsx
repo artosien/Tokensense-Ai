@@ -31,7 +31,7 @@ import { useTokenSenseStore } from "@/lib/store";
 import Link from "next/link";
 
 export default function BatchCostPlanner() {
-    const { setMissionStep, deliveryMode, setDeliveryMode } = useTokenSenseStore();
+    const { setOptimizationStep, deliveryMode, setDeliveryMode } = useTokenSenseStore();
     const [promptTokens, setPromptTokens] = useState<number>(1000);
     const [outputTokens, setOutputTokens] = useState<number>(500);
     const [volume, setVolume] = useState<number>(50000);
@@ -293,15 +293,18 @@ export default function BatchCostPlanner() {
                         />
                         
                         {/* Proceed CTA */}
-                        <div className="mt-6 pt-6 border-t border-white/5">
+                        <div className="mt-6 pt-6 border-t border-white/5 space-y-4">
+                            <p className="text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                                Plan Optimized. Ready for review.
+                            </p>
                             <Button 
                                 asChild
-                                onClick={() => setMissionStep(5)}
+                                onClick={() => setOptimizationStep(5)}
                                 className="w-full h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-base shadow-lg shadow-indigo-500/20 gap-3 group"
                             >
                                 <Link href="/comparison">
                                     <Activity className="w-5 h-5 text-white group-hover:animate-pulse" />
-                                    Plan Optimized. Proceed to Comms Review ➔
+                                    Compare Model Prices ➔
                                 </Link>
                             </Button>
                         </div>

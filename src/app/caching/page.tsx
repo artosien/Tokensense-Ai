@@ -44,6 +44,27 @@ function CachingSchema() {
           "price": "0",
           "priceCurrency": "USD"
         }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How much can prompt caching save on API costs?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Prompt caching can reduce input token costs by up to 90% for reused content. Anthropic Claude and Google Gemini offer significantly lower rates for 'Cache Read' tokens compared to standard input tokens."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is the minimum token count for caching?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "For Anthropic Claude 3.5 Sonnet, the minimum threshold to trigger prompt caching is 1,024 tokens. Google Gemini has different requirements based on the model tier and data type."
+            }
+          }
+        ]
       }
     ]
   };
@@ -110,6 +131,33 @@ export default async function CachingCalculatorPage() {
                 <ContextCachingCalculator />
 
                 <SocialShareBar variant="bottom" />
+
+                {/* Server-Rendered Capabilities Summary */}
+                <section className="mt-20 border-t border-border/40 pt-16 max-w-4xl mx-auto">
+                    <div className="space-y-12">
+                        <div className="text-center space-y-4">
+                            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase">Tool Capabilities</h2>
+                            <p className="text-muted-foreground text-lg">Financial modeling for long-context LLM applications.</p>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div className="space-y-3">
+                                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 font-bold">01</div>
+                                <h4 className="text-lg font-bold text-white">Break-Even ROI Analysis</h4>
+                                <p className="text-sm text-muted-foreground leading-relaxed">Calculate exactly how many times a prompt must be reused before caching becomes profitable. Factor in the initial 'Cache Write' overhead.</p>
+                            </div>
+                            <div className="space-y-3">
+                                <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 font-bold">02</div>
+                                <h4 className="text-lg font-bold text-white">Multi-Provider TTL Modeling</h4>
+                                <p className="text-sm text-muted-foreground leading-relaxed">Compare the Time-To-Live (TTL) strategies of Claude vs Gemini. Understand how auto-refreshing TTL impacts your long-term storage costs.</p>
+                            </div>
+                            <div className="space-y-3">
+                                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold">03</div>
+                                <h4 className="text-lg font-bold text-white">Static vs Dynamic Partitioning</h4>
+                                <p className="text-sm text-muted-foreground leading-relaxed">Visualize the optimal split for your system prompts and knowledge bases. Maximize cache hits by isolating static data from user-specific queries.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
                 {/* Educational Content / FAQ Section */}
                 <section className="mt-20 border-t border-border/40 pt-16">

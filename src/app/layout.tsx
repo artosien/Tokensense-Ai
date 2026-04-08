@@ -8,6 +8,7 @@ import BlogFooter from "@/components/BlogFooter";
 import LoadingScreen from "@/components/LoadingScreen";
 import ThemeProvider from "@/components/ThemeProvider";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import { StickyResultsBar } from "@/components/StickyResultsBar";
 import { AuthProvider } from "@/components/AuthProvider";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
@@ -25,8 +26,21 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.tokensense-ai.com"),
   alternates: {
+    canonical: '/',
     types: {
       'text/plain': '/llms.txt',
+      'application/xml': '/sitemap.xml',
+    },
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
     },
   },
 };
@@ -48,6 +62,8 @@ export default async function RootLayout({
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
       <head>
+        <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
+        <link rel="alternate" type="text/plain" href="/robots.txt" />
         <link rel="llms-content" href="/llms.txt" />
         {/* Google Analytics */}
         <Script
@@ -71,44 +87,19 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@graph": [
-                {
-                  "@type": "WebApplication",
-                  "name": "Tokensense-Ai",
-                  "description": "A free, client-side pre-flight LLM token cost calculator.",
-                  "applicationCategory": "DeveloperApplication",
-                  "operatingSystem": "Any",
-                  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-                  "featureList": [
-                    "Real-time token counting",
-                    "LLM API cost estimation",
-                    "Multi-model support",
-                    "File context upload",
-                    "Agentic loop cost simulator",
-                    "100% client-side, private"
-                  ]
-                },
-                {
-                  "@type": "FAQPage",
-                  "mainEntity": [
-                    {
-                      "@type": "Question",
-                      "name": "What counts as one token?",
-                      "acceptedAnswer": {
-                        "@type": "Answer",
-                        "text": "Tokens are pieces of words. In English, 1,000 tokens is approximately 750 words."
-                      }
-                    },
-                    {
-                      "@type": "Question",
-                      "name": "Why do different models charge different rates for the same text?",
-                      "acceptedAnswer": {
-                        "@type": "Answer",
-                        "text": "Each model (GPT-4o, Claude, Gemini) uses a different tokenizer and pricing structure based on its computational complexity."
-                      }
-                    }
-                  ]
-                }
+              "@type": "WebApplication",
+              "name": "Tokensense-Ai",
+              "description": "A free, client-side pre-flight LLM token cost calculator.",
+              "applicationCategory": "DeveloperApplication",
+              "operatingSystem": "Any",
+              "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+              "featureList": [
+                "Real-time token counting",
+                "LLM API cost estimation",
+                "Multi-model support",
+                "File context upload",
+                "Agentic loop cost simulator",
+                "100% client-side, private"
               ]
             })
           }}
@@ -120,6 +111,7 @@ export default async function RootLayout({
             <NextIntlClientProvider messages={messages} locale="en">
               <LoadingScreen />
               <PWAInstallPrompt />
+              <StickyResultsBar />
               {children}
               <BlogFooter />
               <BackToTop />

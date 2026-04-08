@@ -22,14 +22,22 @@ export default function Footer() {
 
           {/* Main Links */}
           <div>
-            <h4 className="text-white font-semibold mb-4 text-center md:text-left">{t("links")}</h4>
+            <h4 className="text-white font-semibold mb-4 text-center md:text-left">{t("learn") || "Learn"}</h4>
             <ul className="flex flex-row flex-wrap justify-center md:justify-start md:flex-col gap-x-6 gap-y-2 md:gap-0 md:space-y-2">
               <li>
                 <Link
-                  href="/"
+                  href="/tokenomics"
                   className="text-gray-400 hover:text-plasma-400 transition text-sm"
                 >
-                  {tNav("home")}
+                  Tokenomics
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/faq"
+                  className="text-gray-400 hover:text-plasma-400 transition text-sm"
+                >
+                  {tNav("faq")}
                 </Link>
               </li>
               <li>
@@ -38,22 +46,6 @@ export default function Footer() {
                   className="text-gray-400 hover:text-plasma-400 transition text-sm"
                 >
                   {t("about") || "About"}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/contact"
-                  className="text-gray-400 hover:text-plasma-400 transition text-sm"
-                >
-                  {t("contact_us") || "Contact Us"}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/changelog"
-                  className="text-gray-400 hover:text-plasma-400 transition text-sm"
-                >
-                  {t("changelog") || "Changelog"}
                 </Link>
               </li>
             </ul>
@@ -78,6 +70,22 @@ export default function Footer() {
                 >
                   {t("terms_of_service")}
                 </Link>
+              </li>
+              <li>
+                <a
+                  href="/sitemap.xml"
+                  className="text-gray-400 hover:text-plasma-400 transition text-sm"
+                >
+                  Sitemap
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/robots.txt"
+                  className="text-gray-400 hover:text-plasma-400 transition text-sm"
+                >
+                  Robots Configuration
+                </a>
               </li>
             </ul>
           </div>

@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import HeroHeadline from "@/components/HeroHeadline";
 import { GradientOrbs } from "@/components/GradientOrbs";
-import { PricingTicker } from "@/components/PricingTicker";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import HomeClient from "@/app/HomeClient";
 import SocialShareBar from "@/components/SocialShareBar";
 import SiteHeader from "@/components/SiteHeader";
-import { setRequestLocale } from 'next-intl/server';
+import Onboarding from "@/components/Onboarding";
+import { ApiIntegrationSection } from "@/components/ApiIntegrationSection";
 
 export const metadata: Metadata = {
   title: "Tokensense-Ai | Free LLM Token Counter & Prompt Cost Calculator",
@@ -42,35 +42,106 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
-  const locale = 'en';
-  setRequestLocale(locale);
+function HomeSchema() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What counts as one token?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Tokens are pieces of words. In English, 1,000 tokens is approximately 750 words."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why do different models charge different rates for the same text?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Each model (GPT-4o, Claude, Gemini) uses a different tokenizer and pricing structure based on its computational complexity."
+        }
+      }
+    ]
+  };
 
   return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
+}
+
+export default function Home() {
+  return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <HomeSchema />
+      <Onboarding />
       <SiteHeader />
       
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
-        {/* SEMANTIC SEO SHELL: Visible to bots immediately */}
+        {/* SEMANTIC SEO SHELL */}
         <section className="sr-only">
           <h1>Tokensense-Ai | Free LLM Token Counter & Cost Estimator</h1>
           <p>
             Tokensense-Ai is the definitive tool for AI developers to calculate API costs 
             for GPT-4o, Claude 3.5, and Gemini 1.5. Our 100% client-side calculator 
-            provides instant token counts and pricing estimates to help you optimize 
-            your LLM budget and architectural decisions.
+            provides instant token counts and pricing estimates.
           </p>
-          <nav>
-            <ul>
-              <li><Link href="/workflow">AI Workflow Loop Simulator</Link></li>
-              <li><Link href="/comparison">LLM Pricing Comparison Table</Link></li>
-              <li><Link href="/multimodal">Vision & Multimodal Token Estimator</Link></li>
-              <li><Link href="/video-planner">Sora & Runway Video API Planner</Link></li>
-            </ul>
-          </nav>
         </section>
 
         <SocialShareBar variant="top" />
+
+        {/* Start Here Banner */}
+        <section className="mt-8 mb-4">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600/20 via-purple-600/20 to-plasma-500/20 border border-white/10 shadow-2xl p-6 md:p-10">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-10">
+              <div className="flex-1 space-y-6 text-center lg:text-left">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-bold border border-indigo-500/20">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                  </span>
+                  New to Tokensense?
+                </div>
+                <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white leading-[1.1]">
+                  Start Your <span className="text-indigo-400">Optimization</span> Journey
+                </h2>
+                <p className="text-lg text-muted-foreground font-medium max-w-xl">
+                  Watch this 2-minute quickstart guide to learn how to master LLM token costs and build more profitable AI applications.
+                </p>
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
+                  <Button size="lg" className="h-12 px-8 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl" asChild>
+                    <Link href="#calculate-section">Jump to Calculator</Link>
+                  </Button>
+                  <Button variant="outline" size="lg" className="h-12 px-8 border-white/10 hover:bg-white/5 text-white font-bold rounded-xl" asChild>
+                    <Link href="/tokenomics">Learn Tokenomics</Link>
+                  </Button>
+                </div>
+              </div>
+              <div className="flex-1 w-full max-w-2xl">
+                <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/40 group">
+                  <iframe 
+                    width="100%" 
+                    height="100%" 
+                    src="https://www.youtube.com/embed/nKSk_TiR8YA?si=Amxvxk4UzgYe5ms4" 
+                    title="YouTube video player" 
+                    frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    referrerPolicy="strict-origin-when-cross-origin" 
+                    allowFullScreen
+                    className="absolute inset-0 w-full h-full"
+                  ></iframe>
+                </div>
+              </div>
+            </div>
+            {/* Background decorative elements */}
+            <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-600/10 blur-[100px] rounded-full"></div>
+            <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-plasma-500/10 blur-[100px] rounded-full"></div>
+          </div>
+        </section>
 
         {/* Hero Section */}
         <section className="relative pt-10 pb-16 text-center lg:text-left flex flex-col lg:flex-row items-center justify-between gap-12">
@@ -95,17 +166,12 @@ export default function Home() {
               >
                 <Link href="/#calculate-section">{"Try Calculator Now →"}</Link>
               </Button>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="w-full sm:w-auto h-14 px-8 text-lg font-semibold border-border/60 hover:bg-muted/50 transition-all"
-                asChild
-              >
-                <Link href="/faq">{"Learn How It Works"}</Link>
-              </Button>
             </div>
 
-            <PricingTicker />
+            {/* Elevated OpenAI Sync Feature */}
+            <div className="pt-2 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
+              <ApiIntegrationSection variant="hero" />
+            </div>
 
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-2 pt-2">
               {[
@@ -164,13 +230,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* No-JS Fallback - Visible only when JS is disabled */}
-        <noscript>
-          <div className="p-6 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl text-yellow-500 text-center font-medium mb-6">
-            JavaScript is required for real-time AI cost calculations and simulators.
-          </div>
-        </noscript>
-
         <HomeClient />
 
         {/* Features Showcase */}
@@ -182,11 +241,8 @@ export default function Home() {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Feature 1 */}
             <div className="group flex flex-col space-y-4 p-8 rounded-3xl bg-card border border-border/40 hover:border-[#00dcb4]/40 hover:bg-black/20 hover:-translate-y-1 transition-all duration-[250ms] relative overflow-hidden">
-              <div className="w-14 h-14 rounded-2xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center text-3xl mb-2">
-                ⚡
-              </div>
+              <div className="w-14 h-14 rounded-2xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center text-3xl mb-2">⚡</div>
               <div className="space-y-2 flex-1">
                 <h3 className="text-2xl font-bold tracking-tight">{"Instant Token Count"}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed font-medium">
@@ -200,11 +256,8 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Feature 2 */}
             <div className="group flex flex-col space-y-4 p-8 rounded-3xl bg-card border border-border/40 hover:border-[#00dcb4]/40 hover:bg-black/20 hover:-translate-y-1 transition-all duration-[250ms] relative overflow-hidden">
-              <div className="w-14 h-14 rounded-2xl bg-green-500/10 text-green-500 flex items-center justify-center text-3xl mb-2">
-                💸
-              </div>
+              <div className="w-14 h-14 rounded-2xl bg-green-500/10 text-green-500 flex items-center justify-center text-3xl mb-2">💸</div>
               <div className="space-y-2 flex-1">
                 <h3 className="text-2xl font-bold tracking-tight">{"Pre-Flight Cost Estimate"}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed font-medium">
@@ -218,16 +271,12 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Feature 3 */}
             <div className="group flex flex-col space-y-4 p-8 rounded-3xl bg-card border border-border/40 hover:border-[#00dcb4]/40 hover:bg-black/20 hover:-translate-y-1 transition-all duration-[250ms] relative overflow-hidden">
-              <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-3xl mb-2">
-                🔍
-              </div>
+              <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-3xl mb-2">🔍</div>
               <div className="space-y-2 flex-1">
                 <h3 className="text-2xl font-bold tracking-tight">{"Multi-Step Agent Cost Estimator"}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed font-medium">
                   {"See how costs compound across multi-step agent workflows, turn by turn."}
-                  <span className="block mt-2 text-xs italic text-muted-foreground/70">{"e.g. 10 tool calls + 5 replies = $X total"}</span>
                 </p>
               </div>
               <div className="pt-4">
@@ -239,133 +288,26 @@ export default function Home() {
           </div>
         </section>
 
-        {/* About Section */}
-        <section className="pt-8 pb-16 border-t border-border/40">
-          <div className="max-w-4xl mx-auto space-y-6">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground">{"What Is Tokensense-Ai?"}</h2>       
-
-            <div className="space-y-4 text-muted-foreground leading-relaxed font-medium">
-              <p>{"Tokensense-Ai is a free LLM token cost calculator built for developers, AI engineers, and prompt designers who want to estimate API costs before going live."}</p>
-              <p>{"When you build with large language model APIs like OpenAI, Anthropic Claude, or Google Gemini, you're billed by the token - not the word, not the character. A single system prompt, a long user message, or an attached file can quietly balloon your cost-per-call. Tokensense-Ai makes that visible."}</p>
-
-              <div className="pt-4">
-                <p className="font-bold text-foreground mb-3 uppercase tracking-wider text-sm">{"With Tokensense-Ai you can:"}</p>
-                <ul className="space-y-2 list-none pl-0">
-                  {[
-                    "Count tokens in any prompt (system, user, or combined)",
-                    "Estimate cost per API call across popular models like GPT-4o, Claude 3.5 Sonnet, and Gemini 1.5 Pro",
-                    "Adjust expected output length to see how response tokens affect your bill",
-                    "Attach files (.txt, .md, .csv, code, .pdf) to measure file context costs",
-                    "Simulate agentic loop costs across multiple LLM calls",
-                    "Compare input token price vs. output token price side-by-side"
-                  ].map((item, i) => (
-                    <li key={i} className="flex flex-row items-start gap-3 mt-1">
-                      <svg className="w-5 h-5 text-indigo-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <p className="pt-6 font-bold text-foreground text-center bg-indigo-500/5 p-4 rounded-xl border border-indigo-500/10">
-                {"No sign-up. No server. Your prompts never leave your browser."}
-              </p>
-            </div>
-          </div>
-        </section>
-
         {/* FAQ Section */}
         <section className="pt-8 pb-16 border-t border-border/40">
           <div className="max-w-4xl mx-auto space-y-6">
             <h2 className="text-3xl font-bold tracking-tight text-foreground">{"Token Basics"}</h2>
-            <p className="text-lg text-muted-foreground font-medium">
-              {"Quick answers to common questions about tokens and how they work."}
-            </p>
-
             <div className="bg-card border border-border/40 rounded-2xl p-6 sm:p-8 shadow-sm">
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="item-1">
                   <AccordionTrigger className="text-left text-base font-semibold hover:no-underline hover:text-indigo-400">
-                    {"What counts as one token? Is it a word, character, or something else?"}
+                    {"What counts as one token?"}
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground leading-relaxed font-medium">
-                    {"A token is a unit of text that LLMs process. In English, one token is roughly 3-4 characters or about 3/4 of a word. However, tokenization isn't perfectly linear - it depends on the model and its tokenizer. Common words and punctuation like \"the\" or \",\" usually cost 1 token, while longer or uncommon text might cost more. The exact breakdown varies between models (GPT-4o, Claude, Gemini, etc.) because each has its own tokenizer."}
+                    {"A token is a unit of text that LLMs process. In English, one token is roughly 4 characters or about 3/4 of a word."}
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-2">
                   <AccordionTrigger className="text-left text-base font-semibold hover:no-underline hover:text-indigo-400">
-                    {"Why do different models charge different rates for the same text?"}
+                    {"Why do different models charge different rates?"}
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground leading-relaxed font-medium">
-                    {"Different models have different pricing strategies based on their capabilities, compute costs, and market positioning. For example, GPT-4o costs more than GPT-4 Turbo because it's more capable. Additionally, each provider (OpenAI, Anthropic, Google) has different business models. Some charge per-token, others offer usage tiers or flat pricing. Input and output tokens are also typically priced differently - output tokens usually cost 2-4x more than input tokens because generating responses is computationally more expensive."}
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="item-3">
-                  <AccordionTrigger className="text-left text-base font-semibold hover:no-underline hover:text-indigo-400">
-                    {"Do spaces and punctuation count as tokens?"}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground leading-relaxed font-medium">
-                    {"Yes, spaces and punctuation typically count toward your token usage, but not always as full tokens. Spaces are often bundled with adjacent words - \"hello world\" might tokenize as [\"hello\", \" world\"] (2 tokens) rather than [\"hello\", \" \", \"world\"] (3 tokens). Punctuation like periods, commas, and question marks usually take 1 token each. Special characters and formatting can vary. The best way to know for sure is to paste your exact text into Tokensense-Ai and see your model's actual token count."}
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="item-4">
-                  <AccordionTrigger className="text-left text-base font-semibold hover:no-underline hover:text-indigo-400">
-                    {"Why does my token count change slightly between runs with the same prompt?"}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground leading-relaxed font-medium">
-                    {"In most cases, token counts are deterministic - the same text should produce the same count. However, you might see slight variations if you're switching models, which use different tokenizers. Whitespace differences (tabs vs. spaces), encoding issues, or pasting from different sources can also cause tiny variations. If you're testing the same prompt and seeing different counts with the same model, try clearing your browser cache or checking for hidden characters. Tokensense-Ai uses the official tokenizer for each model, so you can trust the accuracy."}
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </div>
-          </div>
-        </section>
-
-        {/* Pricing FAQ Section */}
-        <section className="pt-8 pb-16 border-t border-border/40">
-          <div className="max-w-4xl mx-auto space-y-6">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground uppercase tracking-widest text-sm text-muted-foreground">{"Frequently Asked Questions"}</h2>
-            <div className="space-y-2">
-                <h3 className="text-2xl md:text-3xl font-bold tracking-tight">{"Pricing & Accuracy"}</h3>
-                <p className="text-lg text-muted-foreground font-medium">
-                {"Questions about pricing data, accuracy, and how estimates are calculated."}
-                </p>
-            </div>
-
-            <div className="bg-card border border-border/40 rounded-2xl p-6 sm:p-8 shadow-sm">
-              <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="pricing-1">
-                  <AccordionTrigger className="text-left text-base font-semibold hover:no-underline hover:text-indigo-400">
-                    {"How often does Tokensense-Ai update its pricing data?"}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground leading-relaxed font-medium">
-                    {"Tokensense-Ai pricing is updated manually when we become aware of official price changes announced by OpenAI, Anthropic, Google, and other LLM providers. We aim to update within a few days of official announcements. However, pricing can change frequently, so we recommend always verifying the latest rates directly with your provider before making major cost estimates. You'll see a timestamp on the calculator showing when our price database was last refreshed."}
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="pricing-2">
-                  <AccordionTrigger className="text-left text-base font-semibold hover:no-underline hover:text-indigo-400">
-                    {"Why might my actual API bill differ from Tokensense-Ai's estimate?"}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground leading-relaxed font-medium">
-                    {"Several factors can cause differences between Tokensense-Ai estimates and your actual bill: 1) Pricing updates - rates may have changed since we last updated. 2) Model routing - some providers automatically route requests to different models or variants. 3) Batch processing discounts - if you use batch APIs, you may receive discounts. 4) Usage tier discounts - reaching higher usage tiers can lower per-token costs. 5) Special agreements - enterprise customers may have custom pricing. Always cross-check with your provider's usage dashboard for accurate billing."}
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="pricing-3">
-                  <AccordionTrigger className="text-left text-base font-semibold hover:no-underline hover:text-indigo-400">
-                    {"Are the prices shown inclusive of taxes or fees?"}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground leading-relaxed font-medium">
-                    {"No, Tokensense-Ai displays base API pricing only, before taxes, VAT, or any platform fees. The prices shown are the per-token rates published by each provider. Your final invoice may include: regional sales tax, VAT (if applicable), payment processing fees, or platform surcharges (e.g., if you're using a third-party API gateway). Check your provider's billing page and local tax regulations to understand your actual total cost."}
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="pricing-4" className="border-b-0">
-                  <AccordionTrigger className="text-left text-base font-semibold hover:no-underline hover:text-indigo-400">
-                    {"Do batch API discounts get reflected in the estimates?"}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground leading-relaxed font-medium">
-                    {"No, Tokensense-Ai shows standard pay-as-you-go pricing only. Batch API discounts (offered by OpenAI, Anthropic, and others) are not reflected in the estimates because they vary by provider and batch size. If you plan to use batch APIs, you should manually apply the discount percentage (typically 40-50% off) to Tokensense-Ai's estimates. We may add batch pricing as a separate calculator option in the future, so check back for updates."}
+                    {"Pricing is based on computational complexity and provider strategy. GPT-4o costs more than GPT-4o-mini, for instance."}
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>

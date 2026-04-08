@@ -14,7 +14,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import MissionControlHUD from "@/components/MissionControlHUD";
+import OptimizationProgressHUD from "@/components/OptimizationProgressHUD";
 
 export default function SiteHeader() {
     const tHeader = useTranslations("header");
@@ -26,6 +26,7 @@ export default function SiteHeader() {
 
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [mobileToolsOpen, setMobileToolsOpen] = useState(false);
+    const [mobileLearnOpen, setMobileLearnOpen] = useState(false);
     const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
     const { theme, toggleTheme } = useTheme();
@@ -130,6 +131,9 @@ export default function SiteHeader() {
                                 </DropdownMenuItem>
                                 <div className="h-px bg-border/40 my-1" />
                                 <DropdownMenuItem asChild className="rounded-md cursor-pointer">
+                                    <Link href="/tokenomics" id="tokenomics-link" className="text-xs px-2 py-1.5 font-bold text-indigo-400">Tokenomics</Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild className="rounded-md cursor-pointer">
                                     <Link href="/pricing-history" className="text-xs px-2 py-1.5">{tTools("pricing_history")}</Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild className="rounded-md cursor-pointer">
@@ -149,11 +153,51 @@ export default function SiteHeader() {
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="text-muted-foreground hover:text-indigo-400 border border-transparent hover:border-indigo-500/30 hover:border-indigo-500/30 hover:bg-indigo-500/10 transition-all font-medium gap-1">
+                                    {tNav("learn") || "Learn"} <ChevronDown className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start" className="min-w-[12rem] p-2 space-y-1">
+                                <DropdownMenuItem asChild className="rounded-lg cursor-pointer focus:bg-indigo-500/10 focus:text-indigo-400 transition-colors">
+                                    <Link href="/tokenomics" className="flex items-center gap-2 py-2">
+                                        <div className="w-8 h-8 rounded-md bg-indigo-500/10 flex items-center justify-center">
+                                            <Bot className="w-4 h-4 text-indigo-400" />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-semibold">Tokenomics</span>
+                                            <span className="text-[10px] text-muted-foreground">Master AI economics</span>
+                                        </div>
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild className="rounded-lg cursor-pointer focus:bg-indigo-500/10 focus:text-indigo-400 transition-colors">
+                                    <Link href="/faq" className="flex items-center gap-2 py-2">
+                                        <div className="w-8 h-8 rounded-md bg-purple-500/10 flex items-center justify-center">
+                                            <Bot className="w-4 h-4 text-purple-400" />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-semibold">{tNav("faq")}</span>
+                                            <span className="text-[10px] text-muted-foreground">Common questions</span>
+                                        </div>
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild className="rounded-lg cursor-pointer focus:bg-indigo-500/10 focus:text-indigo-400 transition-colors">
+                                    <Link href="/about" className="flex items-center gap-2 py-2">
+                                        <div className="w-8 h-8 rounded-md bg-plasma-500/10 flex items-center justify-center">
+                                            <Bot className="w-4 h-4 text-plasma-400" />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-semibold">Project Mission</span>
+                                            <span className="text-[10px] text-muted-foreground">About Tokensense</span>
+                                        </div>
+                                    </Link>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
                         <Button variant="ghost" className="text-muted-foreground hover:text-indigo-400 border border-transparent hover:border-indigo-500/30 hover:bg-indigo-500/10 transition-all font-medium" asChild>
                             <Link href="/blog">{tNav("blog")}</Link>
-                        </Button>
-                        <Button variant="ghost" className="text-muted-foreground hover:text-indigo-400 border border-transparent hover:border-indigo-500/30 hover:bg-indigo-500/10 transition-all font-medium" asChild>
-                            <Link href="/faq">{tNav("faq")}</Link>
                         </Button>
 
                         <div className="w-px h-6 bg-border/40 mx-2" />
@@ -411,6 +455,33 @@ export default function SiteHeader() {
                     <div>
                         <button
                             type="button"
+                            onClick={() => setMobileLearnOpen((o) => !o)}
+                            className="flex items-center justify-between w-full py-3 px-4 rounded-md text-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors font-medium border border-transparent hover:border-indigo-500/20"
+                        >
+                            {tNav("learn") || "Learn"}
+                            <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${mobileLearnOpen ? "rotate-180" : ""}`} />
+                        </button>
+                        <div 
+                            className={`grid transition-all duration-300 ease-in-out ${
+                                mobileLearnOpen ? "grid-rows-[1fr] opacity-100 mt-1" : "grid-rows-[0fr] opacity-0"
+                            }`}
+                        >
+                            <div className="overflow-hidden pl-4 flex flex-col gap-1">
+                                <Link href="/tokenomics" onClick={closeMenu} className="py-2.5 px-4 rounded-md font-bold text-indigo-400 hover:bg-indigo-500/10 transition-colors text-sm border border-transparent hover:border-indigo-500/20">
+                                    Tokenomics
+                                </Link>
+                                <Link href="/faq" onClick={closeMenu} className="py-2.5 px-4 rounded-md text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors text-sm border border-transparent hover:border-indigo-500/20">
+                                    {tNav("faq")}
+                                </Link>
+                                <Link href="/about" onClick={closeMenu} className="py-2.5 px-4 rounded-md text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors text-sm border border-transparent hover:border-indigo-500/20">
+                                    Project Mission
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <button
+                            type="button"
                             onClick={() => setMobileAboutOpen((o) => !o)}
                             className="flex items-center justify-between w-full py-3 px-4 rounded-md text-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors font-medium border border-transparent hover:border-indigo-500/20"
                         >
@@ -472,7 +543,7 @@ export default function SiteHeader() {
                 </nav>
             </div>
         </header>
-        <MissionControlHUD />
+        <OptimizationProgressHUD />
         {session?.user && (
             <BioUpdateModal 
                 userId={(session.user as any).id || session.user.email || "default"}

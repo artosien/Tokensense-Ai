@@ -44,6 +44,27 @@ function BatchSchema() {
           "price": "0",
           "priceCurrency": "USD"
         }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is the OpenAI Batch API discount?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "OpenAI and other providers offer a 50% discount for asynchronous batch requests that are processed within 24 hours, significantly reducing high-volume costs for non-urgent tasks."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I estimate costs for 100,000 AI requests?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Use our batch planner to input your average prompt size and total row count. We automatically apply current API rates and volume discounts to project total monthly spend across providers."
+            }
+          }
+        ]
       }
     ]
   };
@@ -108,6 +129,33 @@ export default async function BatchCostPage() {
                 <BatchCostPlanner />
 
                 <SocialShareBar variant="bottom" />
+
+                {/* Server-Rendered Capabilities Summary */}
+                <section className="mt-20 border-t border-border/40 pt-16 max-w-4xl mx-auto">
+                    <div className="space-y-12">
+                        <div className="text-center space-y-4">
+                            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase">Tool Capabilities</h2>
+                            <p className="text-muted-foreground text-lg">Industrial-grade forecasting for high-volume data processing.</p>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div className="space-y-3">
+                                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 font-bold">01</div>
+                                <h4 className="text-lg font-bold text-white">High-Volume Forecasting</h4>
+                                <p className="text-sm text-muted-foreground leading-relaxed">Model the cost of processing 50,000+ rows instantly. Understand how small per-token differences scale into thousands of dollars in infrastructure spend.</p>
+                            </div>
+                            <div className="space-y-3">
+                                <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 font-bold">02</div>
+                                <h4 className="text-lg font-bold text-white">Batch API Discounting</h4>
+                                <p className="text-sm text-muted-foreground leading-relaxed">Automatically calculate potential savings using specialized 'Batch' endpoints. Compare standard 24-hour delivery vs. real-time priority pricing.</p>
+                            </div>
+                            <div className="space-y-3">
+                                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold">03</div>
+                                <h4 className="text-lg font-bold text-white">Multi-Tier Spend Projection</h4>
+                                <p className="text-sm text-muted-foreground leading-relaxed">Visualize your daily, weekly, and monthly AI runway. Identify the exact point where switching to a smaller 'Flash' model saves your project from budget exhaustion.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
                 {/* Educational Content / SEO Section */}
                 <section className="mt-20 border-t border-border/40 pt-16">

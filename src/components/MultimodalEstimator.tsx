@@ -262,7 +262,7 @@ export default function MultimodalEstimator() {
     return (
         <div className="space-y-10">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                {/* ── Left Column: Configuration & Gallery ── */}
+                {/* ── Configuration & Simulation Column ── */}
                 <div className="lg:col-span-7 space-y-6">
                     
                     {/* Primary Upload Zone */}
@@ -324,33 +324,33 @@ export default function MultimodalEstimator() {
                         <div className="px-6 pb-6 pt-2 border-t border-cyan-500/10 bg-cyan-500/[0.02]">
                             <div className="space-y-6">
                                 <div className="space-y-2">
-                                    <h4 className="text-[11px] font-black text-cyan-400 uppercase tracking-widest">What is Agentic Vision Simulation?</h4>
-                                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                                        In 2026, leading AI development has moved from static analysis to <strong>Agentic Vision</strong>. Models like GPT-5 and Gemini 3.1 no longer just process a single image. Instead, agents autonomously decide to crop, zoom, and re-examine specific regions to achieve higher accuracy. This isn&apos;t a single call; it&apos;s a multi-turn visual conversation.
+                                    <h4 className="text-xs font-black text-cyan-400 uppercase tracking-widest">What is Agentic Vision?</h4>
+                                    <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                                        In 2026, leading AI development has moved from static analysis to <strong>Agentic Vision</strong>. Models like GPT-5 and Gemini 3.1 no longer just process a single image. Instead, agents autonomously decide to crop, zoom, and re-examine specific regions to achieve higher accuracy. This isn&apos;t a single call; it&apos;s a <span className="text-white font-bold">multi-turn visual conversation</span>.
                                     </p>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <h5 className="text-[9px] font-black text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
+                                        <h5 className="text-[10px] font-black text-slate-200 uppercase tracking-widest flex items-center gap-1.5">
                                             <div className="w-1 h-1 rounded-full bg-cyan-500" />
                                             Cost Multiplication
                                         </h5>
-                                        <ul className="space-y-1.5 text-[10px] text-slate-500 leading-tight">
-                                            <li><strong className="text-slate-400">Discovery Pass:</strong> The initial low-res look at the whole scene.</li>
-                                            <li><strong className="text-slate-400">Focus Crop:</strong> A high-detail zoom on a specific detail.</li>
-                                            <li><strong className="text-slate-400">Recursive Scan:</strong> Agents may perform 3-5 crops per image.</li>
+                                        <ul className="space-y-1.5 text-[10px] text-slate-400 leading-tight">
+                                            <li><strong className="text-slate-300">Discovery Pass:</strong> The initial low-res look at the whole scene.</li>
+                                            <li><strong className="text-slate-300">Focus Crop:</strong> A high-detail zoom on a specific detail.</li>
+                                            <li><strong className="text-slate-300">Recursive Scan:</strong> Agents may perform 3-5 crops per image.</li>
                                         </ul>
                                     </div>
                                     <div className="space-y-2">
-                                        <h5 className="text-[9px] font-black text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
+                                        <h5 className="text-[10px] font-black text-slate-200 uppercase tracking-widest flex items-center gap-1.5">
                                             <div className="w-1 h-1 rounded-full bg-cyan-500" />
                                             Why Simulate?
                                         </h5>
-                                        <ul className="space-y-1.5 text-[10px] text-slate-500 leading-tight">
-                                            <li><strong className="text-slate-400">Token Accumulation:</strong> High-res tiles "weight" the entire history.</li>
-                                            <li><strong className="text-slate-400">ROI Calculation:</strong> Find the point where more zooms drain ROI.</li>
-                                            <li><strong className="text-slate-400">Latency vs Precision:</strong> Visualize the cost of a "deep look."</li>
+                                        <ul className="space-y-1.5 text-[10px] text-slate-400 leading-tight">
+                                            <li><strong className="text-slate-300">Token Accumulation:</strong> High-res tiles "weight" the entire history.</li>
+                                            <li><strong className="text-slate-300">ROI Calculation:</strong> Find the point where more zooms drain ROI.</li>
+                                            <li><strong className="text-slate-300">Latency vs Precision:</strong> Visualize the cost of a "deep look."</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -358,6 +358,90 @@ export default function MultimodalEstimator() {
                         </div>
                     </Card>
 
+                    {/* Comprehensive Multimodal Bill - Repositioned */}
+                    <Card className="shadow-2xl border-indigo-500/20 bg-slate-900/80 backdrop-blur-xl overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500" />
+                        <CardHeader className="pb-4 border-b border-white/5">
+                            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 flex items-center justify-between">
+                                <span className="flex items-center gap-2"><Sparkles className="w-4 h-4" /> Comprehensive Multimodal Bill</span>
+                                <span className="text-slate-500 font-mono">APRIL 2026</span>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-8 pt-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                                <div className="text-center space-y-1 border-r border-white/5 pr-8">
+                                    <div className="text-6xl font-black tracking-tighter text-white tabular-nums font-mono">
+                                        ${totals.totalCost.toFixed(5)}
+                                    </div>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Estimated Total Cost per Request</p>
+                                </div>
+
+                                <div className="space-y-6">
+                                    {/* Token Distribution Bar */}
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                                            <span className="text-indigo-400">{totals.inputTokens.toLocaleString()} Vision</span>
+                                            <span className="text-cyan-400">{totals.zoomTokens.toLocaleString()} Zoom</span>
+                                            <span className="text-indigo-200">{totals.promptTokens.toLocaleString()} Text</span>
+                                        </div>
+                                        <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden flex">
+                                            <div className="h-full bg-indigo-500 transition-all duration-1000" style={{ width: `${(totals.inputTokens / totals.totalTokens) * 100}%` }} />
+                                            <div className="h-full bg-cyan-500 transition-all duration-1000" style={{ width: `${(totals.zoomTokens / totals.totalTokens) * 100}%` }} />
+                                            <div className="h-full bg-indigo-300 transition-all duration-1000" style={{ width: `${(totals.promptTokens / totals.totalTokens) * 100}%` }} />
+                                            <div className="h-full bg-slate-600 transition-all duration-1000" style={{ width: `${(totals.outputTokens / totals.totalTokens) * 100}%` }} />
+                                        </div>
+                                    </div>
+
+                                    {/* Context Window Occupancy */}
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2 font-black uppercase text-[10px] tracking-widest text-slate-400">
+                                                <Gauge className={cn("w-4 h-4", contextPercent > 80 ? "text-red-400" : "text-emerald-400")} />
+                                                Context Occupancy
+                                            </div>
+                                            <span className="text-[10px] font-mono font-bold text-white">{totals.totalTokens.toLocaleString()} / {(model.maxContext / 1000).toFixed(0)}k</span>
+                                        </div>
+                                        <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                            <div 
+                                                className={cn("h-full transition-all duration-1000", contextPercent > 90 ? "bg-red-500" : contextPercent > 70 ? "bg-amber-500" : "bg-indigo-500")} 
+                                                style={{ width: `${contextPercent}%` }} 
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-8 border-t border-white/5">
+                                <div className="space-y-1">
+                                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Vision Pass</p>
+                                    <p className="text-sm font-black text-white font-mono">{totals.inputTokens.toLocaleString()}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-[9px] font-black text-cyan-500 uppercase tracking-widest">Zoom Patches</p>
+                                    <p className="text-sm font-black text-white font-mono">{totals.zoomTokens.toLocaleString()}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Prompt Text</p>
+                                    <p className="text-sm font-black text-white font-mono">{totals.promptTokens.toLocaleString()}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest">Total Bill</p>
+                                    <p className="text-sm font-black text-indigo-400 font-mono">{totals.totalTokens.toLocaleString()}</p>
+                                </div>
+                            </div>
+
+                            <Link href="/comparison" className="block w-full pt-4">
+                                <Button className="w-full h-12 bg-white text-black hover:bg-slate-200 font-black uppercase tracking-[0.2em] text-xs shadow-xl active:scale-95 transition-all">
+                                    <Scale className="w-4 h-4 mr-2" />
+                                    Compare Vision Models
+                                </Button>
+                            </Link>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* ── Parameters & Results Column ── */}
+                <div className="lg:col-span-5 space-y-6">
                     {/* Multimodal Prompt Buffer */}
                     <Card className="border-white/5 bg-slate-900/50">
                         <CardHeader className="pb-4">
@@ -373,15 +457,15 @@ export default function MultimodalEstimator() {
                                 value={promptText}
                                 onChange={(e) => setPromptText(e.target.value)}
                             />
-                            <div className="flex items-center justify-between">
+                            <div className="flex flex-wrap items-center justify-between gap-4">
                                 <div className="flex items-center gap-4">
                                     <div className="flex items-center space-x-2">
                                         <Switch id="dense-text" checked={isDenseText} onCheckedChange={setIsDenseText} />
-                                        <Label htmlFor="dense-text" className="text-[10px] font-black uppercase tracking-widest text-slate-500 cursor-pointer">Dense Text / OCR</Label>
+                                        <Label htmlFor="dense-text" className="text-[9px] font-black uppercase tracking-widest text-slate-500 cursor-pointer">Dense Text / OCR</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Switch id="detail-toggle" checked={detailMode === 'high'} onCheckedChange={(v) => setDetailMode(v ? 'high' : 'low')} />
-                                        <Label htmlFor="detail-toggle" className="text-[10px] font-black uppercase tracking-widest text-slate-500 cursor-pointer">High Detail</Label>
+                                        <Label htmlFor="detail-toggle" className="text-[9px] font-black uppercase tracking-widest text-slate-500 cursor-pointer">High Detail</Label>
                                     </div>
                                 </div>
                                 <div className="text-[10px] font-mono font-bold text-indigo-400 uppercase">
@@ -391,13 +475,13 @@ export default function MultimodalEstimator() {
                             {isDenseText && (
                                 <div className="flex items-center gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[10px] font-bold text-amber-400 animate-in fade-in slide-in-from-left-2">
                                     <AlertCircle className="w-3.5 h-3.5" />
-                                    TIP: High-detail mode is recommended for this image to ensure accurate OCR extraction.
+                                    TIP: High-detail mode is recommended for accurate OCR.
                                 </div>
                             )}
                         </CardContent>
                     </Card>
 
-                    {/* Global Parameters */}
+                    {/* Processing Configuration */}
                     <Card className="border-white/5 bg-slate-900/50 backdrop-blur-md">
                         <CardHeader className="pb-4">
                             <CardTitle className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
@@ -405,7 +489,7 @@ export default function MultimodalEstimator() {
                                 Processing Configuration
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <CardContent className="grid grid-cols-1 gap-6">
                             <div className="space-y-3">
                                 <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Target Model</Label>
                                 <Select value={selectedModelId} onValueChange={setSelectedModelId}>
@@ -436,13 +520,13 @@ export default function MultimodalEstimator() {
 
                     {/* Image Gallery */}
                     {images.length > 0 && (
-                        <div className="grid grid-cols-1 gap-4">
+                        <div className="space-y-4">
                             {totals.perImageResults.map((img) => (
                                 <Card key={img.id} className="bg-white/5 border-white/5 rounded-2xl overflow-hidden group hover:border-indigo-500/20 transition-all">
-                                    <div className="flex flex-col md:flex-row">
+                                    <div className="flex flex-col">
                                         <div 
                                             className={cn(
-                                                "relative w-full md:w-64 h-64 bg-black shadow-inner overflow-hidden select-none",
+                                                "relative w-full h-48 bg-black shadow-inner overflow-hidden select-none",
                                                 isZoomMode ? "cursor-crosshair" : "cursor-default"
                                             )}
                                             onMouseDown={(e) => handleMouseDown(e, img.id)}
@@ -481,57 +565,33 @@ export default function MultimodalEstimator() {
                                                     }}
                                                 />
                                             )}
-
-                                            <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded border border-white/10 text-[8px] font-mono text-white/80 font-bold uppercase tracking-widest">
-                                                {model.visionPricing?.strategy === 'openai-tiles' ? "512px Tile Analysis" : "768px Frame Analysis"}
-                                            </div>
                                         </div>
-                                        <CardContent className="flex-1 p-6 space-y-6">
+                                        <CardContent className="p-4 space-y-4">
                                             <div className="flex justify-between items-start">
-                                                <div className="space-y-1">
-                                                    <p className="text-sm font-bold text-white truncate max-w-[240px]">{img.fileName}</p>
-                                                    <p className="text-[10px] font-mono text-indigo-400 font-black uppercase tracking-tighter">{img.width}x{img.height} Native Res</p>
+                                                <div className="space-y-0.5">
+                                                    <p className="text-[11px] font-bold text-white truncate max-w-[200px]">{img.fileName}</p>
+                                                    <p className="text-[9px] font-mono text-indigo-400 font-black uppercase tracking-tighter">{img.width}x{img.height} Native Res</p>
                                                 </div>
                                                 <Button 
                                                     variant="ghost" 
                                                     size="icon" 
                                                     onClick={() => setImages(prev => prev.filter(i => i.id !== img.id))}
-                                                    className="text-slate-500 hover:text-red-400 h-8 w-8"
+                                                    className="text-slate-500 hover:text-red-400 h-6 w-6"
                                                 >
-                                                    <Trash2 className="w-4 h-4" />
+                                                    <Trash2 className="w-3.5 h-3.5" />
                                                 </Button>
                                             </div>
 
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-xl p-3">
-                                                    <div className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">Base Tokens</div>
-                                                    <div className="text-lg font-black text-white font-mono">{img.tokens.toLocaleString()}</div>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-xl p-2.5">
+                                                    <div className="text-[8px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Base Vision</div>
+                                                    <div className="text-sm font-black text-white font-mono">{img.tokens.toLocaleString()}</div>
                                                 </div>
-                                                <div className="bg-cyan-500/5 border border-cyan-500/10 rounded-xl p-3">
-                                                    <div className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">Zoom Patches</div>
-                                                    <div className="text-lg font-black text-cyan-400 font-mono">+{img.imageZoomTokens.toLocaleString()}</div>
+                                                <div className="bg-cyan-500/5 border border-cyan-500/10 rounded-xl p-2.5">
+                                                    <div className="text-[8px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Zoom Patches</div>
+                                                    <div className="text-sm font-black text-cyan-400 font-mono">+{img.imageZoomTokens.toLocaleString()}</div>
                                                 </div>
                                             </div>
-
-                                            {/* Smart Optimization */}
-                                            {(() => {
-                                                const opt = getVisionOptimization(img.width, img.height, img.tokens);
-                                                if (opt.improvementPercent < 10) return null;
-                                                return (
-                                                    <div className="flex items-center justify-between p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-xl">
-                                                        <div className="space-y-0.5">
-                                                            <div className="text-[10px] font-black text-emerald-400 uppercase flex items-center gap-1">
-                                                                <TrendingDown className="w-3 h-3" />
-                                                                {opt.improvementPercent}% Saving Potential
-                                                            </div>
-                                                            <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">Target: {opt.recommendedWidth}px max</p>
-                                                        </div>
-                                                        <Button variant="outline" size="sm" className="h-7 text-[9px] font-black uppercase border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10">
-                                                            Optimize
-                                                        </Button>
-                                                    </div>
-                                                );
-                                            })()}
                                         </CardContent>
                                     </div>
                                 </Card>
@@ -562,92 +622,6 @@ export default function MultimodalEstimator() {
                                     </div>
                                 ))}
                             </div>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* ── Right Column: Summary & Analysis ── */}
-                <div className="lg:col-span-5 space-y-6">
-                    <Card className="shadow-2xl border-indigo-500/20 bg-slate-900/80 backdrop-blur-xl h-full flex flex-col sticky top-6 overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500" />
-                        <CardHeader className="pb-4 border-b border-white/5">
-                            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 flex items-center justify-between">
-                                <span className="flex items-center gap-2"><Sparkles className="w-4 h-4" /> Comprehensive Multimodal Bill</span>
-                                <span className="text-slate-500 font-mono">APRIL 2026</span>
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-8 pt-8">
-                            <div className="text-center space-y-1">
-                                <div className="text-6xl font-black tracking-tighter text-white tabular-nums font-mono">
-                                    ${totals.totalCost.toFixed(5)}
-                                </div>
-                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Estimated Total Cost per Request</p>
-                            </div>
-
-                            {/* Token Distribution Bar */}
-                            <div className="space-y-3">
-                                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
-                                    <span className="text-indigo-400">{totals.inputTokens.toLocaleString()} Vision</span>
-                                    <span className="text-cyan-400">{totals.zoomTokens.toLocaleString()} Zoom</span>
-                                    <span className="text-indigo-200">{totals.promptTokens.toLocaleString()} Text</span>
-                                </div>
-                                <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden flex">
-                                    <div className="h-full bg-indigo-500 transition-all duration-1000" style={{ width: `${(totals.inputTokens / totals.totalTokens) * 100}%` }} />
-                                    <div className="h-full bg-cyan-500 transition-all duration-1000" style={{ width: `${(totals.zoomTokens / totals.totalTokens) * 100}%` }} />
-                                    <div className="h-full bg-indigo-300 transition-all duration-1000" style={{ width: `${(totals.promptTokens / totals.totalTokens) * 100}%` }} />
-                                    <div className="h-full bg-slate-600 transition-all duration-1000" style={{ width: `${(totals.outputTokens / totals.totalTokens) * 100}%` }} />
-                                </div>
-                            </div>
-
-                            {/* Context Window Occupancy */}
-                            <div className="space-y-3 pt-4 border-t border-white/5">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2 font-black uppercase text-[10px] tracking-widest text-slate-400">
-                                        <Gauge className={cn("w-4 h-4", contextPercent > 80 ? "text-red-400" : "text-emerald-400")} />
-                                        Context Occupancy
-                                    </div>
-                                    <span className="text-[10px] font-mono font-bold text-white">{totals.totalTokens.toLocaleString()} / {(model.maxContext / 1000).toFixed(0)}k</span>
-                                </div>
-                                <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                                    <div 
-                                        className={cn("h-full transition-all duration-1000", contextPercent > 90 ? "bg-red-500" : contextPercent > 70 ? "bg-amber-500" : "bg-indigo-500")} 
-                                        style={{ width: `${contextPercent}%` }} 
-                                    />
-                                </div>
-                                <p className="text-[9px] text-center font-black uppercase tracking-tighter text-slate-500">
-                                    {contextPercent > 90 ? "⚠️ Danger: Nearing Context Boundary" : "✅ Safe: Significant Headroom Remaining"}
-                                </p>
-                            </div>
-
-                            <div className="space-y-4 pt-4 border-t border-white/5">
-                                <div className="flex items-center justify-between text-xs font-bold">
-                                    <span className="text-slate-400 uppercase tracking-widest flex items-center gap-2"><ImageIcon className="w-3.5 h-3.5" /> Initial Pass</span>
-                                    <span className="text-white font-mono">{totals.inputTokens.toLocaleString()} tokens</span>
-                                </div>
-                                <div className="flex items-center justify-between text-xs font-bold">
-                                    <span className="text-cyan-400 uppercase tracking-widest flex items-center gap-2"><Target className="w-3.5 h-3.5" /> Zoomed Detail</span>
-                                    <span className="text-white font-mono">{totals.zoomTokens.toLocaleString()} tokens</span>
-                                </div>
-                                <div className="flex items-center justify-between text-xs font-bold">
-                                    <span className="text-slate-400 uppercase tracking-widest flex items-center gap-2"><MessageSquare className="w-3.5 h-3.5" /> Text Prompt</span>
-                                    <span className="text-white font-mono">{totals.promptTokens.toLocaleString()} tokens</span>
-                                </div>
-                                <div className="flex items-center justify-between text-xs font-bold">
-                                    <span className="text-slate-400 uppercase tracking-widest flex items-center gap-2"><ArrowRight className="w-3.5 h-3.5" /> Est. Response</span>
-                                    <span className="text-white font-mono">{totals.outputTokens.toLocaleString()} tokens</span>
-                                </div>
-                                <div className="flex items-center justify-between text-xl font-black pt-6 border-t border-white/10 text-white uppercase tracking-tighter">
-                                    <span>Total Bill</span>
-                                    <span className="font-mono text-indigo-400">{totals.totalTokens.toLocaleString()}</span>
-                                </div>
-                            </div>
-
-                            <Link href="/comparison" className="block w-full">
-                                <Button className="w-full h-14 bg-white text-black hover:bg-slate-200 font-black uppercase tracking-[0.2em] text-xs shadow-xl active:scale-95 transition-all">
-                                    <Scale className="w-4 h-4 mr-2" />
-                                    Compare Vision Models
-                                </Button>
-                            </Link>
                         </CardContent>
                     </Card>
                 </div>

@@ -41,7 +41,7 @@ export default function PromptEditor() {
         setActiveTab,
         setRawPrompt,
         setOptimizedPrompt,
-        setMissionStep
+        setOptimizationStep
     } = useTokenSenseStore();
 
     const [savingsMessage, setSavingsMessage] = useState<string | null>(null);
@@ -445,7 +445,7 @@ export default function PromptEditor() {
             <div className="pt-6 border-t border-border/40">
                 <Button 
                     asChild
-                    onClick={() => setMissionStep(2)}
+                    onClick={() => setOptimizationStep(2)}
                     className="w-full h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-base shadow-lg shadow-indigo-500/20 gap-3 group"
                 >
                     <Link href="/tools/context">

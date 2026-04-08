@@ -7,14 +7,13 @@ import { ApiIntegrationSection } from "@/components/ApiIntegrationSection";
 import { BudgetCalculator } from "@/components/BudgetCalculator";
 import { StickyResultsBar } from "@/components/StickyResultsBar";
 import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 export default function HomeClient() {
   return (
     <>
-      <StickyResultsBar />
-      
       {/* STEP 01 */}
-      <section className="space-y-8">
+      <section id="calculator-step" className="scroll-mt-20 space-y-8">
         <div className="text-center mb-8 mt-12">
             <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-[#00dcb4]/10 text-[#00dcb4] text-sm font-mono font-bold tracking-widest uppercase mb-4 border border-[#00dcb4]/20">
               {"STEP 01 — Count your tokens & estimate cost"}
@@ -26,12 +25,12 @@ export default function HomeClient() {
         <MainCalculator />
       </section>
 
-      <div className="hidden md:flex justify-center mt-8 mb-4">
-        <div className="w-px h-16 border-l-2 border-dashed border-[#00dcb4]/40"></div>
+      <div className="py-12">
+        <Separator className="bg-border/40" />
       </div>
 
       {/* STEP 02 */}
-      <section className="space-y-8">
+      <section id="comparison-step" className="scroll-mt-20 space-y-8">
         <div className="text-center mb-8">
            <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-[#00dcb4]/10 text-[#00dcb4] text-sm font-mono font-bold tracking-widest uppercase mb-4 border border-[#00dcb4]/20">
             {"STEP 02 — Compare your model across 30+ options"}
@@ -40,15 +39,17 @@ export default function HomeClient() {
             {"Add multiple models to see side-by-side costs for the same prompt."}
           </p>
         </div>
-        <ComparisonTableSection />
+        <Card className="border-border/40 bg-card/30 backdrop-blur-sm overflow-hidden">
+          <ComparisonTableSection />
+        </Card>
       </section>
 
-      <div className="hidden md:flex justify-center mt-8 mb-4">
-        <div className="w-px h-16 border-l-2 border-dashed border-[#00dcb4]/40"></div>
+      <div className="py-12">
+        <Separator className="bg-border/40" />
       </div>
 
       {/* STEP 03 */}
-      <section className="space-y-8">
+      <section id="simulator-step" className="scroll-mt-20 space-y-8">
         <div className="my-8 relative z-10 text-center">
             <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-[#00dcb4]/10 text-[#00dcb4] text-sm font-mono font-bold tracking-widest uppercase mb-4 border border-[#00dcb4]/20">
               {"STEP 03 — Simulate your agent's total cost over time"}
@@ -56,17 +57,26 @@ export default function HomeClient() {
             <p className="text-muted-foreground text-lg font-medium mb-8">
               {"See how costs compound across multiple turns — before you build."}
             </p>
-            <AgentSimulatorSection />
+            <Card className="border-border/40 bg-card/30 backdrop-blur-sm p-2 sm:p-6 lg:p-8">
+              <AgentSimulatorSection />
+            </Card>
         </div>
       </section>
 
-      {/* API Integration Section */}
-      <div className="pt-8">
-        <ApiIntegrationSection />
+      <div className="py-12">
+        <Separator className="bg-border/40" />
       </div>
 
       {/* Budget Reverse Calculator */}
       <div className="pt-4">
+        <div className="text-center mb-8">
+           <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-indigo-500/10 text-indigo-400 text-sm font-mono font-bold tracking-widest uppercase mb-4 border border-indigo-500/20">
+            {"Reverse Budget Planner"}
+          </div>
+          <p className="text-muted-foreground text-lg font-medium">
+            {"Work backwards from your monthly budget to see how many prompts you can afford."}
+          </p>
+        </div>
         <Card className="border-border/40 bg-card/50 backdrop-blur-sm p-6">
           <BudgetCalculator />
         </Card>

@@ -28,6 +28,19 @@ function PricingSchema() {
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "SoftwareApplication",
+        "name": "LLM Pricing History Tracker",
+        "description": "Historical tracking of AI model pricing from 2023 to 2026. Monitor intelligence deflation and API price cuts.",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Web",
+        "url": "https://www.tokensense-ai.com/pricing-history",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      },
+      {
         "@type": "WebPage",
         "@id": "https://www.tokensense-ai.com/pricing-history/#webpage",
         "url": "https://www.tokensense-ai.com/pricing-history",
@@ -49,6 +62,27 @@ function PricingSchema() {
             }
           ]
         }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How much has AI pricing dropped since 2023?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "On average, the cost per 1M tokens for frontier-grade intelligence has dropped by over 90% since early 2023, driven by architectural efficiency and hardware breakthroughs."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is the 'intelligence deflation' trend?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Intelligence deflation refers to the rapid decrease in the cost of high-level AI reasoning, making advanced LLMs accessible for high-volume automated workflows."
+            }
+          }
+        ]
       }
     ]
   };
@@ -85,6 +119,33 @@ export default function PricingHistoryPage() {
         </section>
 
         <PricingHistoryClient />
+
+        {/* Server-Rendered Capabilities Summary */}
+        <section className="mt-20 border-t border-border/40 pt-16 max-w-4xl mx-auto">
+            <div className="space-y-12">
+                <div className="text-center space-y-4">
+                    <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase">Tool Capabilities</h2>
+                    <p className="text-muted-foreground text-lg">The definitive record of AI infrastructure economics.</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="space-y-3">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 font-bold">01</div>
+                        <h4 className="text-lg font-bold text-white">Historical Price Indexing</h4>
+                        <p className="text-sm text-muted-foreground leading-relaxed">Track the exact dates and magnitudes of price cuts for GPT-4, Claude, and Gemini. Map your past infrastructure spend against the market average.</p>
+                    </div>
+                    <div className="space-y-3">
+                        <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 font-bold">02</div>
+                        <h4 className="text-lg font-bold text-white">Market Trend Forecasting</h4>
+                        <p className="text-sm text-muted-foreground leading-relaxed">Analyze the rate of 'intelligence deflation' to forecast your 2027-2028 AI budget. Identify the intervals between major model architectural shifts.</p>
+                    </div>
+                    <div className="space-y-3">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold">03</div>
+                        <h4 className="text-lg font-bold text-white">Competitive Benchmarking</h4>
+                        <p className="text-sm text-muted-foreground leading-relaxed">See how price leaders like DeepSeek and Meta have forced proprietary providers to slash rates. Understand the hardware cycles driving your API bill.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         {/* SEMANTIC DATA FOR CRAWLERS (Based on 'Economics of LLM Pricing' section) */}
         <div className="sr-only">

@@ -25,9 +25,6 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // Turbopack config (Next.js 16+ default bundler)
-  turbopack: {},
-
   // Webpack fallback for tiktoken WASM support
   webpack: (config, { isServer }) => {
     config.experiments = {

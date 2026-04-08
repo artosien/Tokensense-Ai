@@ -57,7 +57,7 @@ const SYSTEM_PRESETS = [
 ];
 
 export default function ContextWindowVisualizer() {
-    const { setMissionStep } = useTokenSenseStore();
+    const { setOptimizationStep } = useTokenSenseStore();
     const [selectedModelId, setSelectedModelId] = useState(models[0].id);
     const [systemPromptText, setSystemPromptText] = useState("You are a helpful AI assistant tasked with analyzing complex data structures. Please provide concise and accurate summaries.");
     const [systemTokens, setSystemTokens] = useState<number>(0);
@@ -463,7 +463,7 @@ export default function ContextWindowVisualizer() {
                     <div className="pt-2">
                         <Button 
                             asChild
-                            onClick={() => setMissionStep(3)}
+                            onClick={() => setOptimizationStep(3)}
                             className="w-full h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-base shadow-lg shadow-indigo-500/20 gap-3 group"
                         >
                             <Link href="/tools/compression">

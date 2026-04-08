@@ -34,7 +34,7 @@ interface TokenSenseState {
 
     // UI state
     activeTab: "calculate" | "results";
-    missionStep: number; // 1-5 for progress tracking
+    optimizationStep: number; // 1-5 for progress tracking
 
     // Actions
     setRawPrompt: (text: string) => void;
@@ -52,7 +52,7 @@ interface TokenSenseState {
     setAgentIterations: (n: number) => void;
     setAvgNewInputTokensPerTurn: (n: number) => void;
     setActiveTab: (tab: "calculate" | "results") => void;
-    setMissionStep: (step: number) => void;
+    setOptimizationStep: (step: number) => void;
 }
 
 export const useTokenSenseStore = create<TokenSenseState>()(
@@ -77,7 +77,7 @@ export const useTokenSenseStore = create<TokenSenseState>()(
             avgNewInputTokensPerTurn: 500,
 
             activeTab: "calculate",
-            missionStep: 1,
+            optimizationStep: 1,
 
             setRawPrompt: (text) => set({ rawPrompt: text }),
             setOptimizedPrompt: (text) => set({ optimizedPrompt: text }),
@@ -94,10 +94,10 @@ export const useTokenSenseStore = create<TokenSenseState>()(
             setAgentIterations: (n) => set({ agentIterations: n }),
             setAvgNewInputTokensPerTurn: (n) => set({ avgNewInputTokensPerTurn: n }),
             setActiveTab: (tab) => set({ activeTab: tab }),
-            setMissionStep: (step) => set({ missionStep: step }),
+            setOptimizationStep: (step) => set({ optimizationStep: step }),
         }),
         {
-            name: "tokensense-mission-payload",
+            name: "tokensense-optimization-data",
         }
     )
 );

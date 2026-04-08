@@ -16,6 +16,7 @@
   "nav": {
     "home": "Home",
     "tools": "Tools",
+    "learn": "Learn",
     "blog": "Blog",
     "faq": "FAQ",
     "login": "Login",
@@ -248,6 +249,7 @@
   },
   "api_sync": {
     "badge": "New Feature",
+    "benefit": "Automatically pull your live usage data from OpenAI",
     "title": "Sync Real Usage with OpenAI",
     "desc": "Connect your OpenAI API key to track real-time costs, see historical usage graphs, and compare your actual spend against these estimates.",
     "label": "OpenAI API Key (Stored Locally)",
@@ -317,6 +319,7 @@
   "footer": {
     "tagline": "Pre-flight LLM Cost Calculator",
     "tools": "Tools",
+    "learn": "Learn",
     "links": "Links",
     "company": "Company",
     "legal": "Legal",
@@ -328,6 +331,7 @@
     "about": "About",
     "contact_us": "Contact Us",
     "changelog": "Changelog",
+    "learn": "Learn",
     "github_note": "If you find the tool useful, please give it a star on GitHub.",
     "support_dev": "Support Tokensense Development"
   },
@@ -364,17 +368,27 @@
       "title": "Video Token Budget Planner",
       "description": "Estimate and compare AI video processing costs across providers.",
       "mode_simple": "Simple",
+      "mode_simple_desc": "Use smart presets for quick estimates.",
       "mode_advanced": "Advanced",
+      "mode_advanced_desc": "Fine-tune FPS and token overhead.",
+      "batch_button": "Batch Estimate",
+      "batch_desc": "Calculate costs for 100+ videos via CSV.",
       "config_title": "Configuration",
       "analysis_title": "Visual Analysis",
-      "no_video_title": "No video analyzed yet",
-      "no_video_description": "Upload a file or paste a URL on the left to start planning your token budget and comparing provider costs.",
+      "no_video_title": "Ready to Plan Your Video?",
+      "no_video_description": "Paste a YouTube/Vimeo link or upload a file to see exactly what your AI video will cost to process.",
+      "try_sample": "Try with a sample video",
+      "compare_button": "Compare Models",
+      "export_pdf": "Export Budget PDF",
+      "export_pdf_desc": "Generate a professional report for clients.",
       "privacy_title": "Privacy & Security",
-      "privacy_description": "Tokensense is a client-side tool. Your video data is processed locally in your browser for file uploads. API keys are stored in your browser's localStorage and are never sent to our servers. External URL analysis is performed via a secure proxy that does not store your content.",
+      "privacy_description": "Tokensense is a client-side tool. Your video data is processed locally in your browser for file uploads. API keys are stored in your browser's localStorage and are never sent to our servers. External URL analysis is performed via a secondary server that does not store your content.",
       "methodology_title": "Calculation Methodology",
       "methodology_description": "Estimates are based on published tokenization rates for Gemini, Claude, and GPT-4o models. Actual costs may vary slightly based on specific prompt overhead and provider-side adjustments."
     },
     "input": {
+      "tab_url": "Video URL",
+      "tab_file": "File Upload",
       "upload_title": "Upload a video file",
       "upload_description": "Drag and drop or click to browse",
       "upload_limit": "MP4, MOV, WEBM, MKV (Up to 2GB)",
@@ -409,23 +423,20 @@
       "process_audio": "Process Audio",
       "process_audio_desc": "Include audio stream in analysis",
       "advanced_badge": "Advanced Mode Active",
-      "advanced_description": "Manual control over sampling rates and prompt overhead.",
-      "batch_button": "Batch Estimate",
-      "batch_desc": "Calculate costs for 100+ videos via CSV.",
-      "mode_simple": "Simple Mode",
-      "mode_simple_desc": "Use smart presets for quick estimates.",
-      "mode_advanced": "Advanced Mode",
-      "mode_advanced_desc": "Fine-tune FPS and token overhead.",
-      "compare_button": "Compare Models",
-      "export_pdf": "Export Budget PDF",
-      "export_pdf_desc": "Generate a professional report for clients."
+      "advanced_description": "Manual control over sampling rates and prompt overhead."
     },
     "batch": {
       "title": "Batch CSV Estimator",
       "desc": "Calculate costs for entire libraries instantly.",
       "upload_prompt": "Drop CSV with duration/resolution",
       "total_estimate": "Bulk Total Estimate",
-      "files_count": "{count} files processed"
+      "files_count": "{count} files processed",
+      "comparison_title": "Batch Comparison",
+      "comparison_desc": "Projected costs for {count} videos",
+      "cheapest_option": "Cheapest Option",
+      "enterprise_premium": "Enterprise Premium",
+      "potential_savings": "Potential Savings",
+      "by_switching": "By switching"
     },
     "diet": {
       "title": "Token Diet Optimization",
@@ -446,7 +457,22 @@
       "cost_comparison": "Cost Comparison",
       "measure_exactly": "Measure Exactly",
       "estimate_mode": "Estimate Mode",
+      "copy_summary": "Copy Summary",
+      "summary_copied": "Summary copied!",
       "pricing_disclaimer": "Pricing last updated: March 2026. Includes input tokens only. Output costs vary by response length."
+    },
+    "budget": {
+      "title": "Budget Planner",
+      "subtitle": "How many videos can you afford?",
+      "monthly_budget": "Monthly Budget (USD)",
+      "per_video": "{cost} / video",
+      "videos_per_month": "Videos / Month",
+      "disclaimer": "Estimates exclude output token costs and tax."
+    },
+    "tooltips": {
+      "context_window_usage": "Shows how much of the model's total memory this video will occupy.",
+      "token_diet": "Automatically detects where you can save money by reducing unnecessary visual data.",
+      "total_tokens": "Total combined count of visual, audio, and prompt tokens."
     },
     "keys": {
       "title": "API Keys",
@@ -468,6 +494,9 @@
       "col_cost": "Cost",
       "col_status": "Status",
       "best_value": "Best Value",
+      "best_budget": "Best Budget",
+      "best_quality": "Best Quality",
+      "best_speed": "Best Speed",
       "ready": "Ready"
     }
   }

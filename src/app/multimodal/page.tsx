@@ -44,6 +44,27 @@ function MultimodalSchema() {
           "price": "0",
           "priceCurrency": "USD"
         }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How are image tokens calculated in GPT-4o?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "GPT-4o uses a tiling system where images are resized to fit a 2048px square and then divided into 512px tiles, with each tile costing 170 tokens in high-detail mode."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does image file size affect AI vision costs?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No, AI vision costs are determined by the pixel dimensions (resolution) and the model's tiling strategy, not the compressed file size (MB)."
+            }
+          }
+        ]
       }
     ]
   };
@@ -109,6 +130,33 @@ export default async function MultimodalPage() {
                 <MultimodalEstimator />
 
                 <SocialShareBar variant="bottom" />
+
+                {/* Server-Rendered Capabilities Summary */}
+                <section className="mt-20 border-t border-border/40 pt-16 max-w-4xl mx-auto">
+                    <div className="space-y-12">
+                        <div className="text-center space-y-4">
+                            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase">Tool Capabilities</h2>
+                            <p className="text-muted-foreground text-lg">Precision engineering for multimodal AI infrastructure.</p>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div className="space-y-3">
+                                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 font-bold">01</div>
+                                <h4 className="text-lg font-bold text-white">Pixel-to-Token Mapping</h4>
+                                <p className="text-sm text-muted-foreground leading-relaxed">Visualize exactly how your image dimensions translate into API tokens. We simulate the proprietary tiling logic for GPT-4o, Claude, and Gemini.</p>
+                            </div>
+                            <div className="space-y-3">
+                                <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 font-bold">02</div>
+                                <h4 className="text-lg font-bold text-white">High/Low Detail Benchmarking</h4>
+                                <p className="text-sm text-muted-foreground leading-relaxed">Compare the cost impact of vision detail modes. Identify if your OCR or object detection task can be handled in 'low-res' to save 80% on tokens.</p>
+                            </div>
+                            <div className="space-y-3">
+                                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold">03</div>
+                                <h4 className="text-lg font-bold text-white">Token Diet Optimization</h4>
+                                <p className="text-sm text-muted-foreground leading-relaxed">Get automated advice on the 'Semantic Floor' for your images. Resize your visual data to the exact resolution where accuracy remains high but costs drop.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
                 {/* Educational Content / SEO Section */}
                 <section className="mt-24 border-t border-border/40 pt-20 max-w-4xl mx-auto pb-20">

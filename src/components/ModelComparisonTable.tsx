@@ -114,7 +114,7 @@ function AnimatedCostBar({ ratio }: { ratio: number }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function ModelComparisonTable() {
-    const { setMissionStep } = useTokenSenseStore();
+    const { setOptimizationStep } = useTokenSenseStore();
     // Live token sliders state
     const [inputTokens, setInputTokens] = useState(10000);
     const [outputTokens, setOutputTokens] = useState(2000);
@@ -126,7 +126,7 @@ export default function ModelComparisonTable() {
     const [sortMode, setSortMode] = useState<SortMode>("total");
     const [activeProviderFilter, setActiveProviderFilter] = useState<string>("All");
     const [copiedId, setCopiedId] = useState<string | null>(null);
-    const [showPicker, setShowPicker] = useState(true);
+    const [showPicker, setShowPicker] = useState(false);
 
     // Smart Picker State
     const [pickerTask, setPickerTask] = useState<string>("general");
@@ -144,6 +144,14 @@ export default function ModelComparisonTable() {
             }
         };
         window.addEventListener("scroll", handleScroll);
+
+        // On mobile, show picker by default once if not seen
+        const pickerSeen = localStorage.getItem("tokensense-picker-seen");
+        if (window.innerWidth < 768 && !pickerSeen) {
+            setShowPicker(true);
+            localStorage.setItem("tokensense-picker-seen", "true");
+        }
+
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
@@ -421,34 +429,26 @@ export default function ModelComparisonTable() {
 
             {/* ── Sort & Filter Toolset ── */}
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-                <div className="flex flex-wrap gap-1.5 bg-white/5 p-1 rounded-xl border border-white/5">
+                <div className="flex flex-wrap gap-1 bg-white/5 p-1 rounded-xl border border-white/10">
                     {[
-                        { id: "total", label: "Best Total", icon: Calculator, color: "from-emerald-500/20 to-emerald-500/10", activeText: "text-emerald-400", glow: "shadow-emerald-500/20" },
-                        { id: "value", label: "Bang-for-Buck", icon: Trophy, color: "from-indigo-500/20 to-indigo-500/10", activeText: "text-indigo-400", glow: "shadow-indigo-500/20" },
-                        { id: "latency", label: "Low Latency", icon: Timer, color: "from-amber-500/20 to-amber-500/10", activeText: "text-amber-400", glow: "shadow-amber-500/20" },
-                        { id: "input", label: "Input Price", icon: ChevronDown, color: "from-slate-500/20 to-slate-500/10", activeText: "text-slate-300", glow: "shadow-slate-500/20" },
-                        { id: "output", label: "Output Price", icon: ChevronUp, color: "from-slate-500/20 to-slate-500/10", activeText: "text-slate-300", glow: "shadow-slate-500/20" }
+                        { id: "total", label: "Best Total", icon: Calculator, activeColor: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
+                        { id: "value", label: "Bang-for-Buck", icon: Trophy, activeColor: "bg-indigo-500/20 text-indigo-400 border-indigo-500/30" },
+                        { id: "latency", label: "Low Latency", icon: Timer, activeColor: "bg-amber-500/20 text-amber-400 border-amber-500/30" },
+                        { id: "input", label: "Input Price", icon: ChevronDown, activeColor: "bg-slate-500/20 text-slate-300 border-slate-500/30" },
+                        { id: "output", label: "Output Price", icon: ChevronUp, activeColor: "bg-slate-500/20 text-slate-300 border-slate-500/30" }
                     ].map((mode) => (
                         <button
                             key={mode.id}
                             onClick={() => setSortMode(mode.id as SortMode)}
                             className={cn(
-                                "group relative flex items-center gap-2 px-3 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all duration-300 overflow-hidden",
+                                "group flex items-center gap-2 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all border border-transparent",
                                 sortMode === mode.id 
-                                    ? cn("bg-gradient-to-br shadow-lg", mode.color, mode.activeText, mode.glow)
+                                    ? mode.activeColor
                                     : "text-slate-500 hover:text-slate-300 hover:bg-white/5"
                             )}
                         >
-                            <mode.icon className={cn("w-3.5 h-3.5 transition-transform duration-300", sortMode === mode.id ? "scale-110" : "group-hover:scale-110")} />
+                            <mode.icon className={cn("w-3 h-3", sortMode === mode.id ? "opacity-100" : "opacity-50 group-hover:opacity-100")} />
                             {mode.label}
-                            {sortMode === mode.id && (
-                                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-current animate-in slide-in-from-left duration-500" />
-                            )}
-                            <div className={cn(
-                                "absolute -right-1 -top-1 w-4 h-4 rounded-full blur-sm transition-opacity duration-300",
-                                sortMode === mode.id ? "opacity-40" : "opacity-0",
-                                mode.activeText.replace("text", "bg")
-                            )} />
                         </button>
                     ))}
                 </div>
@@ -591,22 +591,31 @@ export default function ModelComparisonTable() {
                 </div>
             </div>
 
-            {/* ── Call to Action ── */}
-            <div className="bg-indigo-500/5 border border-indigo-500/10 p-8 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="space-y-2">
-                    <h3 className="text-xl font-bold text-white uppercase tracking-tighter">Ready to complete the mission?</h3>
-                    <p className="text-sm text-slate-400">Review your final optimization report and manifest.</p>
+            {/* ── Next Step CTA ── */}
+            <div className="mt-20 pt-12 border-t border-white/10 flex flex-col items-center text-center">
+                <div className="mb-8 flex flex-col items-center">
+                    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-4">
+                        <Check className="w-3 h-3" />
+                        Comms Review Complete
+                    </div>
+                    <h2 className="text-3xl font-black text-white mb-2 uppercase tracking-tighter">Mission Analysis Finalized</h2>
+                    <p className="text-slate-400 text-sm max-w-md font-medium">
+                        Your cost comparison is ready. Generate the final flight report to see the optimized workflow manifest.
+                    </p>
                 </div>
                 <Button 
                     asChild
-                    onClick={() => setMissionStep(6)}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-black px-8 h-14 rounded-2xl shadow-lg shadow-indigo-500/20 gap-3 group"
+                    onClick={() => setOptimizationStep(6)}
+                    className="w-full max-w-md h-20 rounded-3xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xl shadow-2xl shadow-indigo-500/20 gap-4 group uppercase tracking-tighter"
                 >
                     <Link href="/workflow">
-                        <Sparkles className="w-5 h-5 fill-white group-hover:animate-spin-slow" />
+                        <Sparkles className="w-6 h-6 fill-white group-hover:animate-spin-slow" />
                         Generate Final Report ➔
                     </Link>
                 </Button>
+                <p className="mt-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
+                    Trajectory Optimized: Mission Ready
+                </p>
             </div>
         </div>
     );

@@ -7,11 +7,14 @@ import { calculateCost } from "@/lib/costEngine";
 import { Check, Copy, ArrowRight } from "lucide-react";
 import { cn, triggerHaptic } from "@/lib/utils";
 
+import { usePathname } from "next/navigation";
+
 /**
  * StickyResultsBar - appears at the top of the viewport after first calculation.
  * Shows Total - Input - Output costs with a copy button.
  */
 export function StickyResultsBar() {
+  const pathname = usePathname();
   const {
     inputTokenCount,
     fileTokenCount,
@@ -41,7 +44,7 @@ export function StickyResultsBar() {
         // Small delay so the animation is noticeable
         setTimeout(() => {
           setVisible(true);
-          triggerHaptic(30); // M14: Calculation complete feel
+          triggerHaptic(30); 
         }, 200);
       }
     }
@@ -55,7 +58,7 @@ export function StickyResultsBar() {
   };
 
   const handleCopy = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Don't trigger tab switch
+    e.stopPropagation();
     if (!cost || !model) return;
     const text =
       `TokenSense AI Estimate\n` +
@@ -66,25 +69,33 @@ export function StickyResultsBar() {
       `tokensense-ai.com`;
 
     navigator.clipboard.writeText(text).then(() => {
-      triggerHaptic([20, 10, 20]); // M14: double tap feel
+      triggerHaptic([20, 10, 20]);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
   };
 
   const handleTabSwitch = () => {
-    triggerHaptic(15);
-    setActiveTab("results");
+    if (pathname === "/") {
+      triggerHaptic(15);
+      setActiveTab("results");
+      // Scroll to top if on home
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   if (!hasCalculated || !cost || !model) return null;
+
+  // Hide when on results tab of home page to avoid duplication
+  const isHidden = pathname === "/" && activeTab === "results";
 
   return (
     <div
       onClick={handleTabSwitch}
       className={cn(
-        "fixed top-0 left-0 right-0 z-[60] transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] cursor-pointer",
-        (visible && (activeTab !== "results")) ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
+        "fixed top-0 left-0 right-0 z-[60] transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]",
+        pathname === "/" ? "cursor-pointer" : "cursor-default",
+        (visible && !isHidden) ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
       )}
     >
       <div className="bg-[#040c0e]/95 backdrop-blur-md border-b border-plasma-500/30 shadow-[0_4px_20px_rgba(0,229,255,0.12)]">

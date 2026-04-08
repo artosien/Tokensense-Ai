@@ -59,6 +59,14 @@ function VideoPlannerSchema() {
         "mainEntity": [
           {
             "@type": "Question",
+            "name": "What is AI video tokenization?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "AI video tokenization is the process of breaking down video data into smaller units called tokens or patches for processing by a transformer model. Unlike text tokens, video tokens are multidimensional, covering both spatial (resolution) and temporal (time) data."
+            }
+          },
+          {
+            "@type": "Question",
             "name": "How does OpenAI Sora tokenize video?",
             "acceptedAnswer": {
               "@type": "Answer",
@@ -79,6 +87,14 @@ function VideoPlannerSchema() {
             "acceptedAnswer": {
               "@type": "Answer",
               "text": "Yes. For many models, higher resolutions (like 4K vs 720p) increase the spatial complexity, leading to higher token counts per frame and consequently higher processing costs."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How can I optimize my AI video token usage?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "To reduce costs, consider downsampling resolution, using lower frame sampling rates (like 1 FPS), and leveraging context caching where available to avoid re-processing identical video segments."
             }
           }
         ]
@@ -154,57 +170,84 @@ export default function VideoPlannerPage() {
 
         <SocialShareBar variant="bottom" />
 
-        {/* Static Content / SEO Section */}
+        {/* FAQ Section */}
         <section className="mt-20 border-t border-border/40 pt-16 max-w-4xl mx-auto">
           <div className="space-y-12">
-            <div className="space-y-6">
-              <h2 className="text-3xl font-bold tracking-tight text-foreground">What is AI Video Tokenization?</h2>
-              <div className="space-y-4 text-muted-foreground leading-relaxed text-lg">
-                <p>
-                  As generative AI expands into video with models like OpenAI’s <strong><a href="https://sora.com" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">Sora</a></strong>, Google’s <strong><a href="https://aistudio.google.com" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">Gemini 1.5 Pro</a></strong>, <strong><a href="https://runwayml.com" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">Runway Gen-3</a></strong>, <strong><a href="https://klingai.com" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">Kling AI</a></strong>, and ByteDance's <strong><a href="https://seed.bytedance.com/en/seedance" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">Seedance</a></strong>, understanding how these models "see" and "bill" video content is becoming critical for developers and creators. Unlike text, where tokens are based on words or characters, video tokenization is multidimensional.
-                </p>
-                <p>
-                  It involves processing temporal (time) and spatial (resolution) data simultaneously. Each model uses its own proprietary method to break down video into manageable "patches" or "frames" for the transformer architecture to process.
+            <div className="text-center space-y-4">
+              <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase">Video Planner FAQ</h2>
+              <p className="text-muted-foreground text-lg">Everything you need to know about AI video costs and tokenization.</p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-8">
+              <div className="bg-card border border-border/40 rounded-3xl p-8 space-y-4">
+                <h3 className="text-xl font-bold text-white">What is AI Video Tokenization?</h3>
+                <div className="text-muted-foreground leading-relaxed">
+                  <p>
+                    Understanding how models like <strong>Sora</strong>, <strong>Gemini 1.5 Pro</strong>, and <strong>Runway</strong> "see" video content is critical. Unlike text, video tokenization is multidimensional, involving temporal (time) and spatial (resolution) data. Each model uses proprietary methods to break down video into manageable "patches" or "frames" for processing.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="bg-card border border-border/40 rounded-3xl p-8 space-y-4">
+                  <h3 className="text-xl font-bold text-white">How do different models handle video?</h3>
+                  <ul className="space-y-4 text-sm text-muted-foreground">
+                    <li>
+                      <strong className="text-white">OpenAI Sora:</strong> Uses spacetime patches as tokens.
+                    </li>
+                    <li>
+                      <strong className="text-white">Google Gemini 1.5:</strong> Samples frames and charges ~265 tokens/sec.
+                    </li>
+                    <li>
+                      <strong className="text-white">Runway & Kling:</strong> Often use credit systems based on GPU-hours.
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="bg-card border border-border/40 rounded-3xl p-8 space-y-4">
+                  <h3 className="text-xl font-bold text-white">Why is budgeting for video hard?</h3>
+                  <ul className="space-y-4 text-sm text-muted-foreground">
+                    <li>
+                      <strong className="text-white">Resolution Scaling:</strong> Moving from 720p to 4K quadruples spatial complexity.
+                    </li>
+                    <li>
+                      <strong className="text-white">Temporal Complexity:</strong> High-motion scenes may require higher sampling for consistency.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="bg-indigo-500/5 border border-indigo-500/20 rounded-3xl p-8 space-y-4">
+                <h3 className="text-xl font-bold text-white text-center">How can I optimize my video workflow?</h3>
+                <p className="text-muted-foreground text-center max-w-2xl mx-auto">
+                  To keep costs low, consider downsampling for initial analysis, using keyframe extraction (like 1 FPS) to reduce token usage, and leveraging context caching for repeated queries.
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-foreground">How Models Handle Video</h3>
-                <ul className="space-y-4 text-muted-foreground">
-                  <li>
-                    <strong className="text-foreground">OpenAI Sora:</strong> Uses a "video patches" approach, decomposing videos into smaller spacetime patches that act like tokens.
-                  </li>
-                  <li>
-                    <strong className="text-foreground">Google Gemini 1.5:</strong> Treats video as a series of frames, typically charging a fixed token count per second (e.g., ~265 tokens/sec).
-                  </li>
-                  <li>
-                    <strong className="text-foreground">Runway & Kling:</strong> Often use credit-based systems that translate internally to GPU-hour or per-frame metrics.
-                  </li>
-                  <li>
-                    <strong className="text-foreground">Seedance:</strong> ByteDance's video model architecture optimized for high-fidelity motion consistency across temporal patches.
-                  </li>
-                </ul>
+            {/* Server-Rendered Capabilities Summary */}
+            <div className="space-y-8 pt-12 border-t border-border/40">
+              <div className="text-center space-y-4">
+                <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase">Tool Capabilities</h2>
+                <p className="text-muted-foreground text-lg">A comprehensive suite for AI video infrastructure planning.</p>
               </div>
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-foreground">Why Budgeting is Hard</h3>
-                <ul className="space-y-4 text-muted-foreground">
-                  <li>
-                    <strong className="text-foreground">Resolution Scaling:</strong> Moving from 720p to 4K quadruples the tokens spatially, not just doubling them.
-                  </li>
-                  <li>
-                    <strong className="text-foreground">Temporal Complexity:</strong> High-motion scenes may require higher sampling rates for consistency.
-                  </li>
-                </ul>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="space-y-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 font-bold">01</div>
+                  <h4 className="text-lg font-bold text-white">Multi-Model Benchmarking</h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed">Instantly compare input token costs across Gemini 1.5, GPT-4o, Claude 3.5, and Sora. Supports native video tokens and frame-based sampling methods.</p>
+                </div>
+                <div className="space-y-3">
+                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 font-bold">02</div>
+                  <h4 className="text-lg font-bold text-white">Batch Pipeline Estimation</h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed">Upload CSV manifests to forecast monthly spend for 100+ videos. Identify the break-even point for switching between Flash and Pro model tiers.</p>
+                </div>
+                <div className="space-y-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold">03</div>
+                  <h4 className="text-lg font-bold text-white">Token Diet Optimization</h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed">Automated recommendations for FPS downsampling and resolution scaling. Reduce your API bill by up to 90% without losing semantic accuracy.</p>
+                </div>
               </div>
-            </div>
-
-            <div className="bg-muted/30 rounded-3xl p-8 border border-border/40 space-y-4">
-              <h3 className="text-xl font-bold text-foreground text-center">Optimizing Your Video AI Workflow</h3>
-              <p className="text-muted-foreground text-center max-w-2xl mx-auto">
-                To keep costs low, consider downsampling for initial analysis, using keyframe extraction to reduce token usage, and leveraging context caching for repeated queries.
-              </p>
             </div>
 
             <div className="space-y-8 pt-12">

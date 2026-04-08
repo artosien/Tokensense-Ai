@@ -30,7 +30,7 @@ export function MainCalculator() {
     setExpectedOutputTokens,
     inputTokenCount,
     fileTokenCount,
-    setMissionStep
+    setOptimizationStep
   } = useTokenSenseStore();
   const { parseUrlState } = useShareableUrl();
 
@@ -69,7 +69,7 @@ export function MainCalculator() {
               <div className="animate-in fade-in slide-in-from-right-4 duration-700">
                 <Button 
                     asChild
-                    onClick={() => setMissionStep(2)}
+                    onClick={() => setOptimizationStep(2)}
                     className="w-full h-20 rounded-3xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xl shadow-2xl shadow-indigo-500/20 gap-4 group uppercase tracking-tighter"
                 >
                     <Link href="/tools/context">
@@ -78,7 +78,7 @@ export function MainCalculator() {
                     </Link>
                 </Button>
                 <p className="text-center text-[10px] font-black text-slate-500 uppercase tracking-widest mt-4">
-                    Trajectory Locked: {totalTkn.toLocaleString()} Tokens
+                    Prompt Locked: {totalTkn.toLocaleString()} Tokens
                 </p>
               </div>
             )}

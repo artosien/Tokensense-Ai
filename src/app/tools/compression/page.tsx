@@ -44,6 +44,27 @@ function CompressionSchema() {
           "price": "0",
           "priceCurrency": "USD"
         }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Can prompt compression reduce AI quality?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "When done correctly, prompt compression removes redundant tokens and filler language without stripping the core instructions, meaning the AI's reasoning quality remains high while the cost drops."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How many tokens can I save by compressing prompts?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Most natural language prompts can be reduced by 10-30% by removing politeness, meta-talk, and converting descriptive sentences into structural formats like Markdown or YAML."
+            }
+          }
+        ]
       }
     ]
   };
@@ -108,6 +129,33 @@ export default async function PromptCompressionPage() {
                 <PromptCompressionAnalyzer />
 
                 <SocialShareBar variant="bottom" />
+
+                {/* Server-Rendered Capabilities Summary */}
+                <section className="mt-20 border-t border-border/40 pt-16 max-w-4xl mx-auto">
+                    <div className="space-y-12">
+                        <div className="text-center space-y-4">
+                            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase">Tool Capabilities</h2>
+                            <p className="text-muted-foreground text-lg">Automated linguistic pruning for LLM cost efficiency.</p>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div className="space-y-3">
+                                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 font-bold">01</div>
+                                <h4 className="text-lg font-bold text-white">Redundancy Detection</h4>
+                                <p className="text-sm text-muted-foreground leading-relaxed">Identify repeating instructions and redundant context. Our analyzer scans for semantic overlap that consumes tokens without adding intelligence.</p>
+                            </div>
+                            <div className="space-y-3">
+                                <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 font-bold">02</div>
+                                <h4 className="text-lg font-bold text-white">Instructional Pruning</h4>
+                                <p className="text-sm text-muted-foreground leading-relaxed">Strip out politeness, meta-talk, and decorative language. Get suggestions for direct, imperative alternatives that reduce token counts by 15-20% instantly.</p>
+                            </div>
+                            <div className="space-y-3">
+                                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold">03</div>
+                                <h4 className="text-lg font-bold text-white">Cost-Per-Call Forecasting</h4>
+                                <p className="text-sm text-muted-foreground leading-relaxed">Visualize the savings of a single compressed prompt scaled across millions of requests. Turn minor edits into major infrastructure savings.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
                 {/* Educational Content / SEO Section */}
                 <section className="mt-20 border-t border-border/40 pt-16">
