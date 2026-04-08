@@ -94,55 +94,6 @@ export default function Home() {
 
         <SocialShareBar variant="top" />
 
-        {/* Start Here Banner */}
-        <section className="mt-8 mb-4">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600/20 via-purple-600/20 to-plasma-500/20 border border-white/10 shadow-2xl p-6 md:p-10">
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-10">
-              <div className="flex-1 space-y-6 text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-bold border border-indigo-500/20">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-                  </span>
-                  New to Tokensense?
-                </div>
-                <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white leading-[1.1]">
-                  Start Your <span className="text-indigo-400">Optimization</span> Journey
-                </h2>
-                <p className="text-lg text-muted-foreground font-medium max-w-xl">
-                  Watch this 2-minute quickstart guide to learn how to master LLM token costs and build more profitable AI applications.
-                </p>
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
-                  <Button size="lg" className="h-12 px-8 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl" asChild>
-                    <Link href="#calculate-section">Jump to Calculator</Link>
-                  </Button>
-                  <Button variant="outline" size="lg" className="h-12 px-8 border-white/10 hover:bg-white/5 text-white font-bold rounded-xl" asChild>
-                    <Link href="/tokenomics">Learn Tokenomics</Link>
-                  </Button>
-                </div>
-              </div>
-              <div className="flex-1 w-full max-w-2xl">
-                <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/40 group">
-                  <iframe 
-                    width="100%" 
-                    height="100%" 
-                    src="https://www.youtube.com/embed/nKSk_TiR8YA?si=Amxvxk4UzgYe5ms4" 
-                    title="YouTube video player" 
-                    frameBorder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                    referrerPolicy="strict-origin-when-cross-origin" 
-                    allowFullScreen
-                    className="absolute inset-0 w-full h-full"
-                  ></iframe>
-                </div>
-              </div>
-            </div>
-            {/* Background decorative elements */}
-            <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-600/10 blur-[100px] rounded-full"></div>
-            <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-plasma-500/10 blur-[100px] rounded-full"></div>
-          </div>
-        </section>
-
         {/* Hero Section */}
         <section className="relative pt-10 pb-16 text-center lg:text-left flex flex-col lg:flex-row items-center justify-between gap-12">
           <GradientOrbs />
@@ -189,24 +140,17 @@ export default function Home() {
 
           <div className="hidden lg:block w-full max-w-md">
             <div className="relative p-1 rounded-3xl bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-plasma-500/20 border border-white/10 shadow-2xl">
-              <div className="rounded-[22px] overflow-hidden bg-background/40 backdrop-blur-xl border border-white/5">
-                <div className="h-8 bg-muted/30 flex items-center px-4 gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-500/20" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-green-500/20" />
-                </div>
-                <div className="p-6 space-y-4">
-                  <div className="h-4 w-3/4 bg-indigo-500/10 rounded-full" />
-                  <div className="space-y-2">
-                    <div className="h-3 w-full bg-muted/40 rounded-full" />
-                    <div className="h-3 w-5/6 bg-muted/40 rounded-full" />
-                    <div className="h-3 w-4/6 bg-muted/40 rounded-full" />
-                  </div>
-                  <div className="pt-4 grid grid-cols-2 gap-4">
-                    <div className="h-16 bg-plasma-500/10 rounded-xl border border-plasma-500/20" />
-                    <div className="h-16 bg-indigo-500/10 rounded-xl border border-indigo-500/20" />
-                  </div>
-                </div>
+              <div className="rounded-[22px] overflow-hidden bg-background/40 backdrop-blur-xl border border-white/5 aspect-square">
+                <video 
+                  src="/Videos/tokensense-promo.mp4" 
+                  autoPlay 
+                  loop 
+                  muted 
+                  playsInline
+                  className="w-full h-full object-cover"
+                >
+                  Your browser does not support the video tag.
+                </video>
               </div>
               <div className="absolute -z-10 -inset-4 bg-indigo-500/20 blur-3xl rounded-full opacity-50" />
             </div>
@@ -312,6 +256,55 @@ export default function Home() {
                 </AccordionItem>
               </Accordion>
             </div>
+          </div>
+        </section>
+
+        {/* Start Here Banner moved to bottom */}
+        <section className="mt-8 mb-4">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600/20 via-purple-600/20 to-plasma-500/20 border border-white/10 shadow-2xl p-6 md:p-10">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-10">
+              <div className="flex-1 space-y-6 text-center lg:text-left">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-bold border border-indigo-500/20">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                  </span>
+                  New to Tokensense?
+                </div>
+                <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white leading-[1.1]">
+                  Start Your <span className="text-indigo-400">Optimization</span> Journey
+                </h2>
+                <p className="text-lg text-muted-foreground font-medium max-w-xl">
+                  Watch this 2-minute quickstart guide to learn how to master LLM token costs and build more profitable AI applications.
+                </p>
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
+                  <Button size="lg" className="h-12 px-8 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl" asChild>
+                    <Link href="#calculate-section">Jump to Calculator</Link>
+                  </Button>
+                  <Button variant="outline" size="lg" className="h-12 px-8 border-white/10 hover:bg-white/5 text-white font-bold rounded-xl" asChild>
+                    <Link href="/tokenomics">Learn Tokenomics</Link>
+                  </Button>
+                </div>
+              </div>
+              <div className="flex-1 w-full max-w-2xl">
+                <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/40 group">
+                  <iframe 
+                    width="100%" 
+                    height="100%" 
+                    src="https://www.youtube.com/embed/nKSk_TiR8YA?si=Amxvxk4UzgYe5ms4" 
+                    title="YouTube video player" 
+                    frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    referrerPolicy="strict-origin-when-cross-origin" 
+                    allowFullScreen
+                    className="absolute inset-0 w-full h-full"
+                  ></iframe>
+                </div>
+              </div>
+            </div>
+            {/* Background decorative elements */}
+            <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-600/10 blur-[100px] rounded-full"></div>
+            <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-plasma-500/10 blur-[100px] rounded-full"></div>
           </div>
         </section>
         

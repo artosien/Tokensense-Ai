@@ -238,14 +238,18 @@ export default function Module3Page() {
                     <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 rounded-[40px] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                     <div className="relative bg-slate-900/50 border border-white/10 rounded-[40px] overflow-hidden shadow-2xl">
                         <div className="aspect-video relative">
-                            <video 
-                                className="w-full h-full object-cover"
-                                controls
-                                poster="/hero-banner.jpg"
-                            >
-                                <source src="/Videos/The_Commoditization_of_Reasoning.mp4" type="video/mp4" />
-                                Your browser does not support the video tag.
-                            </video>
+                            <iframe 
+                                width="100%" 
+                                height="100%" 
+                                src="https://www.youtube.com/embed/s6OO50H0x2o" 
+                                title="YouTube video player" 
+                                frameBorder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                referrerPolicy="strict-origin-when-cross-origin" 
+                                allowFullScreen
+                                loading="lazy"
+                                className="absolute inset-0 w-full h-full"
+                            ></iframe>
                             
                             {/* Share Button Overlay */}
                             <div className="absolute top-6 right-6">

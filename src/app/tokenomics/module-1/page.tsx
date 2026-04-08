@@ -191,13 +191,18 @@ export default function Module1Page() {
                   <Badge className="bg-white/5 text-slate-400 border-white/10">90 SECONDS</Badge>
                 </div>
                 <div className="aspect-video rounded-[32px] overflow-hidden border border-white/10 bg-black shadow-2xl relative group">
-                  <video 
-                    src="/Videos/The Anatomy of a Token.mp4" 
-                    controls 
-                    className="w-full h-full object-cover"
-                  >
-                    Your browser does not support the video tag.
-                  </video>
+                  <iframe 
+                    width="100%" 
+                    height="100%" 
+                    src="https://www.youtube.com/embed/_SfClDjWubY" 
+                    title="YouTube video player" 
+                    frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    referrerPolicy="strict-origin-when-cross-origin" 
+                    allowFullScreen
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full"
+                  ></iframe>
                   <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </div>
               </div>
@@ -342,13 +347,18 @@ export default function Module1Page() {
                         <Badge className="bg-white/5 text-slate-400 border-white/10">60 SECONDS</Badge>
                     </div>
                     <div className="aspect-video rounded-[32px] overflow-hidden border border-white/10 bg-black shadow-2xl relative group">
-                        <video 
-                            src="/Videos/How Tokenizers Actually Work.mp4" 
-                            controls 
-                            className="w-full h-full object-cover"
-                        >
-                            Your browser does not support the video tag.
-                        </video>
+                        <iframe 
+                            width="100%" 
+                            height="100%" 
+                            src="https://www.youtube.com/embed/AC-T7iYorA8" 
+                            title="YouTube video player" 
+                            frameBorder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                            referrerPolicy="strict-origin-when-cross-origin" 
+                            allowFullScreen
+                            loading="lazy"
+                            className="absolute inset-0 w-full h-full"
+                        ></iframe>
                         <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     </div>
                 </div>
@@ -464,13 +474,18 @@ export default function Module1Page() {
                         <Badge className="bg-white/5 text-slate-400 border-white/10">45 SECONDS</Badge>
                     </div>
                     <div className="aspect-video rounded-[32px] overflow-hidden border border-white/10 bg-black shadow-2xl relative group">
-                        <video 
-                            src="/Videos/The Multilingual Token Penalty .mp4" 
-                            controls 
-                            className="w-full h-full object-cover"
-                        >
-                            Your browser does not support the video tag.
-                        </video>
+                        <iframe 
+                            width="100%" 
+                            height="100%" 
+                            src="https://www.youtube.com/embed/gcNbNaN6Yq4" 
+                            title="YouTube video player" 
+                            frameBorder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                            referrerPolicy="strict-origin-when-cross-origin" 
+                            allowFullScreen
+                            loading="lazy"
+                            className="absolute inset-0 w-full h-full"
+                        ></iframe>
                         <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     </div>
                 </div>

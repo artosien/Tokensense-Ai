@@ -79,14 +79,18 @@ export default function Module2Page() {
         <div className="relative group">
           <div className="absolute -inset-1 bg-gradient-to-r from-plasma-500 to-indigo-500 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
           <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 bg-slate-900 shadow-2xl">
-            <video 
-              controls 
-              className="w-full h-full object-cover"
-              poster="/hero-banner.jpg"
-            >
-              <source src="/Videos/The_Asymmetric_Bill.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+            <iframe 
+                width="100%" 
+                height="100%" 
+                src="https://www.youtube.com/embed/4BePIemplR4" 
+                title="YouTube video player" 
+                frameBorder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                referrerPolicy="strict-origin-when-cross-origin" 
+                allowFullScreen
+                loading="lazy"
+                className="absolute inset-0 w-full h-full"
+            ></iframe>
 
             {/* Share Button Overlay */}
             <div className="absolute top-6 right-6">
