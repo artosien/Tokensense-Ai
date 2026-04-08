@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-04-08
+
+### Added
+- Author Bio: Created a dedicated biography page for Angelo S. Enriquez (`/about/angelo`) featuring a modern tech-stack visualizer and professional timeline.
+- Navigation: Integrated "Web App Author" links in both primary and blog footers.
+- Social: Added LinkedIn profile integration with custom branding on the author page.
+- Project Showcase: New "Current Projects" section on author bio linking to AyoSPC, See&Do PH, and FontSniff.
+
+### Changed
+- Performance: **Massive Image Compression.** Converted all blog assets from PNG/JPG to WebP, achieving a **95% reduction** in payload size (e.g., 10MB images reduced to <150KB).
+- Media: **Global Video Optimization.** Replaced heavy local MP4 files in Academy Modules 1-4 with optimized, lazy-loaded YouTube embeds to improve PageSpeed scores and decrease initial load times.
+- Homepage Architecture: Relocated the "Optimization Journey" quickstart banner to the bottom of the page to prioritize the core calculator tool.
+- Homepage Hero: Replaced the static UI graphic with an autoplaying, muted promo video for higher engagement.
+- Internal Linking: Updated all Lesson and Academy CTAs to point directly to the `/tokenomics` foundation page.
+
+### Removed
+- Redundant Content: Deleted `/token-learning` and `/token-learning/how-tokenizers-work` routes to consolidate educational content under the primary `/tokenomics` Academy structure.
+- Legacy Assets: Cleaned up unused local video files and large PNG assets from the `public/` directory.
+
 ## [1.6.0] - 2026-04-01
 
 ### Added

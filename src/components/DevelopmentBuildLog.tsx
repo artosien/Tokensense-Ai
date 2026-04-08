@@ -65,6 +65,10 @@ const buildLogItems = [
   "[2026-04-02] Refactor Context Visualizer: Add 'Needle-in-a-Haystack' simulator, interactive history pruning, and TTFT latency estimates.",
   "[2026-04-02] Rebuild Caching Tool: Integrate 'Break-Even' logic, TTL strategy planning, and multi-turn conversation growth simulations.",
   "[2026-04-02] System-wide Update: Synchronize Tokenizer Sync across all tools; update Sitemap and metadata for new tool discovery.",
+  "[2026-04-08] Clean Up: Delete /token-learning and /token-learning/how-tokenizers-work pages; update sitemaps.",
+  "[2026-04-08] Home Restructure: Move 'Start Your Optimization Journey' banner to bottom; link 'Learn Tokenomics' to /tokenomics.",
+  "[2026-04-08] Media Overhaul: Replace hero image with autoplaying promo video; swap local videos in Modules 1-4 for optimized YouTube embeds.",
+  "[2026-04-08] Performance: Compress 15+ large blog images (PNG → WebP) with 95%+ size reduction; update blog-posts.json with new assets.",
 ];
 
 const RECENT_COUNT = 8;

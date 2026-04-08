@@ -143,7 +143,12 @@ export default function Footer() {
 
           {/* Copyright */}
           <div className="text-gray-500 text-sm text-center sm:text-right">
-            <p>&copy; {new Date().getFullYear()} Tokensense. {t("all_rights")}</p>
+            <div className="flex flex-col sm:flex-row items-center sm:justify-end gap-2 sm:gap-4 mb-1">
+              <p>&copy; {new Date().getFullYear()} Tokensense. {t("all_rights")}</p>
+              <Link href="/about/angelo" className="hover:text-white transition font-bold text-indigo-400">
+                  Web App Author
+              </Link>
+            </div>
             <p className="mt-1">{t("built_with")}</p>
           </div>
         </div>

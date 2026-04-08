@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import BugReportForm from "@/components/BugReportForm";
+import { Sparkles } from "lucide-react";
 import { setRequestLocale } from 'next-intl/server';
 
 export const metadata: Metadata = {
@@ -164,6 +165,22 @@ export default function AboutPage() {
                         </div>
                     </div>
 
+                    <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-transparent border border-white/5 space-y-4">
+                        <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-indigo-400" />
+                            Meet the Developer
+                        </h2>
+                        <p className="text-sm leading-relaxed">
+                            Tokensense-Ai is architected and maintained by <strong>Angelo S. Enriquez</strong>, a developer exploring the frontier of agentic AI and vibe coding.
+                        </p>
+                        <Link 
+                            href="/about/angelo" 
+                            className="inline-flex items-center gap-2 text-sm font-bold text-indigo-400 hover:text-indigo-300 transition-colors"
+                        >
+                            Read Author Bio →
+                        </Link>
+                    </div>
+
                     <hr className="my-8 border-border/40" />
 
                     <h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">Development Build Log</h2>
@@ -179,7 +196,14 @@ export default function AboutPage() {
                             </div>
                         </div>
                         <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar text-foreground/80 selection:bg-plasma-500/30">
-                             <p className="text-plasma-400 font-bold mb-3">[2026-03-27] v1.5.0 — The "Abundance" Update & CMS Release</p>
+                             <p className="text-plasma-400 font-bold mb-3">[2026-04-08] v2.0.0 — The "Performance & Media" Overhaul</p>
+                             <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Clean Up: Successfully deleted /token-learning and /how-tokenizers-work pages and updated sitemaps.</p>
+                             <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Home Restructure: Relocated 'Optimization Journey' banner to bottom; updated all Lesson CTAs to point to /tokenomics.</p>
+                             <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Media Overhaul: Replaced hero image with autoplaying promo video; swapped local videos in Modules 1-4 for YouTube embeds.</p>
+                             <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Performance: Compressed 15+ large blog images (PNG to WebP) with 95%+ size reduction; updated blog-posts.json.</p>
+                             <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Author Bio: Created dedicated biography page for Angelo S. Enriquez at /about/angelo with integrated navigation.</p>
+
+                             <p className="text-plasma-400 font-bold mb-3 mt-6">[2026-03-27] v1.5.0 — The "Abundance" Update & CMS Release</p>
                              <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Launched Local Blog Admin Dashboard with live preview, media management, and draft scheduling.</p>
                              <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Integrated "Create Image (Gemini)" AI assistant into the blog workflow with auto-copy prompt logic.</p>
                              <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Redesigned Homepage Hero and Feature Showcase for high-impact UX and tool discoverability.</p>

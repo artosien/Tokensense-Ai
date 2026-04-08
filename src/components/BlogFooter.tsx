@@ -151,7 +151,12 @@ export default async function BlogFooter() {
 
         {/* Footer Bottom */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6 text-[11px] text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Tokensense. {t("all_rights")}</p>
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+            <p>&copy; {new Date().getFullYear()} Tokensense. {t("all_rights")}</p>
+            <Link href="/about/angelo" className="hover:text-white transition font-bold text-indigo-400">
+                Web App Author
+            </Link>
+          </div>
           <div className="flex items-center gap-6">
             <span>{t("built_with")}</span>
             <a href="https://github.com/artosien" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">
