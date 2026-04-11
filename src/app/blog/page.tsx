@@ -7,6 +7,7 @@ import { Calendar, Clock, ArrowRight } from "lucide-react";
 import { getPublishedPosts } from "@/lib/blog-service";
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import BlogFooter from '@/components/BlogFooter';
+import BlogListing from '@/components/BlogListing';
 
 export const metadata: Metadata = {
   title: "Tokensense-Ai Blog | LLM Economics, Prompt Engineering & Cost Optimization",
@@ -109,53 +110,8 @@ export default async function BlogPage() {
           </p>
         </section>
 
-        {/* Blog Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-          {posts.map((post) => (
-            <Card key={post.id} className="group border-border/40 bg-card/50 backdrop-blur-sm overflow-hidden hover:border-indigo-500/50 transition-all duration-300">
-              <div className="aspect-video w-full overflow-hidden relative">
-                <img 
-                  src={post.image} 
-                  alt={post.title}
-                  className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute top-4 left-4">
-                  <span className="px-3 py-1 rounded-full bg-background/80 backdrop-blur-md text-[10px] font-bold text-indigo-400 uppercase tracking-wider border border-white/10">
-                    {post.category}
-                  </span>
-                </div>
-              </div>
-              
-              <CardHeader className="space-y-2">
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3" /> {post.date}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> {post.readTime}
-                  </span>
-                </div>
-                <CardTitle className="text-2xl font-bold group-hover:text-indigo-400 transition-colors leading-tight">
-                  {post.title}
-                </CardTitle>
-              </CardHeader>
-              
-              <CardContent>
-                <p className="text-muted-foreground leading-relaxed">
-                  {post.description}
-                </p>
-              </CardContent>
-              
-              <CardFooter>
-                <Button variant="ghost" className="p-0 text-indigo-400 hover:text-indigo-300 hover:bg-transparent group/btn" asChild>
-                  <Link href={`/blog/${post.slug}`} className="flex items-center gap-2">
-                    Read Article <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                  </Link>
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+        {/* Blog Listing with Filters and Sorting */}
+        <BlogListing initialPosts={posts} />
 
         {/* Stay Informed Section */}
         <section className="mt-24 p-8 md:p-12 rounded-3xl bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent border border-indigo-500/20 text-center relative overflow-hidden">

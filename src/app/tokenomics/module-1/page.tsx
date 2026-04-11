@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import SiteHeader from "@/components/SiteHeader";
 import { GradientOrbs } from "@/components/GradientOrbs";
+import TokenizerWrapper from "./TokenizerWrapper";
 
 export default function Module1Page() {
   return (
@@ -251,6 +252,8 @@ export default function Module1Page() {
                   </div>
                 </div>
               </div>
+
+              <TokenizerWrapper />
 
               {/* Summary Checklist */}
               <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-3xl p-8 space-y-6">

@@ -25,6 +25,10 @@ console.log(`Found ${files.length} images to convert...`);
       const savings = (((oldSize - newSize) / oldSize) * 100).toFixed(1);
 
       console.log(`✓ ${file} → ${savings}% smaller`);
+      
+      // Delete original file
+      fs.unlinkSync(inputPath);
+      console.log(`  Deleted original: ${file}`);
     } catch (err) {
       console.error(`✗ ${file}: ${err.message}`);
     }

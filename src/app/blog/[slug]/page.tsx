@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import BlogFooter from '@/components/BlogFooter';
 import BlogPostShare from '@/components/BlogPostShare';
+import BlogContent from './BlogContent';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -162,10 +163,9 @@ export default async function BlogPostPage({ params }: Props) {
         </div>
 
         {/* Article Content */}
-        <article 
-          className="prose prose-lg prose-invert prose-indigo max-w-none"
-          dangerouslySetInnerHTML={{ __html: post.content }}
-        />
+        <article className="prose prose-lg prose-invert prose-indigo max-w-none">
+          <BlogContent content={post.content} />
+        </article>
 
         {/* Share & Footer */}
         <footer className="mt-16 pt-8 border-t border-border/40">

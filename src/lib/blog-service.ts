@@ -4,17 +4,30 @@ import path from 'path';
 export interface BlogPost {
   id: string;
   title: string;
-  description: string;
-  date: string;
+  description: string; // Used as Meta Description
+  date: string;        // Formatted display date
   readTime: string;
   category: string;
+  categories?: string[]; // Supporting multiple categories
+  tags?: string[];
+  author?: string;
   slug: string;
-  image: string;
-  content: string;
+  image: string;       // Featured image URL
+  imageAlt?: string;
+  content: string;     // Markdown/HTML content
   status: 'draft' | 'published' | 'scheduled';
-  publishDate: string;
+  visibility?: 'public' | 'private';
+  publishDate: string; // ISO string for scheduling
+  focusKeyword?: string;
+  wordCount?: number;
+  charCount?: number;
   createdAt?: string;
   updatedAt?: string;
+  versions?: {
+    version: number;
+    content: string;
+    updatedAt: string;
+  }[];
 }
 
 const DATA_FILE = path.join(process.cwd(), 'data/blog-posts.json');

@@ -200,6 +200,12 @@ export default function SiteHeader() {
                             <Link href="/blog">{tNav("blog")}</Link>
                         </Button>
 
+                        {process.env.NODE_ENV === "development" && (
+                            <Button variant="ghost" className="text-indigo-400 hover:text-indigo-300 border border-transparent hover:border-indigo-500/30 hover:bg-indigo-500/10 transition-all font-bold" asChild>
+                                <Link href="/admin">Admin</Link>
+                            </Button>
+                        )}
+
                         <div className="w-px h-6 bg-border/40 mx-2" />
 
                         {status === "authenticated" ? (
@@ -395,6 +401,16 @@ export default function SiteHeader() {
                     >
                         {tNav("blog")}
                     </Link>
+
+                    {process.env.NODE_ENV === "development" && (
+                        <Link
+                            href="/admin"
+                            onClick={closeMenu}
+                            className="flex items-center py-3 px-4 rounded-md text-indigo-400 hover:bg-indigo-500/10 transition-colors font-bold border border-transparent hover:border-indigo-500/20"
+                        >
+                            Admin Dashboard
+                        </Link>
+                    )}
 
                     {status === "authenticated" ? (
                         <Link

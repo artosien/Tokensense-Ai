@@ -1,0 +1,35 @@
+[
+  {
+    "id": "m1",
+    "title": "The Atomic Unit of AI",
+    "slug": "module-1",
+    "description": "To master AI costs, you must first master the unit of measurement. Shift your mental model from 'words' to 'tokens'.",
+    "level": "Beginner",
+    "category": "Foundation",
+    "status": "published",
+    "order": 1,
+    "lessons": [
+      {
+        "id": "l1.1",
+        "title": "The Anatomy of a Token",
+        "slug": "anatomy-of-a-token",
+        "description": "Understanding the three identities of a token.",
+        "type": "interactive",
+        "content": "<p>To truly master AI automation, you have to look past the text on the screen. A token isn't just a piece of text—it exists in three distinct states simultaneously.</p>",
+        "interactiveComponent": "TokenizerPlayground",
+        "status": "published",
+        "order": 1
+      },
+      {
+        "id": "l1.2",
+        "title": "How Tokenizers Actually Work (BPE)",
+        "slug": "how-tokenizers-work",
+        "description": "The logic behind Byte-Pair Encoding.",
+        "type": "content",
+        "content": "<p>To understand Byte-Pair Encoding (BPE), you have to stop thinking like a linguist and start thinking like a data compressor.</p>",
+        "status": "published",
+        "order": 2
+      }
+    ]
+  }
+]

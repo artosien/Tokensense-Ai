@@ -1,83 +1,37 @@
 import NextAuth from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
-import GithubProvider from "next-auth/providers/github";
-import { AuthOptions } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { NextRequest } from "next/server";
 
-/**
- * NextAuth Configuration Options
- * 
- * This object defines the providers, callbacks, and security settings for
- * the authentication system.
- */
-export const authOptions: AuthOptions = {
-  // Use Google and GitHub as authentication providers
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-    }),
-    GithubProvider({
-      // Supporting both GITHUB_ID (guide) and GITHUB_CLIENT_ID (common practice)
-      clientId: (process.env.GITHUB_ID || process.env.GITHUB_CLIENT_ID) as string,
-      clientSecret: (process.env.GITHUB_SECRET || process.env.GITHUB_CLIENT_SECRET) as string,
-    }),
-  ],
-  
-  // The secret used to sign the session token (must be set in .env)
-  secret: process.env.NEXTAUTH_SECRET,
-
-  // Session configuration using JSON Web Tokens (JWT)
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-  },
-
-  // Custom pages for the auth flow
-  pages: {
-    signIn: "/login", 
-    error: "/auth/error", // Error page for auth failures
-  },
-
-  // Callbacks for custom logic during the auth lifecycle
-  callbacks: {
-    async jwt({ token, account, user }) {
-      try {
-        // If this is the initial sign-in, add the user ID to the token
-        if (account && user) {
-          token.id = user.id;
-        }
-        return token;
-      } catch (error) {
-        console.error("JWT Callback Error:", error);
-        return token;
-      }
-    },
-    async session({ session, token }) {
-      try {
-        // Transfer the user ID from the token to the session object
-        if (session.user) {
-          (session.user as any).id = token.id;
-        }
-        return session;
-      } catch (error) {
-        console.error("Session Callback Error:", error);
-        return session;
-      }
-    },
-    async redirect({ url, baseUrl }) {
-      // Allows relative callback URLs
-      if (url.startsWith("/")) return `${baseUrl}${url}`
-      // Allows callback URLs on the same origin
-      else if (new URL(url).origin === baseUrl) return url
-      return baseUrl
-    },
-  },
-
-  // Enable debug messages in development to help troubleshoot auth issues
-  debug: process.env.NODE_ENV === "development",
-};
+// Enable dynamic rendering for this route
+export const dynamic = "force-dynamic";
 
 // NextAuth handler for App Router
 const handler = NextAuth(authOptions);
 
-export { handler as GET, handler as POST };
+// For Next.js 15+, params in route handlers are asynchronous and must be awaited
+// before being passed to the NextAuth handler.
+export async function GET(req: NextRequest, { params }: { params: Promise<any> }) {
+  try {
+    const awaitedParams = await params;
+    return await handler(req as any, { params: awaitedParams });
+  } catch (error) {
+    console.error("NextAuth GET Error:", error);
+    return new Response(JSON.stringify({ error: "Internal Server Error" }), { 
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+}
+
+export async function POST(req: NextRequest, { params }: { params: Promise<any> }) {
+  try {
+    const awaitedParams = await params;
+    return await handler(req as any, { params: awaitedParams });
+  } catch (error) {
+    console.error("NextAuth POST Error:", error);
+    return new Response(JSON.stringify({ error: "Internal Server Error" }), { 
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+}
