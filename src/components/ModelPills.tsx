@@ -4,11 +4,11 @@ import { useState } from "react";
 import { models } from "@/lib/models";
 
 const TOP_MODELS = [
-  "claude-3.5-sonnet",
+  "gpt-5",
+  "claude-sonnet-4-6",
+  "gemini-3.1-pro",
   "gpt-4o",
-  "gpt-4o-mini",
-  "claude-3.5-haiku",
-  "gemini-2.0-flash",
+  "deepseek-v4",
 ];
 
 export function ModelPills({

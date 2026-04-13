@@ -5,7 +5,7 @@ export interface ProviderModel {
   provider: string;
   modelName: string;
   displayName: string;
-  inputPricePerKToken: number;
+  inputPricePerKToken: number; // USD per 1,000 tokens
   supportsNativeVideo: boolean;
   supportsAudio: boolean;
   contextWindowTokens: number;
@@ -14,11 +14,22 @@ export interface ProviderModel {
 
 export const PROVIDER_MODELS: ProviderModel[] = [
   {
-    id: "gemini-1.5-flash",
+    id: "gemini-3.1-pro",
     provider: "Google",
-    modelName: "gemini-1.5-flash",
-    displayName: "Gemini 1.5 Flash",
-    inputPricePerKToken: 0.000075,
+    modelName: "gemini-3.1-pro",
+    displayName: "Gemini 3.1 Pro",
+    inputPricePerKToken: 0.002, // $2.00 per 1M
+    supportsNativeVideo: true,
+    supportsAudio: true,
+    contextWindowTokens: 2_000_000,
+    apiDocsUrl: "https://ai.google.dev/pricing",
+  },
+  {
+    id: "gemini-3-flash",
+    provider: "Google",
+    modelName: "gemini-3-flash",
+    displayName: "Gemini 3 Flash",
+    inputPricePerKToken: 0.0005, // $0.50 per 1M
     supportsNativeVideo: true,
     supportsAudio: true,
     contextWindowTokens: 1_000_000,
@@ -27,31 +38,42 @@ export const PROVIDER_MODELS: ProviderModel[] = [
   {
     id: "gemini-1.5-pro",
     provider: "Google",
-    modelName: "gemini-1.5-pro",
+    modelName: "gemini-1.5-pro-002",
     displayName: "Gemini 1.5 Pro",
-    inputPricePerKToken: 0.00125,
+    inputPricePerKToken: 0.00125, // $1.25 per 1M
     supportsNativeVideo: true,
     supportsAudio: true,
     contextWindowTokens: 2_000_000,
     apiDocsUrl: "https://ai.google.dev/pricing",
   },
   {
-    id: "claude-3-5-sonnet",
+    id: "claude-sonnet-4-6",
     provider: "Anthropic",
-    modelName: "claude-3-5-sonnet",
-    displayName: "Claude 3.5 Sonnet",
-    inputPricePerKToken: 0.003,
+    modelName: "claude-sonnet-4-6",
+    displayName: "Claude Sonnet 4.6",
+    inputPricePerKToken: 0.003, // $3.00 per 1M
     supportsNativeVideo: true,
     supportsAudio: false,
-    contextWindowTokens: 200_000,
+    contextWindowTokens: 1_000_000,
     apiDocsUrl: "https://www.anthropic.com/pricing",
+  },
+  {
+    id: "gpt-5",
+    provider: "OpenAI",
+    modelName: "gpt-5",
+    displayName: "GPT-5",
+    inputPricePerKToken: 0.00125, // $1.25 per 1M
+    supportsNativeVideo: true,
+    supportsAudio: true,
+    contextWindowTokens: 400_000,
+    apiDocsUrl: "https://openai.com/pricing",
   },
   {
     id: "gpt-4o",
     provider: "OpenAI",
     modelName: "gpt-4o",
     displayName: "GPT-4o",
-    inputPricePerKToken: 0.0025,
+    inputPricePerKToken: 0.0025, // $2.50 per 1M
     supportsNativeVideo: false,  // Video sent as sampled frames
     supportsAudio: true,
     contextWindowTokens: 128_000,
@@ -62,7 +84,7 @@ export const PROVIDER_MODELS: ProviderModel[] = [
     provider: "OpenAI",
     modelName: "gpt-4o-mini",
     displayName: "GPT-4o mini",
-    inputPricePerKToken: 0.00015,
+    inputPricePerKToken: 0.00015, // $0.15 per 1M
     supportsNativeVideo: false,
     supportsAudio: false,
     contextWindowTokens: 128_000,

@@ -3,9 +3,7 @@
 import { MainCalculator } from "@/components/MainCalculator";
 import { ComparisonTableSection } from "@/components/ComparisonTableSection";
 import { AgentSimulatorSection } from "@/components/AgentSimulatorSection";
-import { ApiIntegrationSection } from "@/components/ApiIntegrationSection";
 import { BudgetCalculator } from "@/components/BudgetCalculator";
-import { StickyResultsBar } from "@/components/StickyResultsBar";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
@@ -13,7 +11,7 @@ export default function HomeClient() {
   return (
     <>
       {/* STEP 01 */}
-      <section id="calculator-step" className="scroll-mt-20 space-y-8">
+      <section id="step-1" className="scroll-mt-24 space-y-8" data-step-section="1">
         <div className="text-center mb-8 mt-12">
             <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-[#00dcb4]/10 text-[#00dcb4] text-sm font-mono font-bold tracking-widest uppercase mb-4 border border-[#00dcb4]/20">
               {"STEP 01 — Count your tokens & estimate cost"}
@@ -30,7 +28,7 @@ export default function HomeClient() {
       </div>
 
       {/* STEP 02 */}
-      <section id="comparison-step" className="scroll-mt-20 space-y-8">
+      <section id="step-2" className="scroll-mt-24 space-y-8" data-step-section="2">
         <div className="text-center mb-8">
            <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-[#00dcb4]/10 text-[#00dcb4] text-sm font-mono font-bold tracking-widest uppercase mb-4 border border-[#00dcb4]/20">
             {"STEP 02 — Compare your model across 30+ options"}
@@ -49,7 +47,7 @@ export default function HomeClient() {
       </div>
 
       {/* STEP 03 */}
-      <section id="simulator-step" className="scroll-mt-20 space-y-8">
+      <section id="step-3" className="scroll-mt-24 space-y-8" data-step-section="3">
         <div className="my-8 relative z-10 text-center">
             <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-[#00dcb4]/10 text-[#00dcb4] text-sm font-mono font-bold tracking-widest uppercase mb-4 border border-[#00dcb4]/20">
               {"STEP 03 — Simulate your agent's total cost over time"}
@@ -68,7 +66,7 @@ export default function HomeClient() {
       </div>
 
       {/* Budget Reverse Calculator */}
-      <div className="pt-4">
+      <div id="budget-planner" className="pt-4 scroll-mt-24">
         <div className="text-center mb-8">
            <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-indigo-500/10 text-indigo-400 text-sm font-mono font-bold tracking-widest uppercase mb-4 border border-indigo-500/20">
             {"Reverse Budget Planner"}

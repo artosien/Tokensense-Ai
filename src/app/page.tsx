@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ShieldCheck, Github } from "lucide-react";
 import HeroHeadline from "@/components/HeroHeadline";
 import { GradientOrbs } from "@/components/GradientOrbs";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
@@ -10,25 +10,31 @@ import SocialShareBar from "@/components/SocialShareBar";
 import SiteHeader from "@/components/SiteHeader";
 import Onboarding from "@/components/Onboarding";
 import { ApiIntegrationSection } from "@/components/ApiIntegrationSection";
+import HeroPreview from "@/components/HeroPreview";
+import SocialProof from "@/components/SocialProof";
+import WhyTokensense from "@/components/WhyTokensense";
+import ScenarioCards from "@/components/ScenarioCards";
+import CalculatorStepTracker from "@/components/CalculatorStepTracker";
+import NewsletterSignup from "@/components/NewsletterSignup";
 
 export const metadata: Metadata = {
-  title: "Tokensense-Ai | Free LLM Token Counter & Prompt Cost Calculator",
-  description: "Calculate AI prompt costs instantly. Estimate token usage and API pricing for GPT-5, Claude 3.5, and Gemini. 100% client-side, private, and no sign-up required.",
-  keywords: ["LLM token counter", "prompt cost calculator", "GPT-5 pricing", "AI developer tools", "Claude token count", "Gemini API cost"],
+  title: "Tokensense AI — Free LLM Token Cost Calculator | GPT-4o, Claude, Gemini",
+  description: "Calculate AI prompt costs instantly. Count tokens, compare GPT-4o vs Claude vs Gemini pricing, simulate agent loop costs, and plan budgets — 100% free, client-side.",
+  keywords: ["llm token cost calculator", "gpt-4o cost per token", "claude vs gpt cost comparison", "how much does ai api cost", "agent loop cost calculator", "reverse token budget planner"],
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: "Tokensense-Ai | AI Prompt Cost Calculator",
-    description: "Know your API costs before you hit send. 100% private, client-side token counting.",
+    title: "Tokensense AI — Free LLM Token Calculator",
+    description: "Know your LLM API cost before you hit send. Supports 50+ models including GPT-4o, Claude Sonnet, and Gemini Flash.",
     url: 'https://www.tokensense-ai.com',
-    siteName: 'Tokensense-Ai',
+    siteName: 'Tokensense AI',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Tokensense-Ai Dashboard Preview',
+        alt: 'Tokensense AI Calculator Preview',
       },
     ],
     locale: 'en_US',
@@ -36,34 +42,67 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Tokensense-Ai | LLM Token & Cost Calculator",
-    description: "Instant cost estimates for GPT, Claude, and Gemini prompts.",
+    title: "Tokensense AI — Free LLM Token Calculator",
+    description: "Know your LLM API cost before you hit send. Supports 50+ models including GPT-4o, Claude Sonnet, and Gemini Flash.",
     images: ['/og-image.png'],
   },
 };
+
+const faqs = [
+  {
+    q: "What counts as one token?",
+    a: "Roughly 4 characters or ¾ of a word in English. 'Hello world' is about 2–3 tokens. Code and non-English languages typically tokenize less efficiently, meaning more tokens per character. Each model uses its own tokenizer — Tokensense uses each model's exact tokenizer for accuracy."
+  },
+  {
+    q: "Why do different models charge different rates?",
+    a: "Pricing reflects model size, inference infrastructure cost, and commercial positioning. GPT-4o and Claude Opus are expensive because they're large, high-capability models. Gemini Flash and GPT-4o mini are cheap because they're distilled or optimized for throughput. Context window size also affects pricing — models with 1M+ token windows often charge more per token."
+  },
+  {
+    q: "Does Tokensense store my prompts?",
+    a: "No. Tokensense is 100% client-side. Your text is tokenized in the browser using the model's local tokenizer library — nothing is ever sent to a Tokensense server. You can verify this by running it offline."
+  },
+  {
+    q: "How often are model prices updated?",
+    a: "Prices are updated manually whenever a major model provider announces a change. The calculator shows a 'prices last updated' timestamp next to each model. For production use, always verify against the provider's official pricing page."
+  },
+  {
+    q: "What is context caching and how does it affect cost?",
+    a: "Some providers (Anthropic, Google) offer discounted rates if the same prefix (system prompt or document) is reused across many calls. The cost is typically 10–25% of the normal input rate for cached tokens. Tokensense's token counter currently shows base pricing — caching discounts are not yet modelled automatically."
+  },
+  {
+    q: "How does the agent loop simulator work?",
+    a: "In multi-step agents, each turn typically receives the full conversation history as context, so your input token count compounds. The simulator models this growth turn-by-turn, letting you see how a 500-token prompt becomes thousands of tokens and dollars across 20+ agent steps."
+  },
+  {
+    q: "Can I compare models for the same prompt?",
+    a: "Yes — Step 2 of the calculator lets you add multiple models and see side-by-side costs for the exact same input/output token count. The comparison bars in the budget planner also show how many API calls each model allows for a fixed monthly budget."
+  },
+  {
+    q: "What is the Reverse Budget Planner?",
+    a: "Instead of 'here's my prompt, what does it cost?', the budget planner asks 'here's my monthly budget ($50), what can I afford?' It calculates requests per day, requests per month, and alerts you when you're approaching your budget ceiling."
+  },
+  {
+    q: "Does it support fine-tuned or self-hosted models?",
+    a: "Currently the calculator covers hosted commercial models from OpenAI, Anthropic, Google, Meta (via API), and Mistral. Fine-tuned model pricing (which often differs from base model pricing) and self-hosted inference cost estimation are not yet supported."
+  },
+  {
+    q: "Is Tokensense open source?",
+    a: "Yes. The full source is available on GitHub under an open-source license. Contributions, bug reports, and feature requests are welcome. The tokenizer libraries used are the official ones published by each model provider."
+  }
+];
 
 function HomeSchema() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "What counts as one token?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Tokens are pieces of words. In English, 1,000 tokens is approximately 750 words."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Why do different models charge different rates for the same text?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Each model (GPT-4o, Claude, Gemini) uses a different tokenizer and pricing structure based on its computational complexity."
-        }
+    "mainEntity": faqs.map(f => ({
+      "@type": "Question",
+      "name": f.q,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": f.a
       }
-    ]
+    }))
   };
 
   return (
@@ -80,13 +119,14 @@ export default function Home() {
       <HomeSchema />
       <Onboarding />
       <SiteHeader />
+      <CalculatorStepTracker />
       
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
         {/* SEMANTIC SEO SHELL */}
         <section className="sr-only">
-          <h1>Tokensense-Ai | Free LLM Token Counter & Cost Estimator</h1>
+          <h1>Tokensense AI | Free LLM Token Counter & Cost Estimator</h1>
           <p>
-            Tokensense-Ai is the definitive tool for AI developers to calculate API costs 
+            Tokensense AI is the definitive tool for AI developers to calculate API costs 
             for GPT-4o, Claude 3.5, and Gemini 1.5. Our 100% client-side calculator 
             provides instant token counts and pricing estimates.
           </p>
@@ -98,18 +138,30 @@ export default function Home() {
         <section className="relative pt-10 pb-16 text-center lg:text-left flex flex-col lg:flex-row items-center justify-between gap-12">
           <GradientOrbs />
           
-          <div className="max-w-3xl space-y-6 mx-auto lg:mx-0">
-            <div className="inline-flex items-center text-center justify-center gap-2 px-3 py-1 rounded-full border border-[#00dcb4]/30 bg-[#00dcb4]/10 text-[#00dcb4] text-[10px] sm:text-xs font-mono font-bold tracking-wide mb-2 max-w-full">
-              {"The only calculator that simulates agent loop costs"}
+          <div className="max-w-3xl space-y-8 mx-auto lg:mx-0">
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#00dcb4]/30 bg-[#00dcb4]/10 text-[#00dcb4] text-[10px] sm:text-xs font-mono font-bold tracking-wide max-w-full">
+                {"The only calculator that simulates agent loop costs"}
+              </div>
+              <Link
+                href="https://github.com/hueanhuean/tokensense-ai"
+                target="_blank"
+                rel="noopener"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/10 text-xs text-white/50 hover:text-white hover:border-white/25 transition-colors"
+              >
+                <Github className="w-3.5 h-3.5" />
+                <span>Star on GitHub</span>
+                <span className="bg-white/10 px-1.5 py-0.5 rounded text-[10px] font-mono">1.2k</span>
+              </Link>
             </div>
 
             <HeroHeadline />
 
             <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium text-center lg:text-left text-balance">
-              {"Know your token counts and pricing across GPT-4o, Claude 3.5, Gemini 1.5, and 50+ other major models before you hit send."}
+              {"Paste a prompt. Pick a model. See the exact cost — before you hit send. Supports GPT-4o, Claude, Gemini, and 50+ models."}
             </p>
             
-            <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start pt-4">
+            <div className="flex flex-col sm:flex-row items-center gap-6 justify-center lg:justify-start pt-4">
               <Button 
                 size="lg" 
                 className="w-full sm:w-auto h-[56px] px-[28px] text-lg font-bold bg-[#00dcb4] hover:bg-[#00c5a1] text-black shadow-xl shadow-[#00dcb4]/20 transition-all hover:-translate-y-0.5"
@@ -117,6 +169,12 @@ export default function Home() {
               >
                 <Link href="/#calculate-section">{"Try Calculator Now →"}</Link>
               </Button>
+              <Link 
+                href="/#budget-planner" 
+                className="text-sm font-bold text-indigo-400 hover:text-indigo-300 transition-colors underline decoration-indigo-500/30 underline-offset-4"
+              >
+                Or start with your monthly budget →
+              </Link>
             </div>
 
             {/* Elevated OpenAI Sync Feature */}
@@ -136,158 +194,107 @@ export default function Home() {
                 </div>
               ))}
             </div>
+
+            {/* Quick-jump tool nav */}
+            <div className="flex items-center justify-center lg:justify-start gap-2 flex-wrap mt-8">
+              <span className="text-[10px] font-black text-white/30 uppercase tracking-widest mr-2">Jump to:</span>
+              <Link href="/#step-1" className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border border-white/10 text-white/50 hover:text-white hover:border-white/25 transition-colors">Token Counter</Link>
+              <Link href="/#step-2" className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border border-white/10 text-white/50 hover:text-white hover:border-white/25 transition-colors">Model Compare</Link>
+              <Link href="/#step-3" className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border border-white/10 text-white/50 hover:text-white hover:border-white/25 transition-colors">Agent Simulator</Link>
+              <Link href="/#budget-planner" className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border border-indigo-500/30 text-indigo-400 hover:border-indigo-400 transition-colors">← Budget Planner</Link>
+            </div>
           </div>
 
-          <div className="hidden lg:block w-full max-w-md">
-            <div className="relative p-1 rounded-3xl bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-plasma-500/20 border border-white/10 shadow-2xl">
-              <div className="rounded-[22px] overflow-hidden bg-background/40 backdrop-blur-xl border border-white/5 aspect-square">
-                <video 
-                  src="/Videos/tokensense-promo.mp4" 
-                  autoPlay 
-                  loop 
-                  muted 
-                  playsInline
-                  className="w-full h-full object-cover"
-                >
-                  Your browser does not support the video tag.
-                </video>
-              </div>
-              <div className="absolute -z-10 -inset-4 bg-indigo-500/20 blur-3xl rounded-full opacity-50" />
-            </div>
+          <div className="w-full max-w-md lg:mr-4">
+            <HeroPreview />
           </div>
         </section>
 
         {/* Stats Bar */}
-        <section className="py-6 border-y border-border/40 bg-card/20 backdrop-blur-sm mt-8 mb-16">
-          <div className="max-w-5xl mx-auto flex flex-wrap justify-center sm:justify-between items-center gap-8 px-4">
+        <section className="py-12 border-y border-border/40 bg-card/20 backdrop-blur-sm mt-8 mb-16 relative overflow-hidden">
+          <div className="max-w-6xl mx-auto flex flex-wrap justify-center sm:justify-between items-center gap-12 px-4 relative z-10">
             {[
-              { val: "30+", label: "Models Supported" },
-              { val: "100%", label: "Client-Side" },
-              { val: "<50ms", label: "Token Count Speed" },
-              { val: "$0", label: "Cost to Use" },
+              { val: "50+", label: "LLM models supported" },
+              { val: "100%", label: "Client-side — prompts never leave your browser", highlight: true },
+              { val: "<50ms", label: "Real-time token counting" },
+              { val: "Free", label: "Always free & open source" },
             ].map((stat, i) => (
-              <div key={i} className="flex flex-col items-center">
-                <span className="text-2xl sm:text-3xl font-black tracking-tighter text-foreground">{stat.val}</span>
-                <span className="text-[10px] sm:text-xs font-mono text-muted-foreground uppercase">{stat.label}</span>
+              <div key={i} className={`flex flex-col items-center sm:items-start text-center sm:text-left ${stat.highlight ? 'bg-indigo-500/5 px-6 py-4 rounded-3xl border border-indigo-500/20' : ''}`}>
+                <div className="flex items-center gap-2">
+                  {stat.highlight && <ShieldCheck className="w-5 h-5 text-indigo-400" />}
+                  <span className="text-3xl sm:text-4xl font-black tracking-tighter text-foreground">{stat.val}</span>
+                </div>
+                <span className="text-[10px] sm:text-xs font-mono text-muted-foreground uppercase tracking-widest mt-1 font-bold">{stat.label}</span>
               </div>
             ))}
           </div>
+          {/* Decorative background for highlight */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-px bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none" />
         </section>
 
-        <HomeClient />
+        <SocialProof />
+        <WhyTokensense />
 
-        {/* Features Showcase */}
-        <section className="pt-24 pb-12">
-          <div className="text-center mb-12 space-y-4">
-            <h2 className="text-3xl md:text-4xl font-black tracking-tight uppercase">{"Powerful Tools for AI Developers"}</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-              {"Everything you need to optimize your LLM costs and architectural decisions."}
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="group flex flex-col space-y-4 p-8 rounded-3xl bg-card border border-border/40 hover:border-[#00dcb4]/40 hover:bg-black/20 hover:-translate-y-1 transition-all duration-[250ms] relative overflow-hidden">
-              <div className="w-14 h-14 rounded-2xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center text-3xl mb-2">⚡</div>
-              <div className="space-y-2 flex-1">
-                <h3 className="text-2xl font-bold tracking-tight">{"Instant Token Count"}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed font-medium">
-                  {"Real-time token counting using each model's exact tokenizer — as you type."}
-                </p>
-              </div>
-              <div className="pt-4">
-                <Button className="w-full justify-between font-bold group-hover:bg-[#00dcb4] group-hover:text-black transition-colors" asChild>
-                  <Link href="/#calculate-section">{"Launch Tool"} <ChevronRight className="w-4 h-4 ml-2" /></Link>
-                </Button>
-              </div>
-            </div>
+        <div id="calculate-section" className="scroll-mt-24">
+          <HomeClient />
+        </div>
 
-            <div className="group flex flex-col space-y-4 p-8 rounded-3xl bg-card border border-border/40 hover:border-[#00dcb4]/40 hover:bg-black/20 hover:-translate-y-1 transition-all duration-[250ms] relative overflow-hidden">
-              <div className="w-14 h-14 rounded-2xl bg-green-500/10 text-green-500 flex items-center justify-center text-3xl mb-2">💸</div>
-              <div className="space-y-2 flex-1">
-                <h3 className="text-2xl font-bold tracking-tight">{"Pre-Flight Cost Estimate"}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed font-medium">
-                  {"Accurate input + output cost projections before you make a single API call."}
-                </p>
-              </div>
-              <div className="pt-4">
-                <Button className="w-full justify-between font-bold group-hover:bg-[#00dcb4] group-hover:text-black transition-colors" asChild>
-                  <Link href="/comparison">{"Compare Costs"} <ChevronRight className="w-4 h-4 ml-2" /></Link>
-                </Button>
-              </div>
-            </div>
-
-            <div className="group flex flex-col space-y-4 p-8 rounded-3xl bg-card border border-border/40 hover:border-[#00dcb4]/40 hover:bg-black/20 hover:-translate-y-1 transition-all duration-[250ms] relative overflow-hidden">
-              <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-3xl mb-2">🔍</div>
-              <div className="space-y-2 flex-1">
-                <h3 className="text-2xl font-bold tracking-tight">{"Multi-Step Agent Cost Estimator"}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed font-medium">
-                  {"See how costs compound across multi-step agent workflows, turn by turn."}
-                </p>
-              </div>
-              <div className="pt-4">
-                <Button className="w-full justify-between font-bold group-hover:bg-[#00dcb4] group-hover:text-black transition-colors" asChild>
-                  <Link href="/workflow">{"Simulate Loops"} <ChevronRight className="w-4 h-4 ml-2" /></Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
+        <ScenarioCards />
 
         {/* FAQ Section */}
-        <section className="pt-8 pb-16 border-t border-border/40">
-          <div className="max-w-4xl mx-auto space-y-6">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground">{"Token Basics"}</h2>
-            <div className="bg-card border border-border/40 rounded-2xl p-6 sm:p-8 shadow-sm">
+        <section className="py-24 border-t border-border/40">
+          <div className="max-w-4xl mx-auto space-y-12">
+            <div className="text-center space-y-4">
+              <h2 className="text-4xl font-black tracking-tight text-white uppercase">{"Token Economics FAQ"}</h2>
+              <p className="text-muted-foreground font-medium">Everything you need to know about LLM pricing and tokenization.</p>
+            </div>
+            
+            <div className="bg-card/30 backdrop-blur-sm border border-border/40 rounded-[40px] p-8 sm:p-12 shadow-xl">
               <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="item-1">
-                  <AccordionTrigger className="text-left text-base font-semibold hover:no-underline hover:text-indigo-400">
-                    {"What counts as one token?"}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground leading-relaxed font-medium">
-                    {"A token is a unit of text that LLMs process. In English, one token is roughly 4 characters or about 3/4 of a word."}
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="item-2">
-                  <AccordionTrigger className="text-left text-base font-semibold hover:no-underline hover:text-indigo-400">
-                    {"Why do different models charge different rates?"}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground leading-relaxed font-medium">
-                    {"Pricing is based on computational complexity and provider strategy. GPT-4o costs more than GPT-4o-mini, for instance."}
-                  </AccordionContent>
-                </AccordionItem>
+                {faqs.map((f, i) => (
+                  <AccordionItem key={i} value={`item-${i}`} className="border-border/40 last:border-0">
+                    <AccordionTrigger className="text-left text-base font-bold py-6 hover:no-underline hover:text-indigo-400 transition-colors uppercase tracking-tight">
+                      {f.q}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground leading-relaxed font-medium pb-6 text-sm">
+                      {f.a}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
               </Accordion>
             </div>
           </div>
         </section>
 
-        {/* Start Here Banner moved to bottom */}
-        <section className="mt-8 mb-4">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600/20 via-purple-600/20 to-plasma-500/20 border border-white/10 shadow-2xl p-6 md:p-10">
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-10">
-              <div className="flex-1 space-y-6 text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-bold border border-indigo-500/20">
+        {/* Mid-Page CTA */}
+        <section className="mt-8 mb-20 px-4">
+          <div className="relative overflow-hidden rounded-[48px] bg-gradient-to-br from-indigo-600/20 via-purple-600/20 to-plasma-500/20 border border-white/10 shadow-2xl p-10 md:p-20">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-16 relative z-10">
+              <div className="flex-1 space-y-8 text-center lg:text-left">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-black uppercase tracking-[0.2em] border border-indigo-500/20">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
                   </span>
-                  New to Tokensense?
+                  Stop paying for tokens you didn't plan for
                 </div>
-                <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white leading-[1.1]">
-                  Start Your <span className="text-indigo-400">Optimization</span> Journey
+                <h2 className="text-4xl md:text-6xl font-black tracking-tight text-white leading-[1.05] uppercase">
+                  Ready to <span className="text-indigo-400">Master</span> Your AI Budget?
                 </h2>
-                <p className="text-lg text-muted-foreground font-medium max-w-xl">
-                  Watch this 2-minute quickstart guide to learn how to master LLM token costs and build more profitable AI applications.
+                <p className="text-lg md:text-xl text-muted-foreground font-medium max-w-xl leading-relaxed">
+                  Every LLM API call has a cost. Most developers only find out after the invoice arrives. Tokensense shows you the number before you hit send — for free, forever.
                 </p>
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
-                  <Button size="lg" className="h-12 px-8 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl" asChild>
-                    <Link href="#calculate-section">Jump to Calculator</Link>
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6">
+                  <Button size="lg" className="h-14 px-10 bg-indigo-600 hover:bg-indigo-500 text-white font-black uppercase tracking-tight rounded-2xl shadow-xl shadow-indigo-600/20 transition-all hover:-translate-y-0.5" asChild>
+                    <Link href="#calculate-section">Try the calculator →</Link>
                   </Button>
-                  <Button variant="outline" size="lg" className="h-12 px-8 border-white/10 hover:bg-white/5 text-white font-bold rounded-xl" asChild>
-                    <Link href="/tokenomics">Learn Tokenomics</Link>
+                  <Button variant="outline" size="lg" className="h-14 px-10 border-white/10 hover:bg-white/5 text-white font-black uppercase tracking-tight rounded-2xl" asChild>
+                    <Link href="/tokenomics">Read the cost guide</Link>
                   </Button>
                 </div>
               </div>
               <div className="flex-1 w-full max-w-2xl">
-                <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/40 group">
+                <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-black/40 group">
                   <iframe 
                     width="100%" 
                     height="100%" 
@@ -303,9 +310,13 @@ export default function Home() {
               </div>
             </div>
             {/* Background decorative elements */}
-            <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-600/10 blur-[100px] rounded-full"></div>
-            <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-plasma-500/10 blur-[100px] rounded-full"></div>
+            <div className="absolute -top-48 -right-48 w-full h-full bg-indigo-600/5 blur-[120px] rounded-full"></div>
+            <div className="absolute -bottom-48 -left-48 w-full h-full bg-plasma-500/5 blur-[120px] rounded-full"></div>
           </div>
+        </section>
+
+        <section className="pb-24">
+          <NewsletterSignup />
         </section>
         
         <SocialShareBar variant="bottom" />

@@ -97,11 +97,14 @@ const TEMPLATES = [
 
 const AI_MODELS = [
   { id: "none", label: "None", inputCost: 0, outputCost: 0, limit: 0 },
-  { id: "gpt4o", label: "GPT-4o", inputCost: 5, outputCost: 15, limit: 128000 }, // Per 1M
-  { id: "gpt4o-mini", label: "GPT-4o mini", inputCost: 0.15, outputCost: 0.6, limit: 128000 },
-  { id: "claude-sonnet", label: "Claude Sonnet", inputCost: 3, outputCost: 15, limit: 200000 },
-  { id: "claude-haiku", label: "Claude Haiku", inputCost: 0.25, outputCost: 1.25, limit: 200000 },
-  { id: "gemini-flash", label: "Gemini Flash", inputCost: 0.05, outputCost: 0.15, limit: 1000000 },
+  { id: "gpt-5", label: "GPT-5", inputCost: 1.25, outputCost: 10.00, limit: 400000 },
+  { id: "gpt-4o", label: "GPT-4o", inputCost: 2.50, outputCost: 10.00, limit: 128000 },
+  { id: "gpt-4o-mini", label: "GPT-4o mini", inputCost: 0.15, outputCost: 0.60, limit: 128000 },
+  { id: "claude-sonnet-4-6", label: "Claude Sonnet 4.6", inputCost: 3.00, outputCost: 15.00, limit: 1000000 },
+  { id: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5", inputCost: 1.00, outputCost: 5.00, limit: 200000 },
+  { id: "gemini-3.1-pro", label: "Gemini 3.1 Pro", inputCost: 2.00, outputCost: 12.00, limit: 2000000 },
+  { id: "gemini-3-flash", label: "Gemini 3 Flash", inputCost: 0.50, outputCost: 3.00, limit: 1000000 },
+  { id: "deepseek-v4", label: "DeepSeek V4", inputCost: 0.30, outputCost: 0.50, limit: 1000000 },
 ];
 
 const PHP_RATE = 56.5; // Example rate

@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { 
     Trash2, Zap, Brain, Trophy, TrendingDown, Copy, Check, 
-    ChevronUp, ChevronDown, ChevronsUpDown, Clock, Search, 
+    ChevronUp, ChevronDown, ChevronRight, ChevronsUpDown, Clock, Search, 
     Filter, Sparkles, Calculator, ArrowRight, MousePointer2, 
     MessageSquareText, Layers, Key, History, BarChart3,
     Share2, Download, Timer, Activity, Info, Star,
@@ -52,17 +52,21 @@ function getBarColor(ratio: number): string {
 // ─── Latency Sparkline ────────────────────────────────────────────────────────
 
 function LatencySparkline({ latency }: { latency?: number }) {
-    if (!latency) return null;
-    
-    // Mock sparkline points
+    // Hooks must be called unconditionally
     const points = useMemo(() => {
+        if (!latency) return [];
         const base = latency;
-        return Array.from({ length: 8 }, () => base + (Math.random() - 0.5) * (base * 0.2));
+        // Deterministic-ish random based on latency to keep it "stable" for same latency
+        // or just accept it's a mock. To fix the "impure" error, 
+        // we use a simple sine wave for the mock sparkline.
+        return Array.from({ length: 8 }, (_, i) => base + Math.sin(i * 1.5) * (base * 0.1));
     }, [latency]);
+
+    if (!latency || points.length === 0) return null;
 
     const max = Math.max(...points);
     const min = Math.min(...points);
-    const range = max - min;
+    const range = max - min || 1;
 
     return (
         <div className="flex items-center gap-2">
@@ -127,6 +131,15 @@ export default function ModelComparisonTable() {
     const [activeProviderFilter, setActiveProviderFilter] = useState<string>("All");
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const [showPicker, setShowPicker] = useState(false);
+    const [collapsedProviders, setCollapsedProviders] = useState<string[]>([]);
+
+    const toggleProvider = (provider: string) => {
+        setCollapsedProviders(prev => 
+            prev.includes(provider) 
+                ? prev.filter(p => p !== provider) 
+                : [...prev, provider]
+        );
+    };
 
     // Smart Picker State
     const [pickerTask, setPickerTask] = useState<string>("general");
@@ -231,10 +244,26 @@ export default function ModelComparisonTable() {
             return 0;
         });
 
-        return data;
+        return data.map((m, idx) => ({ ...m, globalRank: idx + 1 }));
     }, [inputTokens, outputTokens, isRecurring, cachePercent, activeProviderFilter, searchQuery, sortMode]);
 
-    const maxTotalCost = useMemo(() => Math.max(...tableData.map(m => m.totalCost)), [tableData]);
+    const groupedData = useMemo(() => {
+        const groups: Record<string, any[]> = {};
+        tableData.forEach(m => {
+            if (!groups[m.provider]) groups[m.provider] = [];
+            groups[m.provider].push(m);
+        });
+        
+        return Object.entries(groups).map(([provider, models]) => ({
+            provider,
+            models
+        })).sort((a, b) => a.provider.localeCompare(b.provider));
+    }, [tableData]);
+
+    const maxTotalCost = useMemo(() => {
+        if (tableData.length === 0) return 1;
+        return Math.max(...tableData.map(m => m.totalCost));
+    }, [tableData]);
 
     const handleCopyRow = (model: any) => {
         const text = `${model.name} (${model.provider}): ${formatCost(model.totalCost)} total for ${inputTokens} in / ${outputTokens} out`;
@@ -513,77 +542,113 @@ export default function ModelComparisonTable() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/[0.03]">
-                            {tableData.map((model, idx) => {
-                                const isCheapest = idx === 0 && sortMode === "total";
-                                const isBestValue = idx === 0 && sortMode === "value";
-                                const isFastest = idx === 0 && sortMode === "latency";
-                                const ratio = model.totalCost / maxTotalCost;
-
+                            {groupedData.map((group) => {
+                                const isCollapsed = collapsedProviders.includes(group.provider);
+                                
                                 return (
-                                    <tr 
-                                        key={model.id}
-                                        className={cn(
-                                            "group transition-all duration-200 hover:bg-white/[0.035]",
-                                            (isCheapest || isBestValue || isFastest) ? "bg-plasma-500/[0.03] border-l-2 border-l-plasma-500" : "border-l-2 border-l-transparent"
-                                        )}
-                                    >
-                                        <td className={cn(
-                                            "py-5 pl-6 font-mono text-xs",
-                                            (isCheapest || isBestValue || isFastest) ? "text-plasma-400 font-black" : "text-slate-600"
-                                        )}>
-                                            {idx + 1}
-                                        </td>
-                                        <td className="py-5 px-4">
-                                            <div className="flex flex-col">
-                                                <div className="flex items-center gap-2">
-                                                    <span className={cn(
-                                                        "text-sm font-bold tracking-tight",
-                                                        (isCheapest || isBestValue || isFastest) ? "text-white" : "text-slate-300"
+                                    <React.Fragment key={group.provider}>
+                                        {/* Provider Header Row */}
+                                        <tr 
+                                            className="bg-white/5 cursor-pointer hover:bg-white/10 transition-colors group/provider"
+                                            onClick={() => toggleProvider(group.provider)}
+                                        >
+                                            <td colSpan={6} className="py-3 px-6">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={cn(
+                                                            "p-1 rounded-md bg-white/5 border border-white/10 transition-transform duration-200",
+                                                            !isCollapsed && "rotate-90"
+                                                        )}>
+                                                            <ChevronRight className="w-3 h-3 text-slate-400" />
+                                                        </div>
+                                                        <span className="font-black text-[10px] uppercase tracking-[0.3em] text-indigo-400">
+                                                            {group.provider}
+                                                        </span>
+                                                        <span className="text-[10px] text-slate-500 font-bold">
+                                                            ({group.models.length} models)
+                                                        </span>
+                                                    </div>
+                                                    <div className="text-[9px] font-bold text-slate-600 uppercase tracking-widest opacity-0 group-hover/provider:opacity-100 transition-opacity">
+                                                        {isCollapsed ? "Click to Expand" : "Click to Collapse"}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        {!isCollapsed && group.models.map((model) => {
+                                            const isCheapest = model.globalRank === 1 && sortMode === "total";
+                                            const isBestValue = model.globalRank === 1 && sortMode === "value";
+                                            const isFastest = model.globalRank === 1 && sortMode === "latency";
+                                            const ratio = model.totalCost / maxTotalCost;
+
+                                            return (
+                                                <tr 
+                                                    key={model.id}
+                                                    className={cn(
+                                                        "group transition-all duration-200 hover:bg-white/[0.035]",
+                                                        (isCheapest || isBestValue || isFastest) ? "bg-plasma-500/[0.03] border-l-2 border-l-plasma-500" : "border-l-2 border-l-transparent"
+                                                    )}
+                                                >
+                                                    <td className={cn(
+                                                        "py-5 pl-6 font-mono text-xs",
+                                                        (isCheapest || isBestValue || isFastest) ? "text-plasma-400 font-black" : "text-slate-600"
                                                     )}>
-                                                        {model.name}
-                                                    </span>
-                                                    {isCheapest && <span title="Cheapest Option"><Trophy className="w-3 h-3 text-yellow-500" /></span>}
-                                                    {isBestValue && <span title="Best Bang for Buck"><Star className="w-3 h-3 text-indigo-400" /></span>}
-                                                    {isFastest && <span title="Fastest Response"><Zap className="w-3 h-3 text-amber-400" /></span>}
-                                                </div>
-                                                <span className="text-[10px] text-slate-600 font-medium uppercase tracking-wider">
-                                                    {model.provider}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="py-5 px-4 text-right">
-                                            <div className="flex flex-col items-end">
-                                                <span className="font-mono text-xs text-white font-bold">{model.benchmarks?.mmlu || "-" }</span>
-                                                <span className="text-[8px] text-slate-600 uppercase font-black">Accuracy Score</span>
-                                            </div>
-                                        </td>
-                                        <td className="py-5 px-4 text-right">
-                                            <div className="flex justify-end">
-                                                <LatencySparkline latency={model.latencyMs} />
-                                            </div>
-                                        </td>
-                                        <td className="py-5 px-4 text-right">
-                                            <div className="flex flex-col items-end">
-                                                <span className={cn(
-                                                    "text-sm font-black font-mono",
-                                                    (isCheapest || isBestValue || isFastest) ? "text-plasma-400" : "text-white"
-                                                )}>
-                                                    {formatCost(model.totalCost)}
-                                                </span>
-                                                <div className="w-24 mt-1">
-                                                    <AnimatedCostBar ratio={ratio} />
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="py-5 pr-6 text-right">
-                                            <button 
-                                                onClick={() => handleCopyRow(model)}
-                                                className="opacity-0 group-hover:opacity-100 p-2 rounded-lg hover:bg-white/10 text-slate-500 transition-all"
-                                            >
-                                                {copiedId === model.id ? <Check className="w-3.5 h-3.5 text-plasma-400" /> : <Copy className="w-3.5 h-3.5" />}
-                                            </button>
-                                        </td>
-                                    </tr>
+                                                        {model.globalRank}
+                                                    </td>
+                                                    <td className="py-5 px-4">
+                                                        <div className="flex flex-col">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className={cn(
+                                                                    "text-sm font-bold tracking-tight",
+                                                                    (isCheapest || isBestValue || isFastest) ? "text-white" : "text-slate-300"
+                                                                )}>
+                                                                    {model.name}
+                                                                </span>
+                                                                {isCheapest && <span title="Cheapest Option"><Trophy className="w-3 h-3 text-yellow-500" /></span>}
+                                                                {isBestValue && <span title="Best Bang for Buck"><Star className="w-3 h-3 text-indigo-400" /></span>}
+                                                                {isFastest && <span title="Fastest Response"><Zap className="w-3 h-3 text-amber-400" /></span>}
+                                                            </div>
+                                                            <span className="text-[10px] text-slate-600 font-medium uppercase tracking-wider">
+                                                                {model.tier || "Standard"} • {formatContext(model.maxContext)} context
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-5 px-4 text-right">
+                                                        <div className="flex flex-col items-end">
+                                                            <span className="font-mono text-xs text-white font-bold">{model.benchmarks?.mmlu || "-" }</span>
+                                                            <span className="text-[8px] text-slate-600 uppercase font-black">Accuracy Score</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-5 px-4 text-right">
+                                                        <div className="flex justify-end">
+                                                            <LatencySparkline latency={model.latencyMs} />
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-5 px-4 text-right">
+                                                        <div className="flex flex-col items-end">
+                                                            <span className={cn(
+                                                                "text-sm font-black font-mono",
+                                                                (isCheapest || isBestValue || isFastest) ? "text-plasma-400" : "text-white"
+                                                            )}>
+                                                                {formatCost(model.totalCost)}
+                                                            </span>
+                                                            <div className="w-24 mt-1">
+                                                                <AnimatedCostBar ratio={ratio} />
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-5 pr-6 text-right">
+                                                        <button 
+                                                            onClick={() => handleCopyRow(model)}
+                                                            className="opacity-0 group-hover:opacity-100 p-2 rounded-lg hover:bg-white/10 text-slate-500 transition-all"
+                                                        >
+                                                            {copiedId === model.id ? <Check className="w-3.5 h-3.5 text-plasma-400" /> : <Copy className="w-3.5 h-3.5" />}
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </React.Fragment>
                                 );
                             })}
                         </tbody>

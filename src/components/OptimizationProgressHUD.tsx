@@ -110,7 +110,7 @@ export default function OptimizationProgressHUD() {
                                 <React.Fragment key={step.path}>
                                     <Link 
                                         href={step.path}
-                                        className={`flex items-center gap-2 px-2 py-1 rounded transition-all whitespace-nowrap ${isCurrent ? 'bg-indigo-500/10 text-indigo-400 ring-1 ring-indigo-500/20' : isPast ? 'text-emerald-400/70 hover:text-emerald-400' : 'text-slate-600 hover:text-slate-400'}`}
+                                        className={`step-nav-item flex items-center gap-2 px-2 py-1 rounded transition-all whitespace-nowrap ${isCurrent ? 'active' : isPast ? 'completed' : ''}`}
                                     >
                                         <span className={`text-[9px] font-black border rounded-sm w-4 h-4 flex items-center justify-center ${isCurrent ? 'border-indigo-500/50 bg-indigo-500 text-white' : isPast ? 'border-emerald-500/50 bg-emerald-500 text-black' : 'border-slate-700'}`}>
                                             {isPast ? "✓" : i + 1}

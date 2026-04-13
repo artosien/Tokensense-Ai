@@ -18,6 +18,15 @@ import {
 } from "lucide-react";
 import SiteHeader from "@/components/SiteHeader";
 import { GradientOrbs } from "@/components/GradientOrbs";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Tokenomics Academy | Master AI Economics",
+  description: "A structured curriculum to help you master the economics of artificial intelligence and build high-margin AI applications.",
+  alternates: {
+    canonical: "/tokenomics",
+  },
+};
 
 export default function TokenomicsPage() {
   const modules = [

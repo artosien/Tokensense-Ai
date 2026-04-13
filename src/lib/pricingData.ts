@@ -5,12 +5,22 @@ export const pricingData = [
     { date: "2024-11", openai: 2.5, anthropic: 3.0, google: 3.5, event: "Claude 3.5 Sonnet v2" },
     { date: "2025-02", openai: 2.0, anthropic: 3.0, google: 1.25, event: "Gemini 2.0 Price Cut" },
     { date: "2025-06", openai: 1.75, anthropic: 3.0, google: 1.25, event: "GPT-5 Preview" },
-    { date: "2025-10", openai: 1.75, anthropic: 3.0, google: 1.25, event: "Claude 4.5 Release" },
-    { date: "2026-01", openai: 1.75, anthropic: 3.0, google: 1.25, event: "Grok 4 Release" },
-    { date: "2026-03", openai: 1.75, anthropic: 3.0, google: 1.25, event: "Claude 4.6 Release" },
+    { date: "2025-10", openai: 1.25, anthropic: 3.0, google: 1.25, event: "Claude 4.5 Release" },
+    { date: "2026-01", openai: 1.25, anthropic: 3.0, google: 1.25, event: "Grok 4 Release" },
+    { date: "2026-04", openai: 1.25, anthropic: 3.0, google: 2.00, event: "Gemini 3.1 Launch" },
 ];
 
 export const timelineEvents = [
+    {
+        id: "gemini-3.1",
+        date: "April 2026",
+        provider: "Google",
+        model: "Gemini 3.1 Pro",
+        change: "Generational Launch",
+        details: "Gemini 3.1 Pro launched with 2M context window and improved multimodal reasoning.",
+        type: "release",
+        dataPointIndex: 8
+    },
     {
         id: "claude-4.6",
         date: "March 2026",
@@ -19,27 +29,27 @@ export const timelineEvents = [
         change: "New Release",
         details: "Claude 4.6 series launched with significant intelligence gains while maintaining 4.5 pricing levels.",
         type: "release",
-        dataPointIndex: 8
-    },
-    {
-        id: "gpt-5.2",
-        date: "January 2026",
-        provider: "OpenAI",
-        model: "GPT-5.2 Series",
-        change: "-15% Input Cost",
-        details: "OpenAI optimized inference for GPT-5.2, reducing input costs across the board.",
-        type: "cut",
         dataPointIndex: 7
     },
     {
-        id: "deepseek-v3",
+        id: "gpt-5",
         date: "October 2025",
-        provider: "DeepSeek",
-        model: "DeepSeek V3",
-        change: "Market Disruptor",
-        details: "V3 set a new floor for open-weights performance at proprietary-beating prices.",
-        type: "disruptor",
+        provider: "OpenAI",
+        model: "GPT-5",
+        change: "New Flagship",
+        details: "GPT-5 officially released, setting a new price floor for flagship intelligence at $1.25/M tokens.",
+        type: "release",
         dataPointIndex: 6
+    },
+    {
+        id: "deepseek-v4",
+        date: "September 2025",
+        provider: "DeepSeek",
+        model: "DeepSeek V4",
+        change: "Market Disruptor",
+        details: "DeepSeek V4 disruptive pricing forces major providers to reconsider their flagship margins.",
+        type: "disruptor",
+        dataPointIndex: 5
     },
     {
         id: "gemini-2.5-flash",
@@ -49,17 +59,7 @@ export const timelineEvents = [
         change: "-40% Output Cost",
         details: "Google slashed output costs for Flash models to compete with GPT-4o mini.",
         type: "cut",
-        dataPointIndex: 5
-    },
-    {
-        id: "gpt-5",
-        date: "May 2025",
-        provider: "OpenAI",
-        model: "GPT-5",
-        change: "Generational Launch",
-        details: "GPT-5 launched with 400k context window and improved reasoning capabilities.",
-        type: "release",
-        dataPointIndex: 4 // approximation for interaction
+        dataPointIndex: 4
     },
     {
         id: "claude-3.5-v2",
@@ -79,14 +79,14 @@ export const timelineEvents = [
         change: "-90% vs GPT-3.5",
         details: "The death of GPT-3.5. A massive leap in cost-efficiency for small tasks.",
         type: "cut",
-        dataPointIndex: 2 // Approx for interaction
+        dataPointIndex: 2
     }
 ];
 
 export const priceWarData = [
-    { provider: "OpenAI", lastCutDate: "2026-01-15", daysSinceCut: 45 }, // Assume today is ~Mar 2026
-    { provider: "Anthropic", lastCutDate: "2024-11-01", daysSinceCut: 120 },
-    { provider: "Google", lastCutDate: "2025-07-01", daysSinceCut: 240 },
-    { provider: "Meta", lastCutDate: "2024-04-18", daysSinceCut: 680 },
-    { provider: "Mistral", lastCutDate: "2025-02-15", daysSinceCut: 380 },
+    { provider: "OpenAI", lastCutDate: "2025-10-15", daysSinceCut: 180 }, // Assume today is April 2026
+    { provider: "Anthropic", lastCutDate: "2026-03-01", daysSinceCut: 30 },
+    { provider: "Google", lastCutDate: "2026-04-10", daysSinceCut: 3 },
+    { provider: "Meta", lastCutDate: "2026-02-20", daysSinceCut: 60 },
+    { provider: "DeepSeek", lastCutDate: "2025-09-15", daysSinceCut: 210 },
 ];

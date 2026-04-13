@@ -26,7 +26,6 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.tokensense-ai.com"),
   alternates: {
-    canonical: '/',
     types: {
       'text/plain': '/llms.txt',
       'application/xml': '/sitemap.xml',
