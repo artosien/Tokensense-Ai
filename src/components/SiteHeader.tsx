@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Link } from "@/lib/i18n/navigation";
-import { Bot, Menu, X, Sun, Moon, ChevronDown, Github, User, LogOut, Video } from "lucide-react";
+import { Bot, Menu, X, Sun, Moon, ChevronDown, Github, User, LogOut, Video, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/ThemeProvider";
 import { useSession, signIn, signOut } from "next-auth/react";
@@ -168,6 +168,17 @@ export default function SiteHeader() {
                                         <div className="flex flex-col">
                                             <span className="text-sm font-semibold">Tokenomics</span>
                                             <span className="text-[10px] text-muted-foreground">Master AI economics</span>
+                                        </div>
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild className="rounded-lg cursor-pointer focus:bg-indigo-500/10 focus:text-indigo-400 transition-colors">
+                                    <Link href="/glossary" className="flex items-center gap-2 py-2">
+                                        <div className="w-8 h-8 rounded-md bg-indigo-500/10 flex items-center justify-center">
+                                            <BookOpen className="w-4 h-4 text-indigo-400" />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-semibold">{tNav("glossary") || "LLM Glossary"}</span>
+                                            <span className="text-[10px] text-muted-foreground">Every AI term defined</span>
                                         </div>
                                     </Link>
                                 </DropdownMenuItem>
@@ -469,6 +480,9 @@ export default function SiteHeader() {
                             <div className="overflow-hidden pl-4 flex flex-col gap-1">
                                 <Link href="/tokenomics" onClick={closeMenu} className="py-2.5 px-4 rounded-md font-bold text-indigo-400 hover:bg-indigo-500/10 transition-colors text-sm border border-transparent hover:border-indigo-500/20">
                                     Tokenomics
+                                </Link>
+                                <Link href="/glossary" onClick={closeMenu} className="py-2.5 px-4 rounded-md text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors text-sm border border-transparent hover:border-indigo-500/20">
+                                    {tNav("glossary") || "LLM Glossary"}
                                 </Link>
                                 <Link href="/faq" onClick={closeMenu} className="py-2.5 px-4 rounded-md text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors text-sm border border-transparent hover:border-indigo-500/20">
                                     {tNav("faq")}

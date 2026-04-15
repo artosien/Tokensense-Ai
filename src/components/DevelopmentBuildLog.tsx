@@ -69,6 +69,7 @@ const buildLogItems = [
   "[2026-04-08] Home Restructure: Move 'Start Your Optimization Journey' banner to bottom; link 'Learn Tokenomics' to /tokenomics.",
   "[2026-04-08] Media Overhaul: Replace hero image with autoplaying promo video; swap local videos in Modules 1-4 for optimized YouTube embeds.",
   "[2026-04-08] Performance: Compress 15+ large blog images (PNG → WebP) with 95%+ size reduction; update blog-posts.json with new assets.",
+  "[2026-04-15] Media: Replace YouTube iframe with local high-performance promo video in 'Master Your AI Budget' section.",
 ];
 
 const RECENT_COUNT = 8;

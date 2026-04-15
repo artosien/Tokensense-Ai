@@ -196,7 +196,10 @@ export default function AboutPage() {
                             </div>
                         </div>
                         <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar text-foreground/80 selection:bg-plasma-500/30">
-                             <p className="text-plasma-400 font-bold mb-3">[2026-04-08] v2.0.0 — The "Performance & Media" Overhaul</p>
+                             <p className="text-plasma-400 font-bold mb-3">[2026-04-15] v2.0.1 — Homepage Video Integration</p>
+                             <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Media: Replaced YouTube iframe with local high-performance promo video in 'Master Your AI Budget' section.</p>
+
+                             <p className="text-plasma-400 font-bold mb-3 mt-6">[2026-04-08] v2.0.0 — The "Performance & Media" Overhaul</p>
                              <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Clean Up: Successfully deleted /token-learning and /how-tokenizers-work pages and updated sitemaps.</p>
                              <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Home Restructure: Relocated 'Optimization Journey' banner to bottom; updated all Lesson CTAs to point to /tokenomics.</p>
                              <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Media Overhaul: Replaced hero image with autoplaying promo video; swapped local videos in Modules 1-4 for YouTube embeds.</p>

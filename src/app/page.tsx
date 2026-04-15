@@ -295,17 +295,19 @@ export default function Home() {
               </div>
               <div className="flex-1 w-full max-w-2xl">
                 <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-black/40 group">
-                  <iframe 
+                  <video 
                     width="100%" 
                     height="100%" 
-                    src="https://www.youtube.com/embed/nKSk_TiR8YA?si=Amxvxk4UzgYe5ms4" 
-                    title="YouTube video player" 
-                    frameBorder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                    referrerPolicy="strict-origin-when-cross-origin" 
-                    allowFullScreen
-                    className="absolute inset-0 w-full h-full"
-                  ></iframe>
+                    controls
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover"
+                  >
+                    <source src="/Videos/tokensense-promo.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
                 </div>
               </div>
             </div>

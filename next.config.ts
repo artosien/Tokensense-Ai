@@ -16,9 +16,9 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        // Redirect /{lang}/{path} to /{path}
-        // Matches /en/about, /es/blog/foo, etc.
-        source: '/:lang([a-z]{2})/:path*',
+        // Redirect /{lang}/{path} to /{path} for supported locales
+        // This explicitly lists supported locales to avoid matching /api
+        source: '/:lang(ar|de|en|es|fr|hi|id|ja|ko|pt-BR|zh)/:path*',
         destination: '/:path*',
         permanent: true,
       },

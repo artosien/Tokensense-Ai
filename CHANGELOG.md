@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2026-04-15
+
+### Changed
+- Media: **Homepage Video Integration.** Replaced the YouTube iframe in the "Master Your AI Budget" section with a local, high-performance MP4 video (`tokensense-promo.mp4`) for better performance and a more seamless UI experience.
+
 ## [2.0.0] - 2026-04-08
 
 ### Added

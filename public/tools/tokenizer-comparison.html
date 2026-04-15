@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LLM Tokenizer Comparison</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      padding: 20px 16px 28px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    h1 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #111;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: #777;
+      margin-bottom: 14px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 80px;
+      resize: vertical;
+      font-size: 13px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #d0d0d0;
+      background: #fff;
+      color: #1a1a1a;
+      font-family: inherit;
+      line-height: 1.6;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    textarea:focus { border-color: #888; }
+
+    .models {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 560px) {
+      .models { grid-template-columns: 1fr; }
+    }
+
+    .model-card {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 12px 13px;
+    }
+
+    .model-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 9px;
+    }
+
+    .model-name { font-size: 13px; font-weight: 600; color: #111; }
+
+    .model-badge {
+      font-size: 10px;
+      color: #888;
+      background: #f3f3f3;
+      padding: 2px 7px;
+      border-radius: 20px;
+    }
+
+    .token-display {
+      min-height: 56px;
+      font-size: 12px;
+      line-height: 2;
+      background: #f8f8f8;
+      border-radius: 6px;
+      padding: 7px 9px;
+    }
+
+    .tok {
+      display: inline-block;
+      margin: 1px 1px;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 11px;
+      cursor: default;
+    }
+
+    .stats {
+      display: flex;
+      gap: 8px;
+      margin-top: 9px;
+    }
+
+    .stat {
+      flex: 1;
+      background: #f5f5f5;
+      border-radius: 6px;
+      padding: 7px 8px;
+      text-align: center;
+    }
+
+    .stat-val { font-size: 17px; font-weight: 600; color: #111; }
+    .stat-lbl { font-size: 10px; color: #888; margin-top: 1px; }
+
+    .diff-note {
+      font-size: 12px;
+      color: #555;
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: #f5f3ff;
+      border-radius: 7px;
+      border-left: 3px solid #7F77DD;
+      line-height: 1.6;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: #aaa;
+      margin-top: 9px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Live Tokenizer Comparison</h1>
+  <p class="subtitle">Type any text — see how GPT-4o, Claude, and Gemini slice it into tokens differently.</p>
+
+  <textarea id="input">Antidisestablishmentarianism is surprisingly difficult to tokenize.</textarea>
+
+  <div class="models" id="models"></div>
+  <div class="diff-note" id="diff-note"></div>
+  <p class="hint">Each colored block = one token &nbsp;·&nbsp; Same text, different slices</p>
+
+  <script>
+    const PALETTE = [
+      ['#EEEDFE','#534AB7'],['#E1F5EE','#0F6E56'],['#FAECE7','#993C1D'],
+      ['#FBEAF0','#993556'],['#E6F1FB','#185FA5'],['#EAF3DE','#3B6D11'],
+      ['#FAEEDA','#854F0B'],['#FCEBEB','#A32D2D'],['#F1EFE8','#5F5E5A'],
+    ];
+
+    const MODELS = [
+      { name: 'GPT-4o',      badge: 'tiktoken / BPE',      algo: 'gpt',    costPer1k: 0.005   },
+      { name: 'Claude 3.5',  badge: 'Anthropic / BPE',     algo: 'claude', costPer1k: 0.003   },
+      { name: 'Gemini 1.5',  badge: 'SentencePiece',       algo: 'gemini', costPer1k: 0.00125 },
+    ];
+
+    function tokenizeGPT(text) {
+      const tokens = []; let i = 0;
+      while (i < text.length) {
+        const ch = text[i];
+        if (/\s/.test(ch)) {
+          let j = i + 1;
+          while (j < text.length && /[a-zA-Z0-9']/.test(text[j])) j++;
+          if (j > i + 1) { tokens.push(text.slice(i, j)); i = j; continue; }
+          tokens.push(text[i++]); continue;
+        }
+        if (/[a-zA-Z]/.test(ch)) {
+          let j = i;
+          while (j < text.length && /[a-zA-Z]/.test(text[j])) j++;
+          tokens.push(...splitWordGPT(text.slice(i, j))); i = j; continue;
+        }
+        if (/[0-9]/.test(ch)) {
+          let j = i;
+          while (j < text.length && /[0-9]/.test(text[j])) j++;
+          const num = text.slice(i, j);
+          for (let k = 0; k < num.length; k++) tokens.push(num[k]);
+          i = j; continue;
+        }
+        tokens.push(text[i++]);
+      }
+      return tokens;
+    }
+
+    function splitWordGPT(word) {
+      if (word.length <= 5) return [word];
+      const prefixes = ['anti','dis','un','re','pre','pro','over','under','out','sub','super','inter','trans','mis','non','semi'];
+      const suffixes = ['ing','tion','ness','ment','ize','ise','ful','less','able','ible','ary','ery','ory','ism','ist','ity','ous','ive','al','ic'];
+      for (const p of prefixes) {
+        if (word.toLowerCase().startsWith(p) && word.length - p.length >= 3)
+          return [word.slice(0, p.length), ...splitWordGPT(word.slice(p.length))];
+      }
+      for (const s of suffixes) {
+        if (word.toLowerCase().endsWith(s) && word.length - s.length >= 3) {
+          const base = word.slice(0, word.length - s.length);
+          return [...splitWordGPT(base), word.slice(base.length)];
+        }
+      }
+      if (word.length > 8) {
+        const mid = Math.floor(word.length / 2);
+        return [word.slice(0, mid), word.slice(mid)];
+      }
+      return [word];
+    }
+
+    function tokenizeClaude(text) {
+      const tokens = []; let i = 0;
+      while (i < text.length) {
+        const ch = text[i];
+        if (/[ \t]/.test(ch)) {
+          let j = i;
+          while (j < text.length && /[ \t]/.test(text[j])) j++;
+          tokens.push(text.slice(i, j)); i = j; continue;
+        }
+        if (ch === '\n') { tokens.push('\n'); i++; continue; }
+        if (/[a-zA-Z]/.test(ch)) {
+          let j = i;
+          while (j < text.length && /[a-zA-Z]/.test(text[j])) j++;
+          tokens.push(...splitWordClaude(text.slice(i, j))); i = j; continue;
+        }
+        if (/[0-9]/.test(ch)) {
+          let j = i;
+          while (j < text.length && /[0-9]/.test(text[j])) j++;
+          tokens.push(text.slice(i, j)); i = j; continue;
+        }
+        tokens.push(text[i++]);
+      }
+      return tokens;
+    }
+
+    function splitWordClaude(word) {
+      if (word.length <= 6) return [word];
+      const prefixes = ['anti','dis','un','re','pre','over','under','sub','inter','mis','non'];
+      const suffixes = ['ment','tion','ness','ize','ism','ist','ity','ary','ory','ing','ful','less'];
+      for (const p of prefixes) {
+        if (word.toLowerCase().startsWith(p) && word.length - p.length >= 4)
+          return [word.slice(0, p.length), ...splitWordClaude(word.slice(p.length))];
+      }
+      for (const s of suffixes) {
+        if (word.toLowerCase().endsWith(s) && word.length - s.length >= 3) {
+          const base = word.slice(0, word.length - s.length);
+          return [...splitWordClaude(base), word.slice(base.length)];
+        }
+      }
+      if (word.length > 7) {
+        const chunk = word.length > 12 ? 4 : 5;
+        return [word.slice(0, chunk), ...splitWordClaude(word.slice(chunk))];
+      }
+      return [word];
+    }
+
+    function tokenizeGemini(text) {
+      const tokens = []; let i = 0;
+      while (i < text.length) {
+        const ch = text[i];
+        if (/\s/.test(ch)) { tokens.push(text[i++]); continue; }
+        if (/[a-zA-Z]/.test(ch)) {
+          let j = i;
+          while (j < text.length && /[a-zA-Z]/.test(text[j])) j++;
+          tokens.push(...splitWordGemini(text.slice(i, j))); i = j; continue;
+        }
+        if (/[0-9]/.test(ch)) {
+          let j = i;
+          while (j < text.length && /[0-9]/.test(text[j])) j++;
+          const num = text.slice(i, j);
+          for (let k = 0; k < num.length; k += 2) tokens.push(num.slice(k, k+2));
+          i = j; continue;
+        }
+        tokens.push(text[i++]);
+      }
+      return tokens;
+    }
+
+    function splitWordGemini(word) {
+      if (word.length <= 3) return [word];
+      if (word.length <= 6) return [word];
+      const vowels = 'aeiouAEIOU';
+      const chunks = []; let i = 0;
+      while (i < word.length) {
+        if (word.length - i <= 4) { chunks.push(word.slice(i)); break; }
+        let end = i + 3;
+        while (end < word.length && !vowels.includes(word[end]) && end < i + 5) end++;
+        if (end < word.length && vowels.includes(word[end])) end++;
+        chunks.push(word.slice(i, end)); i = end;
+      }
+      return chunks.length > 1 ? chunks : [word];
+    }
+
+    function renderTokens(tokens) {
+      return tokens.map((t, i) => {
+        const [bg, fg] = PALETTE[i % PALETTE.length];
+        const display = t.replace(/ /g, '·').replace(/\n/g, '↵');
+        return `<span class="tok" style="background:${bg};color:${fg}" title="${t}">${display}</span>`;
+      }).join('');
+    }
+
+    function estimateCost(count, costPer1k) {
+      return (count / 1000 * costPer1k).toFixed(5);
+    }
+
+    function render() {
+      const text = document.getElementById('input').value;
+      const container = document.getElementById('models');
+      container.innerHTML = '';
+      const counts = [];
+
+      MODELS.forEach(m => {
+        let tokens;
+        if (m.algo === 'gpt') tokens = tokenizeGPT(text);
+        else if (m.algo === 'claude') tokens = tokenizeClaude(text);
+        else tokens = tokenizeGemini(text);
+        counts.push(tokens.length);
+
+        const card = document.createElement('div');
+        card.className = 'model-card';
+        card.innerHTML = `
+          <div class="model-header">
+            <span class="model-name">${m.name}</span>
+            <span class="model-badge">${m.badge}</span>
+          </div>
+          <div class="token-display">${renderTokens(tokens)}</div>
+          <div class="stats">
+            <div class="stat"><div class="stat-val">${tokens.length}</div><div class="stat-lbl">tokens</div></div>
+            <div class="stat"><div class="stat-val">$${estimateCost(tokens.length, m.costPer1k)}</div><div class="stat-lbl">est. cost</div></div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      const [g, c, gem] = counts;
+      const max = Math.max(g, c, gem), min = Math.min(g, c, gem);
+      const diff = max - min;
+      const pct = min > 0 ? Math.round((diff / min) * 100) : 0;
+      document.getElementById('diff-note').textContent =
+        diff === 0
+          ? 'All three models tokenize this text identically — try a longer or more complex input!'
+          : `Token counts vary by up to ${diff} tokens (${pct}%) for the same text. That gap grows significantly at scale — a 100,000-token document could see thousands of tokens of difference, directly affecting cost and context window usage.`;
+    }
+
+    document.getElementById('input').addEventListener('input', render);
+
+    // Auto-resize iframe height when content changes
+    function notifyHeight() {
+      const h = document.body.scrollHeight;
+      window.parent.postMessage({ type: 'tokenizerHeight', height: h }, '*');
+    }
+    const obs = new ResizeObserver(notifyHeight);
+    obs.observe(document.body);
+    notifyHeight();
+
+    render();
+  </script>
+</body>
+</html>
