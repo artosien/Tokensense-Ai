@@ -152,6 +152,7 @@ export default function MultimodalEstimator() {
                 const dataUrl = e.target?.result as string;
                 const img = new window.Image();
                 img.onload = () => {
+                    if (!model) return;
                     setImages(prev => [
                         ...prev.filter(i => i.id !== 'sample'),
                         {
@@ -169,7 +170,7 @@ export default function MultimodalEstimator() {
             };
             reader.readAsDataURL(file);
         });
-    }, []);
+    }, [model]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -233,6 +234,8 @@ export default function MultimodalEstimator() {
     };
 
     const totals = useMemo(() => {
+        if (!model) return { inputTokens: 0, zoomTokens: 0, promptTokens: 0, totalInput: 0, outputTokens: 0, totalTokens: 0, totalCost: 0, perImageResults: [] };
+
         let inputTokensCount = 0;
         let zoomTokensCount = 0;
         
@@ -257,7 +260,7 @@ export default function MultimodalEstimator() {
         return { inputTokens: inputTokensCount, zoomTokens: zoomTokensCount, promptTokens, totalInput, outputTokens, totalTokens, totalCost, perImageResults };
     }, [images, model, detailMode, taskPreset, customOutputTokens, promptText]);
 
-    const contextPercent = Math.min(100, (totals.totalTokens / model.maxContext) * 100);
+    const contextPercent = model ? Math.min(100, (totals.totalTokens / model.maxContext) * 100) : 0;
 
     return (
         <div className="space-y-10">

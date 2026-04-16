@@ -2,10 +2,11 @@
 
 import React from "react";
 import { useSession, signOut, signIn } from "next-auth/react";
-import { User, Mail, LogOut, ArrowLeft, Shield, Clock, HardDrive, BarChart3, Briefcase, Globe, Info } from "lucide-react";
+import { User, Mail, LogOut, ArrowLeft, Shield, Clock, HardDrive, BarChart3, Briefcase, Globe, Info, MessageSquare, Save, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import SiteHeader from "@/components/SiteHeader";
+import AccountHistory from "@/components/AccountHistory";
 
 export default function AccountPage() {
     const { data: session, status } = useSession();
@@ -15,11 +16,14 @@ export default function AccountPage() {
         location: "",
         bio: ""
     });
+    const [slackWebhook, setSlackWebhook] = React.useState("");
+    const [isSavingSlack, setIsSavingSlack] = React.useState(false);
 
-    // Load bio from localStorage
-    const loadBio = React.useCallback(() => {
+    // Load bio and slack webhook from localStorage
+    const loadUserData = React.useCallback(() => {
         const userId = (session?.user as any)?.id || session?.user?.email;
         if (userId) {
+            // Load Bio
             const savedBio = localStorage.getItem(`user_bio_${userId}`);
             if (savedBio) {
                 try {
@@ -28,15 +32,32 @@ export default function AccountPage() {
                     console.error("Failed to parse saved bio", e);
                 }
             }
+
+            // Load Slack Webhook
+            const savedWebhook = localStorage.getItem(`user_slack_webhook_${userId}`);
+            if (savedWebhook) {
+                setSlackWebhook(savedWebhook);
+            }
         }
     }, [session?.user]);
 
     React.useEffect(() => {
-        loadBio();
-        // Listen for storage events (from modal)
-        window.addEventListener('storage', loadBio);
-        return () => window.removeEventListener('storage', loadBio);
-    }, [loadBio]);
+        loadUserData();
+        // Listen for storage events
+        window.addEventListener('storage', loadUserData);
+        return () => window.removeEventListener('storage', loadUserData);
+    }, [loadUserData]);
+
+    const handleSaveSlack = () => {
+        const userId = (session?.user as any)?.id || session?.user?.email;
+        if (userId) {
+            setIsSavingSlack(true);
+            localStorage.setItem(`user_slack_webhook_${userId}`, slackWebhook);
+            setTimeout(() => {
+                setIsSavingSlack(false);
+            }, 500);
+        }
+    };
 
     if (status === "loading") {
         return (
@@ -56,14 +77,26 @@ export default function AccountPage() {
                     </div>
                     <h1 className="text-3xl font-bold text-foreground mb-4">Access Denied</h1>
                     <p className="text-muted-foreground mb-8">
-                        Please sign in with your Google account to access your personalized dashboard.
+                        Please sign in with your account to access your personalized dashboard.
                     </p>
-                    <Button 
-                        onClick={() => signIn("google")}
-                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-6 text-lg font-bold shadow-lg shadow-indigo-500/20"
-                    >
-                        Sign in with Google
-                    </Button>
+                    <div className="space-y-4">
+                        <Button 
+                            onClick={() => signIn("google")}
+                            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-6 text-lg font-bold shadow-lg shadow-indigo-500/20"
+                        >
+                            <img src="https://www.google.com/favicon.ico" className="w-5 h-5 mr-3" alt="Google" />
+                            Sign in with Google
+                        </Button>
+                        <Button 
+                            onClick={() => signIn("slack")}
+                            className="w-full bg-[#4A154B] hover:bg-[#3b113c] text-white py-6 text-lg font-bold shadow-lg shadow-[#4A154B]/20"
+                        >
+                            <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.528 2.528 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52h6.313a2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 15.147 24a2.528 2.528 0 0 1-2.52-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.523 2.52A2.528 2.528 0 0 1 3.79 5.042a2.528 2.528 0 0 1 2.52-2.522h2.523v2.522zM8.834 6.313a2.527 2.527 0 0 1-2.52 2.521V15.147A2.528 2.528 0 0 1 3.792 17.668a2.528 2.528 0 0 1-2.522-2.521V8.834zM18.958 8.834a2.528 2.528 0 0 1 2.522-2.52A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.52h-2.52v-2.52zM17.688 8.834a2.527 2.527 0 0 1-2.521 2.52H8.854a2.527 2.527 0 0 1-2.521-2.52V2.522A2.528 2.528 0 0 1 8.854 0a2.528 2.528 0 0 1 2.521 2.522v6.312zM15.165 18.958a2.528 2.528 0 0 1 2.52-2.522 2.528 2.528 0 0 1 2.522 2.522a2.528 2.528 0 0 1-2.522 2.52h-2.52v-2.52zM15.165 17.688a2.527 2.527 0 0 1 2.52-2.521h6.313A2.528 2.528 0 0 1 24 15.167a2.528 2.528 0 0 1-2.522 2.521h-6.313z"/>
+                            </svg>
+                            Sign in with Slack
+                        </Button>
+                    </div>
                     <Link href="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-indigo-400 mt-6 transition-colors">
                         <ArrowLeft className="w-4 h-4" />
                         Back to Home
@@ -145,7 +178,7 @@ export default function AccountPage() {
                         <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-3xl p-8 text-white shadow-xl shadow-indigo-500/10">
                             <h1 className="text-3xl font-bold mb-2">Welcome back, {session?.user?.name?.split(' ')[0]}!</h1>
                             <p className="text-indigo-100 opacity-90 max-w-md">
-                                You are now signed in. In future updates, you'll be able to save your token calculation history and custom model presets here.
+                                You are now signed in. Access your calculation history and connect your workspace to receive real-time budget alerts.
                             </p>
                         </div>
 
@@ -167,16 +200,63 @@ export default function AccountPage() {
                                     )}
                                 </div>
                             )}
-                            <div className="bg-card border border-border/40 rounded-2xl p-6 hover:border-indigo-500/30 transition-colors group">
-                                <div className="w-12 h-12 bg-indigo-500/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-indigo-500/20 transition-colors">
-                                    <Clock className="w-6 h-6 text-indigo-400" />
-                                </div>
-                                <h3 className="font-bold text-foreground mb-1 text-lg">Calculation History</h3>
-                                <p className="text-sm text-muted-foreground">
-                                    Coming Soon: Access your past token cost estimations across all devices.
-                                </p>
+                        </div>
+
+                        {/* Calculation History Section */}
+                        <AccountHistory />
+                        
+                        {/* Integrations Section */}
+                        <div className="bg-card border border-border/40 rounded-3xl overflow-hidden shadow-sm">
+                            <div className="px-8 py-6 border-b border-border/40 bg-muted/30">
+                                <h3 className="font-bold text-foreground flex items-center gap-2">
+                                    <MessageSquare className="w-5 h-5 text-indigo-400" />
+                                    Slack Integration
+                                </h3>
                             </div>
-                            
+                            <div className="p-8">
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="block text-sm font-bold text-foreground mb-2">Incoming Webhook URL</label>
+                                        <div className="flex gap-2">
+                                            <input 
+                                                type="text" 
+                                                value={slackWebhook}
+                                                onChange={(e) => setSlackWebhook(e.target.value)}
+                                                placeholder="https://hooks.slack.com/services/..."
+                                                className="flex-1 bg-background border border-border/60 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                            />
+                                            <Button 
+                                                onClick={handleSaveSlack}
+                                                disabled={isSavingSlack}
+                                                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 font-bold rounded-xl"
+                                            >
+                                                {isSavingSlack ? "Saving..." : <Save className="w-4 h-4" />}
+                                            </Button>
+                                        </div>
+                                        <p className="text-[10px] text-muted-foreground mt-3 flex items-center gap-1">
+                                            <Info className="w-3 h-3" />
+                                            Don't have a URL? <a href="https://api.slack.com/messaging/webhooks" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline flex items-center gap-0.5">Create one here <ExternalLink className="w-2 h-2" /></a>
+                                        </p>
+                                    </div>
+                                    
+                                    <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-2xl p-4">
+                                        <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-2">Slack Features</h4>
+                                        <ul className="space-y-2">
+                                            <li className="text-xs text-muted-foreground flex items-center gap-2">
+                                                <div className="w-1 h-1 bg-indigo-400 rounded-full" />
+                                                Send history summaries directly to any Slack channel.
+                                            </li>
+                                            <li className="text-xs text-muted-foreground flex items-center gap-2">
+                                                <div className="w-1 h-1 bg-indigo-400 rounded-full" />
+                                                Receive instant notifications when you exceed token budget thresholds.
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="bg-card border border-border/40 rounded-2xl p-6 hover:border-purple-500/30 transition-colors group">
                                 <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-purple-500/20 transition-colors">
                                     <HardDrive className="w-6 h-6 text-purple-400" />
@@ -203,8 +283,8 @@ export default function AccountPage() {
                                             <Mail className="w-5 h-5 text-indigo-400" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-bold text-foreground">Email Provider</p>
-                                            <p className="text-xs text-muted-foreground">Authenticated via Google OAuth 2.0</p>
+                                            <p className="text-sm font-bold text-foreground">Auth Method</p>
+                                            <p className="text-xs text-muted-foreground">Authenticated via Google or Slack OAuth</p>
                                         </div>
                                     </div>
                                     <div className="px-3 py-1 bg-green-500/10 text-green-400 text-[10px] font-bold rounded-full uppercase tracking-wider">

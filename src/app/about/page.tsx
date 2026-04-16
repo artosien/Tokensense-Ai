@@ -170,15 +170,26 @@ export default function AboutPage() {
                             <Sparkles className="w-5 h-5 text-indigo-400" />
                             Meet the Developer
                         </h2>
-                        <p className="text-sm leading-relaxed">
-                            Tokensense-Ai is architected and maintained by <strong>Angelo S. Enriquez</strong>, a developer exploring the frontier of agentic AI and vibe coding.
-                        </p>
-                        <Link 
-                            href="/about/angelo" 
-                            className="inline-flex items-center gap-2 text-sm font-bold text-indigo-400 hover:text-indigo-300 transition-colors"
-                        >
-                            Read Author Bio →
-                        </Link>
+                        <div className="flex flex-col sm:flex-row items-center gap-6">
+                            <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-indigo-500/30 flex-shrink-0 bg-slate-800">
+                                <img 
+                                    src="/images/Author/angelo-profile.webp" 
+                                    alt="Angelo S. Enriquez" 
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                            <div className="space-y-3">
+                                <p className="text-sm leading-relaxed">
+                                    Tokensense-Ai is architected and maintained by <strong>Angelo S. Enriquez</strong>, a developer exploring the frontier of agentic AI and vibe coding.
+                                </p>
+                                <Link 
+                                    href="/about/angelo" 
+                                    className="inline-flex items-center gap-2 text-sm font-bold text-indigo-400 hover:text-indigo-300 transition-colors"
+                                >
+                                    Read Author Bio →
+                                </Link>
+                            </div>
+                        </div>
                     </div>
 
                     <hr className="my-8 border-border/40" />

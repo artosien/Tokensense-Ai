@@ -1,13 +1,17 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useSession } from "next-auth/react";
 import { models, getModelById } from "@/lib/models";
 import { calculateCost } from "@/lib/costEngine";
 import { TermTooltip } from "./TermTooltip";
 import { ModelPickerModal } from "./ModelPickerModal";
-import { Calculator, AlertTriangle, TrendingUp } from "lucide-react";
+import { Calculator, AlertTriangle, TrendingUp, MessageSquare, Loader2 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
+import { triggerHaptic } from "@/lib/utils";
+import { slackService } from "@/lib/slackService";
 
 const PROVIDER_COLORS: Record<string, string> = {
   OpenAI: "text-emerald-400",
@@ -44,6 +48,9 @@ export function BudgetCalculator() {
   const [alertThreshold, setAlertThreshold] = useState(100);
 
   const model = getModelById(selectedModelId) ?? models[0];
+  const { data: session } = useSession();
+  const [isSharing, setIsSharing] = useState(false);
+
   const cost = useMemo(
     () => calculateCost(inputTokens, outputTokens, model),
     [inputTokens, outputTokens, model]
@@ -55,6 +62,38 @@ export function BudgetCalculator() {
 
   const projectedMonthlySpend = cost.totalCost * dailyVolume * 30;
   const isOverBudget = projectedMonthlySpend > alertThreshold;
+
+  const handleSendSlackAlert = async () => {
+    const userId = (session?.user as any)?.id || session?.user?.email;
+    if (!userId) {
+      alert("Please sign in to send Slack alerts.");
+      return;
+    }
+
+    const webhookUrl = localStorage.getItem(`user_slack_webhook_${userId}`);
+    if (!webhookUrl) {
+      alert("Slack Webhook not configured. Please add it in your Account settings.");
+      return;
+    }
+
+    setIsSharing(true);
+    triggerHaptic(20);
+    try {
+      await slackService.sendBudgetAlert(webhookUrl, {
+        budget: alertThreshold,
+        projected: projectedMonthlySpend,
+        modelName: model.name,
+        dailyVolume: dailyVolume
+      });
+      triggerHaptic(100);
+      alert("Budget alert sent to Slack!");
+    } catch (error) {
+      console.error(error);
+      alert("Failed to send Slack alert. Check your Webhook URL.");
+    } finally {
+      setIsSharing(false);
+    }
+  };
 
   // Alternatives: top 5 cheapest models by total cost for this token profile
   const alternatives = useMemo(() => {
@@ -174,6 +213,21 @@ export function BudgetCalculator() {
                 <div className={`text-3xl font-black font-mono ${isOverBudget ? "text-red-400" : "text-indigo-400"}`}>
                   ${projectedMonthlySpend.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                 </div>
+                {isOverBudget && (
+                  <Button 
+                    onClick={handleSendSlackAlert}
+                    disabled={isSharing}
+                    size="sm"
+                    className="bg-[#4A154B] hover:bg-[#3b113c] text-white text-[10px] font-bold h-7 rounded-lg"
+                  >
+                    {isSharing ? (
+                      <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                    ) : (
+                      <MessageSquare className="w-3 h-3 mr-1" />
+                    )}
+                    Notify Team
+                  </Button>
+                )}
                 <div className="text-xs text-muted-foreground">
                   {tBudget("at_req_day", { volume: dailyVolume.toLocaleString() })}
                 </div>

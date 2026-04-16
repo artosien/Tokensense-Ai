@@ -46,19 +46,63 @@ export default async function GlossaryTermPage({ params }: Props) {
   if (!term) {
     notFound();
   }
+
+  const definedTermSchema = {
+    "@context": "https://schema.org",
+    "@type": "DefinedTerm",
+    "@id": `https://tokensense-ai.com/glossary/${term.id}`,
+    "name": term.term,
+    "description": term.definition.replace(/<[^>]+>/g, ''),
+    "inDefinedTermSet": "https://tokensense-ai.com/glossary",
+    "termCode": term.abbr || undefined
+  };
+
+  const techArticleSchema = {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": `What is ${term.term}? A Complete Guide`,
+    "description": term.tldr || term.definition.replace(/<[^>]+>/g, ''),
+    "author": {
+      "@type": "Person",
+      "name": "Angelo",
+      "url": "https://tokensense-ai.com/about"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Tokensense-Ai",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://tokensense-ai.com/logo.png"
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `https://tokensense-ai.com/glossary/${term.id}`
+    }
+  };
+
   // Find related terms (same categories)
   const relatedTerms = (glossaryData as Term[])
     .filter(t => t.id !== term.id && t.categories.some(cat => term.categories.includes(cat)))
     .slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-[#e8e8f0]">
+    <div className="min-h-screen bg-[#040c0e] text-white">
       <SiteHeader />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(definedTermSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(techArticleSchema) }}
+      />
       
       <main className="max-w-4xl mx-auto px-6 pt-32 pb-32">
         <Link 
           href="/glossary" 
-          className="inline-flex items-center gap-2 text-[#8888a8] hover:text-[#e8c547] transition-colors font-mono text-xs uppercase tracking-widest mb-12 group"
+          className="inline-flex items-center gap-2 text-slate-500 hover:text-[#00e5ff] transition-colors font-mono text-xs uppercase tracking-widest mb-12 group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           Back to Glossary
@@ -68,28 +112,28 @@ export default async function GlossaryTermPage({ params }: Props) {
           <header className="mb-12">
             <div className="flex flex-wrap gap-2 mb-6">
               {term.categories.map(cat => (
-                <span key={cat} className="px-3 py-1 rounded-full border border-white/5 bg-white/5 text-[10px] font-mono text-[#8888a8] uppercase tracking-wider">
+                <span key={cat} className="px-3 py-1 rounded-full border border-[#00e5ff]/10 bg-[#00e5ff]/5 text-[10px] font-mono text-slate-500 uppercase tracking-wider">
                   {cat}
                 </span>
               ))}
             </div>
             
-            <h1 className="text-4xl md:text-6xl font-serif font-bold text-white mb-4 leading-tight">
-              What is {term.term}? <span className="text-[#e8c547]">A Complete Guide</span>
+            <h1 className="text-4xl md:text-6xl font-sans font-black text-white mb-4 leading-tight tracking-tighter">
+              What is {term.term}? <span className="text-[#00e5ff]">A Complete Guide</span>
             </h1>
             
             {term.abbr && (
-              <div className="text-2xl font-mono text-[#e8c547] opacity-80">
+              <div className="text-2xl font-mono text-[#00e5ff] opacity-80">
                 {term.abbr}
               </div>
             )}
           </header>
 
           {/* TL;DR Section */}
-          <div className="mb-12 p-8 rounded-3xl bg-[#e8c547]/5 border border-[#e8c547]/20 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-1 h-full bg-[#e8c547]"></div>
-            <h2 className="text-[#e8c547] font-mono text-xs uppercase tracking-[0.2em] mb-4">TL;DR Definition</h2>
-            <p className="text-xl md:text-2xl font-light leading-relaxed text-white">
+          <div className="mb-12 p-8 rounded-3xl bg-[#00e5ff]/5 border border-[#00e5ff]/20 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-1 h-full bg-[#00e5ff]"></div>
+            <h2 className="text-[#00e5ff] font-mono text-xs uppercase tracking-[0.2em] mb-4">TL;DR Definition</h2>
+            <p className="text-xl md:text-2xl font-medium leading-relaxed text-white">
               {term.tldr || term.definition.replace(/<[^>]+>/g, '')}
             </p>
           </div>
@@ -97,14 +141,14 @@ export default async function GlossaryTermPage({ params }: Props) {
           <div className="space-y-16">
             {/* Deep Dive */}
             <section>
-              <h2 className="text-2xl font-serif font-bold text-white mb-6 flex items-center gap-3">
-                <div className="w-8 h-px bg-[#e8c547]/30" />
+              <h2 className="text-2xl font-sans font-black text-white mb-6 flex items-center gap-3 uppercase tracking-tight">
+                <div className="w-8 h-px bg-[#00e5ff]/30" />
                 Deep Dive: How it Works
               </h2>
               <div 
-                className="text-lg font-light leading-relaxed text-[#b4b4d0] prose prose-invert prose-indigo max-w-none"
+                className="text-lg font-medium leading-relaxed text-slate-400 prose prose-invert prose-cyan max-w-none"
                 dangerouslySetInnerHTML={{ 
-                  __html: (term.deepDive || term.definition).replace(/<strong>/g, '<strong class="text-white font-medium">') 
+                  __html: (term.deepDive || term.definition).replace(/<strong>/g, '<strong class="text-white font-bold">') 
                 }} 
               />
             </section>
@@ -112,11 +156,11 @@ export default async function GlossaryTermPage({ params }: Props) {
             {/* Why it Matters */}
             {term.whyItMatters && (
               <section>
-                <h2 className="text-2xl font-serif font-bold text-white mb-6 flex items-center gap-3">
-                  <div className="w-8 h-px bg-[#e8c547]/30" />
+                <h2 className="text-2xl font-sans font-black text-white mb-6 flex items-center gap-3 uppercase tracking-tight">
+                  <div className="w-8 h-px bg-[#00e5ff]/30" />
                   Why it Matters
                 </h2>
-                <p className="text-lg font-light leading-relaxed text-[#b4b4d0]">
+                <p className="text-lg font-medium leading-relaxed text-slate-400">
                   {term.whyItMatters}
                 </p>
               </section>
@@ -125,37 +169,37 @@ export default async function GlossaryTermPage({ params }: Props) {
             {/* Examples */}
             {term.examples && (
               <section>
-                <h2 className="text-2xl font-serif font-bold text-white mb-6 flex items-center gap-3">
-                  <div className="w-8 h-px bg-[#e8c547]/30" />
+                <h2 className="text-2xl font-sans font-black text-white mb-6 flex items-center gap-3 uppercase tracking-tight">
+                  <div className="w-8 h-px bg-[#00e5ff]/30" />
                   Examples & Visualization
                 </h2>
-                <div className="p-8 rounded-2xl bg-slate-950 border border-white/5 font-mono text-sm overflow-x-auto text-indigo-300 leading-relaxed">
+                <div className="p-8 rounded-2xl bg-[#061417] border border-[#00e5ff]/10 font-mono text-sm overflow-x-auto text-[#00e5ff] leading-relaxed">
                   <div dangerouslySetInnerHTML={{ __html: term.examples }} />
                 </div>
               </section>
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-12 border-t border-[#1e1e2e] mt-24">
-            <div className="p-8 rounded-3xl bg-[#111118] border border-[#1e1e2e]">
-              <h3 className="text-[#e8c547] font-mono text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-12 border-t border-white/5 mt-24">
+            <div className="p-8 rounded-3xl bg-[#061417] border border-white/5">
+              <h3 className="text-[#00e5ff] font-mono text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
                 <Tag className="w-4 h-4" />
                 Topical Context
               </h3>
-              <p className="text-sm text-[#8888a8] leading-relaxed">
+              <p className="text-sm text-slate-400 leading-relaxed font-medium">
                 This term is fundamental to <strong>{term.categories.join(', ')}</strong> within the Large Language Model ecosystem. Understanding it is crucial for mastering AI infrastructure and implementation.
               </p>
             </div>
             
-            <div className="p-8 rounded-3xl bg-[#111118] border border-[#1e1e2e]">
-              <h3 className="text-[#e8c547] font-mono text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
+            <div className="p-8 rounded-3xl bg-[#061417] border border-white/5">
+              <h3 className="text-[#00e5ff] font-mono text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
                 <BookOpen className="w-4 h-4" />
                 Learn More
               </h3>
-              <p className="text-sm text-[#8888a8] leading-relaxed mb-4">
+              <p className="text-sm text-slate-400 leading-relaxed mb-4 font-medium">
                 Explore our Academy modules to see how these concepts translate into real-world token costs and optimizations.
               </p>
-              <Link href="/tokenomics" className="text-xs font-bold text-white underline decoration-[#e8c547] underline-offset-4 hover:text-[#e8c547] transition-colors">
+              <Link href="/tokenomics" className="text-xs font-bold text-white underline decoration-[#00e5ff] underline-offset-4 hover:text-[#00e5ff] transition-colors">
                 Visit Tokenomics Academy
               </Link>
             </div>
@@ -163,18 +207,18 @@ export default async function GlossaryTermPage({ params }: Props) {
 
           {relatedTerms.length > 0 && (
             <section className="mt-24">
-              <h2 className="text-2xl font-serif font-bold text-white mb-8">Related Concepts</h2>
+              <h2 className="text-2xl font-sans font-black text-white mb-8 uppercase tracking-tight">Related Concepts</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {relatedTerms.map(rt => (
                   <Link 
                     key={rt.id} 
                     href={`/glossary/${rt.id}`}
-                    className="p-6 rounded-2xl bg-[#111118] border border-[#1e1e2e] hover:border-[#e8c547]/30 transition-all group"
+                    className="p-6 rounded-2xl bg-[#061417] border border-white/5 hover:border-[#00e5ff]/30 transition-all group"
                   >
-                    <h4 className="text-sm font-mono text-[#f0d875] group-hover:text-[#e8c547] transition-colors mb-2">
+                    <h4 className="text-sm font-mono font-bold text-white group-hover:text-[#00e5ff] transition-colors mb-2">
                       {rt.term}
                     </h4>
-                    <p className="text-xs text-[#55556a] line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed font-medium">
                       {rt.tldr || rt.definition.replace(/<[^>]+>/g, '')}
                     </p>
                   </Link>
@@ -182,8 +226,33 @@ export default async function GlossaryTermPage({ params }: Props) {
               </div>
             </section>
           )}
+
+          {/* About the Author Section */}
+          <section className="mt-24 pt-12 border-t border-white/5">
+            <div className="flex flex-col md:flex-row items-center gap-8 p-8 rounded-3xl bg-gradient-to-br from-[#061417] to-[#040c0e] border border-white/5">
+              <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#00e5ff]/20 flex-shrink-0 bg-[#061417]">
+                <img 
+                  src="/images/Author/angelo-profile.webp" 
+                  alt="Angelo" 
+                  className="w-full h-full object-cover opacity-80"
+                />
+              </div>
+              <div>
+                <h3 className="text-[#00e5ff] font-mono text-xs uppercase tracking-[0.2em] mb-2">About the Author</h3>
+                <h4 className="text-2xl font-sans font-black text-white mb-3">Angelo</h4>
+                <p className="text-slate-400 text-sm leading-relaxed max-w-2xl font-medium">
+                  Specialist in LLM tokenomics and AI infrastructure optimization. Angelo builds tools like Tokensense-Ai to help developers and enterprises navigate the complex landscape of AI costs, focusing on high-performance, cost-efficient implementation of frontier models.
+                </p>
+                <div className="flex gap-4 mt-4">
+                  <a href="https://tokensense-ai.com/about" className="text-xs font-bold text-[#00e5ff] hover:underline">Learn More</a>
+                  <a href="/blog" className="text-xs font-bold text-slate-500 hover:text-white transition-colors">Read More Articles</a>
+                </div>
+              </div>
+            </div>
+          </section>
         </article>
       </main>
     </div>
   );
 }
+

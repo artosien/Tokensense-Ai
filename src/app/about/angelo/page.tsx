@@ -30,7 +30,14 @@ export default function AngeloBioPage() {
 
           {/* Hero Section */}
           <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="flex flex-col md:flex-row md:items-center gap-8">
+              <div className="w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-indigo-500/30 shadow-[0_0_30px_rgba(99,102,241,0.2)] flex-shrink-0 bg-slate-800">
+                <img 
+                  src="/images/Author/angelo-profile.webp" 
+                  alt="Angelo S. Enriquez" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <div className="space-y-4">
                 <Badge variant="outline" className="px-3 py-1 border-indigo-500/30 bg-indigo-500/10 text-indigo-400 font-black text-[10px] tracking-[0.2em] uppercase">
                   Lead Developer
@@ -39,7 +46,9 @@ export default function AngeloBioPage() {
                   Angelo S. <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">Enriquez</span>
                 </h1>
               </div>
+            </div>
 
+            <div className="flex justify-end">
               <a 
                 href="https://www.linkedin.com/in/angelo-s-enriquez-aug2022/" 
                 target="_blank" 

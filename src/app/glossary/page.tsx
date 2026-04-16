@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function GlossaryPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-[#e8e8f0]">
+    <div className="min-h-screen bg-[#040c0e] text-white">
       <SiteHeader />
       <GlossaryClient terms={glossaryData} />
     </div>

@@ -50,7 +50,8 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
-    pricingUrl: 'https://openai.com/api/pricing/'
+    pricingUrl: 'https://openai.com/api/pricing/',
+    visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
   {
     id: 'gpt-4o-mini',
@@ -64,7 +65,8 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
-    pricingUrl: 'https://openai.com/api/pricing/'
+    pricingUrl: 'https://openai.com/api/pricing/',
+    visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
   {
     id: 'gpt-4.1',
@@ -78,7 +80,8 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
-    pricingUrl: 'https://openai.com/api/pricing/'
+    pricingUrl: 'https://openai.com/api/pricing/',
+    visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
   {
     id: 'gpt-4.1-mini',
@@ -92,7 +95,8 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
-    pricingUrl: 'https://openai.com/api/pricing/'
+    pricingUrl: 'https://openai.com/api/pricing/',
+    visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
   {
     id: 'gpt-5',
@@ -106,7 +110,8 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
-    pricingUrl: 'https://openai.com/api/pricing/'
+    pricingUrl: 'https://openai.com/api/pricing/',
+    visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
   {
     id: 'gpt-5-mini',
@@ -120,7 +125,8 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
-    pricingUrl: 'https://openai.com/api/pricing/'
+    pricingUrl: 'https://openai.com/api/pricing/',
+    visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
   {
     id: 'o1',
@@ -135,7 +141,8 @@ export const models: ModelConfig[] = [
     cachingAvailable: true,
     batchDiscount: 0.5,
     notes: 'Reasoning model. Internal thinking tokens billed as output — actual cost higher than visible output suggests.',
-    pricingUrl: 'https://openai.com/api/pricing/'
+    pricingUrl: 'https://openai.com/api/pricing/',
+    visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
   {
     id: 'o3',
@@ -150,7 +157,8 @@ export const models: ModelConfig[] = [
     cachingAvailable: true,
     batchDiscount: 0.5,
     notes: 'Reasoning model. Internal thinking tokens billed as output.',
-    pricingUrl: 'https://openai.com/api/pricing/'
+    pricingUrl: 'https://openai.com/api/pricing/',
+    visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
   {
     id: 'o4-mini',
@@ -165,7 +173,8 @@ export const models: ModelConfig[] = [
     cachingAvailable: true,
     batchDiscount: 0.5,
     notes: 'Budget reasoning model. Great for math and coding at lower cost than o1/o3.',
-    pricingUrl: 'https://openai.com/api/pricing/'
+    pricingUrl: 'https://openai.com/api/pricing/',
+    visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
 
   // ── Anthropic ────────────────────────────────────────────────────────────
@@ -181,7 +190,8 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
-    pricingUrl: 'https://platform.claude.com/docs/en/about-claude/pricing'
+    pricingUrl: 'https://platform.claude.com/docs/en/about-claude/pricing',
+    visionPricing: { strategy: 'anthropic-scale' }
   },
   {
     id: 'claude-sonnet-4-6',
@@ -196,7 +206,8 @@ export const models: ModelConfig[] = [
     cachingAvailable: true,
     batchDiscount: 0.5,
     notes: 'Long context surcharge (>200K tokens): $6.00 input / $22.50 output',
-    pricingUrl: 'https://platform.claude.com/docs/en/about-claude/pricing'
+    pricingUrl: 'https://platform.claude.com/docs/en/about-claude/pricing',
+    visionPricing: { strategy: 'anthropic-scale' }
   },
   {
     id: 'claude-haiku-4-5-20251001',
@@ -210,7 +221,8 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
-    pricingUrl: 'https://platform.claude.com/docs/en/about-claude/pricing'
+    pricingUrl: 'https://platform.claude.com/docs/en/about-claude/pricing',
+    visionPricing: { strategy: 'anthropic-scale' }
   },
   {
     id: 'claude-opus-4-1',
@@ -224,7 +236,8 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
-    pricingUrl: 'https://platform.claude.com/docs/en/about-claude/pricing'
+    pricingUrl: 'https://platform.claude.com/docs/en/about-claude/pricing',
+    visionPricing: { strategy: 'anthropic-scale' }
   },
   {
     id: 'claude-sonnet-4-5',
@@ -238,7 +251,8 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
-    pricingUrl: 'https://platform.claude.com/docs/en/about-claude/pricing'
+    pricingUrl: 'https://platform.claude.com/docs/en/about-claude/pricing',
+    visionPricing: { strategy: 'anthropic-scale' }
   },
   {
     id: 'claude-haiku-3-5',
@@ -252,7 +266,8 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
-    pricingUrl: 'https://platform.claude.com/docs/en/about-claude/pricing'
+    pricingUrl: 'https://platform.claude.com/docs/en/about-claude/pricing',
+    visionPricing: { strategy: 'anthropic-scale' }
   },
   {
     id: 'claude-haiku-3',
@@ -284,7 +299,8 @@ export const models: ModelConfig[] = [
     cachingAvailable: true,
     batchDiscount: 0.5,
     notes: 'Long context surcharge (>200K tokens): 2x input price',
-    pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing'
+    pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing',
+    visionPricing: { strategy: 'gemini-flat', flatTokens: 258 }
   },
   {
     id: 'gemini-3-flash',
@@ -298,7 +314,8 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
-    pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing'
+    pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing',
+    visionPricing: { strategy: 'gemini-flat', flatTokens: 258 }
   },
   {
     id: 'gemini-2.5-pro-preview-05-06',
@@ -313,7 +330,8 @@ export const models: ModelConfig[] = [
     cachingAvailable: true,
     batchDiscount: 0.5,
     notes: 'Long context (>200K tokens): $2.50/$15 per 1M.',
-    pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing'
+    pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing',
+    visionPricing: { strategy: 'gemini-flat', flatTokens: 258 }
   },
   {
     id: 'gemini-2.5-flash-preview-04-17',
@@ -328,7 +346,8 @@ export const models: ModelConfig[] = [
     cachingAvailable: true,
     freeTier: true,
     batchDiscount: 0.5,
-    pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing'
+    pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing',
+    visionPricing: { strategy: 'gemini-flat', flatTokens: 258 }
   },
   {
     id: 'gemini-2.5-flash-lite-preview-06-17',
@@ -343,7 +362,8 @@ export const models: ModelConfig[] = [
     cachingAvailable: true,
     freeTier: true,
     batchDiscount: 0.5,
-    pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing'
+    pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing',
+    visionPricing: { strategy: 'gemini-flat', flatTokens: 258 }
   },
   {
     id: 'gemini-2.0-flash-001',
@@ -357,7 +377,8 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
-    pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing'
+    pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing',
+    visionPricing: { strategy: 'gemini-flat', flatTokens: 258 }
   },
   {
     id: 'gemini-2.0-flash-lite',
@@ -372,7 +393,8 @@ export const models: ModelConfig[] = [
     cachingAvailable: true,
     deprecated: true,
     notes: '⚠️ Deprecated — shuts down June 1, 2026.',
-    pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing'
+    pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing',
+    visionPricing: { strategy: 'gemini-flat', flatTokens: 258 }
   },
   {
     id: 'gemini-1.5-pro-002',
@@ -386,7 +408,8 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
-    pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing'
+    pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing',
+    visionPricing: { strategy: 'gemini-flat', flatTokens: 258 }
   },
   {
     id: 'gemini-1.5-flash-002',
@@ -400,7 +423,8 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
-    pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing'
+    pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing',
+    visionPricing: { strategy: 'gemini-flat', flatTokens: 258 }
   },
 
   // ── xAI ──────────────────────────────────────────────────────────────────
@@ -415,7 +439,8 @@ export const models: ModelConfig[] = [
     tier: 'flagship',
     supportsVision: true,
     cachingAvailable: false,
-    pricingUrl: 'https://x.ai/api'
+    pricingUrl: 'https://x.ai/api',
+    visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
   {
     id: 'grok-4.1-fast',
@@ -516,7 +541,8 @@ export const models: ModelConfig[] = [
     cachingAvailable: false,
     freeTier: true,
     notes: 'Cheapest output price in its capability tier. EU data residency available.',
-    pricingUrl: 'https://mistral.ai/pricing'
+    pricingUrl: 'https://mistral.ai/pricing',
+    visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
   {
     id: 'mistral-medium-latest',
@@ -604,7 +630,8 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: false,
     notes: 'Open-weight model. Self-hosting is free. Prices shown for hosted inference via Together AI.',
-    pricingUrl: 'https://www.together.ai/pricing'
+    pricingUrl: 'https://www.together.ai/pricing',
+    visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
   {
     id: 'meta-llama/Llama-4-Scout-17B-16E-Instruct',
@@ -720,7 +747,8 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: false,
     notes: 'Available via AWS Bedrock.',
-    pricingUrl: 'https://aws.amazon.com/bedrock/pricing/'
+    pricingUrl: 'https://aws.amazon.com/bedrock/pricing/',
+    visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
   {
     id: 'amazon.nova-lite-v1:0',
@@ -734,7 +762,8 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: false,
     notes: 'Very low cost multimodal model via AWS Bedrock.',
-    pricingUrl: 'https://aws.amazon.com/bedrock/pricing/'
+    pricingUrl: 'https://aws.amazon.com/bedrock/pricing/',
+    visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
 ];
 

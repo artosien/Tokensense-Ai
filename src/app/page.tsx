@@ -16,6 +16,7 @@ import WhyTokensense from "@/components/WhyTokensense";
 import ScenarioCards from "@/components/ScenarioCards";
 import CalculatorStepTracker from "@/components/CalculatorStepTracker";
 import NewsletterSignup from "@/components/NewsletterSignup";
+import CommunityFeedback from "@/components/CommunityFeedback";
 
 export const metadata: Metadata = {
   title: "Tokensense AI — Free LLM Token Cost Calculator | GPT-4o, Claude, Gemini",
@@ -240,6 +241,8 @@ export default function Home() {
         </div>
 
         <ScenarioCards />
+
+        <CommunityFeedback />
 
         {/* FAQ Section */}
         <section className="py-24 border-t border-border/40">

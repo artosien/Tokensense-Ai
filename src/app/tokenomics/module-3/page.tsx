@@ -1,734 +1,370 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
   ArrowLeft, 
-  TrendingDown,
+  TrendingUp,
   Zap,
-  Scale,
   ChevronRight,
   Target,
   CheckCircle2,
-  LineChart,
   History,
-  Activity,
-  ArrowRight,
   AlertTriangle,
-  Info,
   Layers,
-  Calculator,
   Cpu,
   Clock,
   ExternalLink,
-  Milestone
+  BookOpen,
+  Info,
+  Database,
+  Search,
+  Maximize2
 } from "lucide-react";
 import SiteHeader from "@/components/SiteHeader";
 import { GradientOrbs } from "@/components/GradientOrbs";
 import ShareButton from "@/components/ShareButton";
-import { cn } from "@/lib/utils";
-
-// ─── Constants & Data ────────────────────────────────────────────────────────
-
-const TASK_DATA = [
-    { 
-        id: 1, 
-        task: "Classify support tickets as urgent / not urgent", 
-        tier: 'flash', 
-        model: 'Gemini 2.5 Flash', 
-        reason: 'Binary classification is well within Flash capabilities. No multi-step reasoning required. At 10,000 calls/day, Flash costs ~$1.50/day vs Frontier at ~$225/day.' 
-    },
-    { 
-        id: 2, 
-        task: "Analyze a contract for conflicting indemnification clauses", 
-        tier: 'frontier', 
-        model: 'Claude Sonnet / GPT-5', 
-        reason: 'Interpreting conflicting legal language across jurisdictions requires deep multi-step reasoning, citation tracking, and low error tolerance. Frontier is the right call.' 
-    },
-    { 
-        id: 3, 
-        task: "Extract names and amounts from 500 invoices", 
-        tier: 'flash', 
-        model: 'Gemini 2.5 Flash', 
-        reason: 'Structured extraction is a pattern-matching task Flash handles with high accuracy. Consider running a Flash model with a structured output schema (JSON mode).' 
-    },
-    { 
-        id: 4, 
-        task: "Debug a race condition in a distributed async system", 
-        tier: 'frontier', 
-        model: 'Claude Sonnet / GPT-5', 
-        reason: 'Debugging requires understanding state across multiple files and reasoning about causal chains. Frontier models show dramatically higher first-attempt fix rates.' 
-    },
-    { 
-        id: 5, 
-        task: "Translate 10,000 product descriptions to Spanish", 
-        tier: 'flash', 
-        model: 'Gemini 2.5 Flash', 
-        reason: 'Translation is a well-solved Flash task. Modern Flash models match Frontier quality on 40+ major languages. Use Flash and save 150×.' 
-    },
-    { 
-        id: 6, 
-        task: "Synthesize 20 research papers into an investment thesis", 
-        tier: 'frontier', 
-        model: 'Claude Sonnet / GPT-5', 
-        reason: 'Multi-document synthesis across sources with conflicting data requires tracking provenance and resolving contradictions. This is the Frontier sweet spot.' 
-    }
-];
-
-const ERAS = [
-    {
-        year: "2023",
-        name: "Context Scarcity",
-        tokens: "4K – 8K tokens",
-        desc: "Roughly 6–12 pages of text. Most real-world documents didn't fit. Teams built RAG pipelines and chunking strategies just to process anything substantial.",
-        cost: "$0.48",
-        costLabel: "to fill 8K context (GPT-4)",
-        overhead: "High",
-        fits: [
-            { label: "Short Q&A, single-page docs", status: "Fits", type: "fits" },
-            { label: "Legal contracts (5-10 pages)", status: "Tight", type: "tight" },
-            { label: "Codebases, books, reports", status: "Impossible", type: "nope" }
-        ]
-    },
-    {
-        year: "2024",
-        name: "Context Expansion",
-        tokens: "128K – 200K tokens",
-        desc: "Claude and GPT-4 Turbo pushed limits. Entire codebases and long books could now be processed in a single call. RAG was still preferred for cost, but ceilings vanished.",
-        cost: "$0.38",
-        costLabel: "to fill 128K context (GPT-4T)",
-        overhead: "Medium",
-        fits: [
-            { label: "Contracts, reports, codebases", status: "Fits", type: "fits" },
-            { label: "Full novels (200K words)", status: "Fits", type: "fits" },
-            { label: "Very large repos, datasets", status: "Tight", type: "tight" }
-        ]
-    },
-    {
-        year: "2025",
-        name: "Context Abundance (Early)",
-        tokens: "500K – 1M tokens",
-        desc: "Gemini 1.5 Pro offered 1M tokens. Entire documentation sets and databases could be sent in a single call. Cost-per-token fell enough to make this viable.",
-        cost: "$0.50",
-        costLabel: "to fill 1M context (Gemini 1.5)",
-        overhead: "Low",
-        fits: [
-            { label: "Entire codebases (mid-size)", status: "Fits", type: "fits" },
-            { label: "Full product doc sets", status: "Fits", type: "fits" },
-            { label: "Long research histories", status: "Fits", type: "fits" }
-        ]
-    },
-    {
-        year: "2026",
-        name: "Context Abundance (Mature)",
-        tokens: "2M+ tokens",
-        desc: "2M+ token windows are standard. The bottleneck has fully inverted: the constraint is no longer fitting data, it's the cost of keeping it in memory on every call.",
-        cost: "$0.15",
-        costLabel: "to fill 2M context (Flash 2026)",
-        overhead: "Minimal",
-        fits: [
-            { label: "Large enterprise codebases", status: "Fits", type: "fits" },
-            { label: "Year-long conversation logs", status: "Fits", type: "fits" },
-            { label: "Encyclopedias, full datasets", status: "Fits", type: "fits" }
-        ]
-    }
-];
-
-// ─── Components ──────────────────────────────────────────────────────────────
+import ContextCompoundingSimulator from "@/components/ContextCompoundingSimulator";
 
 export default function Module3Page() {
-    const [activeTask, setActiveTask] = useState<typeof TASK_DATA[0] | null>(null);
-    const [activeEra, setActiveEra] = useState(0);
-    
-    // Forecaster State
-    const [baseCost, setBaseCost] = useState(1000);
-    const [growthRate, setGrowthRate] = useState(20);
-    const [halvingPeriod, setHalvingPeriod] = useState(18);
-
-    const forecast = useMemo(() => {
-        const monthlyGrowthRate = Math.pow(1 + growthRate / 100, 1/12) - 1;
-        const monthlyDecayRate = Math.pow(0.5, 1 / halvingPeriod);
+  return (
+    <div className="min-h-screen bg-[#020817] text-slate-200 selection:bg-indigo-500/30">
+      <SiteHeader />
+      
+      <main className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12 md:py-24 space-y-20">
+        <GradientOrbs />
         
-        return [1, 2, 3, 4, 5].map(yr => {
-            const monthly = baseCost * Math.pow(1 + monthlyGrowthRate, yr * 12) * Math.pow(monthlyDecayRate, yr * 12);
-            return { yr, monthly };
-        });
-    }, [baseCost, growthRate, halvingPeriod]);
-
-    const maxForecastMonthly = Math.max(...forecast.map(f => f.monthly), baseCost);
-
-    return (
-        <div className="min-h-screen bg-[#020817] text-slate-200 selection:bg-emerald-500/30">
-            <SiteHeader />
-            
-            {/* Floating Nav */}
-            <nav className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-6 py-3 bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-full hidden md:flex items-center gap-8 shadow-2xl">
-                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest border-r border-white/10 pr-8">Module 3</span>
-                <div className="flex gap-6">
-                    {['The Crash', 'Flash vs Frontier', 'Context', 'Forecasting'].map((link, i) => (
-                        <a key={i} href={`#lesson-${i+1}`} className="text-[10px] font-bold text-slate-400 hover:text-white transition-colors uppercase tracking-tight">
-                            3.{i+1} {link}
-                        </a>
-                    ))}
-                </div>
-            </nav>
-
-            <main className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12 md:py-32 space-y-32">
-                <GradientOrbs />
-                
-                {/* HERO */}
-                <section className="relative min-h-[60vh] flex flex-col justify-center space-y-10">
-                    <div className="space-y-6">
-                        <Link 
-                            href="/tokenomics" 
-                            className="inline-flex items-center gap-2 text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors group"
-                        >
-                            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-                            BACK TO ACADEMY
-                        </Link>
-                        
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-3">
-                                <Badge variant="outline" className="px-3 py-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-black text-[10px] tracking-[0.2em] uppercase">
-                                    Module 3 · Economics of AI
-                                </Badge>
-                            </div>
-                            <h1 className="text-5xl md:text-8xl font-black text-white tracking-tighter leading-none uppercase">
-                                Deflationary<br/>
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 italic font-serif normal-case">Intelligence</span>
-                            </h1>
-                            <p className="text-xl text-slate-400 font-medium max-w-xl leading-relaxed">
-                                In 24 months, intelligence costs have dropped 90%. Learn to navigate the fastest-falling price curve in the history of computing.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-8 items-center">
-                        <div className="inline-flex items-baseline gap-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl px-6 py-4">
-                            <span className="text-4xl font-black text-emerald-400 font-mono tracking-tighter">−92%</span>
-                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest max-w-[120px] leading-tight">
-                                Cost per 1M tokens Mar 2023 → 2026
-                            </span>
-                        </div>
-                        
-                        <div className="space-y-3">
-                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Learning Objectives</p>
-                            <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
-                                {[
-                                    "Analyze price-performance ratios",
-                                    "Distinguish model tiers",
-                                    "Master context economics",
-                                    "Forecast future token costs"
-                                ].map((obj, i) => (
-                                    <li key={i} className="flex items-center gap-2 text-xs font-bold text-slate-300">
-                                        <ArrowRight className="w-3 h-3 text-emerald-500" /> {obj}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
-                {/* EXPLAINER VIDEO */}
-                <section className="relative group">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 rounded-[40px] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-                    <div className="relative bg-slate-900/50 border border-white/10 rounded-[40px] overflow-hidden shadow-2xl">
-                        <div className="aspect-video relative">
-                            <iframe 
-                                width="100%" 
-                                height="100%" 
-                                src="https://www.youtube.com/embed/s6OO50H0x2o" 
-                                title="YouTube video player" 
-                                frameBorder="0" 
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                                referrerPolicy="strict-origin-when-cross-origin" 
-                                allowFullScreen
-                                loading="lazy"
-                                className="absolute inset-0 w-full h-full"
-                            ></iframe>
-                            
-                            {/* Share Button Overlay */}
-                            <div className="absolute top-6 right-6">
-                                <ShareButton 
-                                    title="The Commoditization of Reasoning"
-                                    text="Watch this explainer on the deflationary economics of AI reasoning."
-                                    url={typeof window !== 'undefined' ? window.location.href : ''}
-                                    className="bg-black/60 hover:bg-black/80 text-white border-white/20 backdrop-blur-md rounded-2xl w-12 h-12"
-                                />
-                            </div>
-
-                            {/* Video Label */}
-                            <div className="absolute top-6 left-6 flex items-center gap-3 px-4 py-2 bg-black/60 backdrop-blur-md rounded-full border border-white/10">
-                                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                <span className="text-[10px] font-black text-white uppercase tracking-widest">MODULE 3 EXPLAINER</span>
-                            </div>
-                        </div>
-                    </div>
-                    <p className="mt-6 text-center text-sm text-slate-500 font-medium italic">
-                        "As reasoning becomes a commodity, the value shifts from the model itself to the orchestration of loops."
-                    </p>
-                </section>
-
-                {/* LESSON 3.1: THE CRASH */}
-                <section id="lesson-1" className="space-y-16 scroll-mt-32">
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-4">
-                            <span className="text-6xl font-black text-slate-800/50 font-serif">3.1</span>
-                            <div className="h-px flex-1 bg-white/5" />
-                        </div>
-                        <h2 className="text-4xl font-black text-white uppercase tracking-tight">The 90% Drop</h2>
-                        <p className="text-xl text-slate-400 font-medium max-w-2xl italic">"We aren't just seeing lower prices. We're witnessing the commoditization of reasoning itself."</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-                        <div className="lg:col-span-7 space-y-8 text-lg text-slate-300 leading-relaxed font-medium">
-                            <p>
-                                What cost <strong>$30.00</strong> to process in early 2023 now costs less than <strong>$0.10</strong> for the same amount of information. No technology in recent history has deflated this fast.
-                            </p>
-                            <p className="text-slate-400 text-base">
-                                Three structural forces are compounding: algorithmic efficiency (more per FLOP), hardware improvements (H100 → Blackwell), and competitive pressure driving margins toward zero.
-                            </p>
-                            
-                            <Card className="p-8 bg-emerald-500/5 border-emerald-500/20 space-y-4">
-                                <h4 className="text-xs font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2">
-                                    <Info className="w-4 h-4" /> Key Insight
-                                </h4>
-                                <p className="text-sm text-slate-300 leading-relaxed italic">
-                                    The price of <span className="text-white font-bold">intelligence</span> is now decoupling from the cost of <span className="text-white font-bold">quality</span>. Yesterday's premium capability is today's commodity.
-                                </p>
-                            </Card>
-                        </div>
-
-                        <div className="lg:col-span-5">
-                            <Card className="p-8 bg-slate-900/50 border-white/10 space-y-10 relative overflow-hidden">
-                                <div className="space-y-2">
-                                    <div className="flex justify-between items-center">
-                                        <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Cost Crash Timeline</h4>
-                                        <Badge className="bg-red-500/20 text-red-400 border-none font-mono text-[10px]">-92% in 36mo</Badge>
-                                    </div>
-                                    <p className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">Cost per 1M Input Tokens</p>
-                                </div>
-
-                                <div className="space-y-12 relative">
-                                    <div className="absolute left-0 top-2 bottom-2 w-px bg-white/5" />
-                                    
-                                    {[
-                                        { date: "Mar 2023", model: "GPT-4 (8K)", price: "$30.00", width: "100%", color: "bg-slate-700", note: "Frontier Launch" },
-                                        { date: "May 2024", model: "GPT-4o", price: "$5.00", width: "16.7%", color: "bg-emerald-600", note: "83% Cheaper" },
-                                        { date: "2026", model: "Gemini 2.5 Flash", price: "$0.075", width: "2%", color: "bg-cyan-400", note: "400x Reduction" }
-                                    ].map((item, i) => (
-                                        <div key={i} className="pl-6 relative">
-                                            <div className="absolute left-[-4px] top-1 w-2 h-2 rounded-full bg-slate-900 border border-white/20" />
-                                            <div className="flex justify-between items-baseline mb-2">
-                                                <span className="text-[10px] font-black text-slate-500 font-mono uppercase tracking-widest">{item.date}</span>
-                                                <span className="text-xs font-bold text-white">{item.model}</span>
-                                            </div>
-                                            <div className="flex items-center gap-4">
-                                                <span className={cn("text-2xl font-black font-mono tracking-tighter", i === 0 ? "text-slate-500" : i === 1 ? "text-emerald-500" : "text-cyan-400")}>{item.price}</span>
-                                                <div className="h-1.5 flex-1 bg-white/5 rounded-full overflow-hidden">
-                                                    <div className={cn("h-full rounded-full transition-all duration-1000", item.color)} style={{ width: item.width }} />
-                                                </div>
-                                            </div>
-                                            <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mt-1 italic">{item.note}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </Card>
-                        </div>
-                    </div>
-
-                    <div className="p-8 bg-slate-900/30 border border-dashed border-white/10 rounded-3xl space-y-6">
-                        <div className="flex items-center gap-3 text-emerald-400">
-                            <Activity className="w-5 h-5" />
-                            <h4 className="text-lg font-black uppercase tracking-tight">Wright's Law in AI Inference</h4>
-                        </div>
-                        <p className="text-sm text-slate-400 leading-relaxed">
-                            Every time cumulative production doubles, costs fall by a predictable percentage. For AI inference, we see a <strong>40-50% cost reduction per year</strong>. The implication: never lock in architecture assumptions. A $500/mo workflow today will cost $50/mo in 18 months.
-                        </p>
-                        <div className="flex items-start gap-3 p-4 bg-red-500/5 border border-red-500/20 rounded-2xl">
-                            <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                            <p className="text-xs text-slate-400 leading-relaxed italic">
-                                <strong className="text-white uppercase tracking-widest text-[10px] block mb-1">Architectural Risk:</strong> The biggest mistake is hard-coding model names. Always abstract your model layer behind a config variable so you can swap GPT-5 for Gemini Flash in a single line.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="relative aspect-video w-full overflow-hidden rounded-[32px] border border-white/10 shadow-2xl">
-                        <Image 
-                            src="/images/Deflationary Intelligence.png" 
-                            alt="The Era of Deflationary Intelligence: The 90% Cost Crash" 
-                            fill
-                            className="object-cover"
-                        />
-                    </div>
-                </section>
-
-                {/* LESSON 3.2: FLASH VS FRONTIER */}
-                <section id="lesson-2" className="space-y-16 scroll-mt-32">
-                    <div className="space-y-4 text-right">
-                        <div className="flex items-center gap-4 justify-end">
-                            <div className="h-px flex-1 bg-white/5" />
-                            <span className="text-6xl font-black text-slate-800/50 font-serif">3.2</span>
-                        </div>
-                        <h2 className="text-4xl font-black text-white uppercase tracking-tight">Flash vs. Frontier</h2>
-                        <p className="text-xl text-slate-400 font-medium max-w-2xl ml-auto italic">"Flash models have solved the cost problem for 80% of use cases. The skill is knowing when you need the $15/1M reasoning."</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <Card className="p-8 bg-slate-900/50 border-emerald-500/20 space-y-6 group hover:border-emerald-500/40 transition-all">
-                            <div className="flex justify-between items-center">
-                                <h4 className="text-sm font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2">
-                                    <Zap className="w-4 h-4" /> Flash Tier
-                                </h4>
-                                <span className="text-2xl font-black text-white font-mono tracking-tighter">$0.10</span>
-                            </div>
-                            <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest -mt-4">Avg Output / 1M tokens · 2026</p>
-                            
-                            <div className="space-y-3 border-y border-white/5 py-6">
-                                <div className="flex justify-between text-xs font-bold"><span className="text-slate-500 uppercase tracking-tight">Latency</span><span className="text-emerald-400">&lt; 300ms</span></div>
-                                <div className="flex justify-between text-xs font-bold"><span className="text-slate-500 uppercase tracking-tight">Context</span><span className="text-white">1M – 2M</span></div>
-                                <div className="flex justify-between text-xs font-bold"><span className="text-slate-500 uppercase tracking-tight">Throughput</span><span className="text-white">Very High</span></div>
-                            </div>
-
-                            <div className="flex flex-wrap gap-2">
-                                {['Classification', 'Summarization', 'Extraction', 'Translation', 'Routing'].map(tag => (
-                                    <Badge key={tag} className="bg-emerald-500/10 text-emerald-400 border-none font-black text-[9px] uppercase tracking-tighter">{tag}</Badge>
-                                ))}
-                            </div>
-                        </Card>
-
-                        <Card className="p-8 bg-slate-900/50 border-indigo-500/20 space-y-6 group hover:border-indigo-500/40 transition-all">
-                            <div className="flex justify-between items-center">
-                                <h4 className="text-sm font-black text-indigo-400 uppercase tracking-widest flex items-center gap-2">
-                                    <Scale className="w-4 h-4" /> Frontier Tier
-                                </h4>
-                                <span className="text-2xl font-black text-white font-mono tracking-tighter">$15.00</span>
-                            </div>
-                            <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest -mt-4">Avg Output / 1M tokens · 2026</p>
-                            
-                            <div className="space-y-3 border-y border-white/5 py-6">
-                                <div className="flex justify-between text-xs font-bold"><span className="text-slate-500 uppercase tracking-tight">Latency</span><span className="text-indigo-400">500ms – 2s</span></div>
-                                <div className="flex justify-between text-xs font-bold"><span className="text-slate-500 uppercase tracking-tight">Context</span><span className="text-white">200K – 1M</span></div>
-                                <div className="flex justify-between text-xs font-bold"><span className="text-slate-500 uppercase tracking-tight">Throughput</span><span className="text-white">Moderate</span></div>
-                            </div>
-
-                            <div className="flex flex-wrap gap-2">
-                                {['Legal Analysis', 'Code Generation', 'Research', 'Strategy', 'Novel Tasks'].map(tag => (
-                                    <Badge key={tag} className="bg-indigo-500/10 text-indigo-400 border-none font-black text-[9px] uppercase tracking-tighter">{tag}</Badge>
-                                ))}
-                            </div>
-                        </Card>
-                    </div>
-
-                    <div className="space-y-8">
-                        <div className="text-center space-y-2">
-                            <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Decision Engine Exercise</h4>
-                            <p className="text-lg text-white font-bold tracking-tight uppercase">Which tier would you deploy?</p>
-                        </div>
-
-                        <Card className="bg-black/40 border-white/5 overflow-hidden">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-white/5">
-                                {TASK_DATA.map(item => (
-                                    <button 
-                                        key={item.id}
-                                        onClick={() => setActiveTask(item)}
-                                        className={cn(
-                                            "p-6 text-left transition-all duration-300 group relative",
-                                            activeTask?.id === item.id ? "bg-slate-900" : "bg-slate-950 hover:bg-slate-900"
-                                        )}
-                                    >
-                                        {activeTask?.id === item.id && <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500" />}
-                                        <p className="text-xs font-bold text-slate-400 group-hover:text-slate-200 leading-relaxed mb-4">{item.task}</p>
-                                        <div className="flex items-center gap-2 text-[9px] font-black text-slate-600 group-hover:text-emerald-400 uppercase tracking-widest">
-                                            SELECT TASK <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                            
-                            <div className="p-8 bg-slate-900/80 border-t border-white/10 min-h-[160px] flex items-center justify-center text-center">
-                                {!activeTask ? (
-                                    <p className="text-xs font-mono text-slate-600 uppercase tracking-widest animate-pulse">Select a task above to reveal the optimal deployment strategy</p>
-                                ) : (
-                                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500 max-w-2xl">
-                                        <div className="flex items-center justify-center gap-3">
-                                            <div className={cn(
-                                                "w-10 h-10 rounded-full flex items-center justify-center text-xl",
-                                                activeTask.tier === 'flash' ? "bg-emerald-500/20 text-emerald-400" : "bg-indigo-500/20 text-indigo-400"
-                                            )}>
-                                                {activeTask.tier === 'flash' ? <Zap className="w-5 h-5" /> : <Scale className="w-5 h-5" />}
-                                            </div>
-                                            <div className="text-left">
-                                                <h5 className={cn("text-sm font-black uppercase tracking-widest", activeTask.tier === 'flash' ? "text-emerald-400" : "text-indigo-400")}>
-                                                    {activeTask.tier === 'flash' ? '⚡ Flash Tier' : '🔬 Frontier Tier'} — {activeTask.model}
-                                                </h5>
-                                                <p className="text-xs text-slate-400 font-bold uppercase tracking-tight">Deployment Strategy Verified</p>
-                                            </div>
-                                        </div>
-                                        <p className="text-sm text-slate-300 leading-relaxed font-medium">{activeTask.reason}</p>
-                                    </div>
-                                )}
-                            </div>
-                        </Card>
-                    </div>
-
-                    <div className="p-8 bg-indigo-500/10 border border-indigo-500/20 rounded-[32px] space-y-4">
-                        <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest flex items-center gap-2">
-                            <Milestone className="w-4 h-4" /> Routing Pattern
-                        </h4>
-                        <p className="text-sm text-slate-300 leading-relaxed font-medium italic">
-                            "Advanced teams use a <strong>model router</strong>: a cheap classifier (Flash) that reads each request and decides which model tier to invoke. This alone can cut costs 40–70% on mixed workloads."
-                        </p>
-                    </div>
-                </section>
-
-                {/* LESSON 3.3: CONTEXT ABUNDANCE */}
-                <section id="lesson-3" className="space-y-16 scroll-mt-32">
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-4">
-                            <span className="text-6xl font-black text-slate-800/50 font-serif">3.3</span>
-                            <div className="h-px flex-1 bg-white/5" />
-                        </div>
-                        <h2 className="text-4xl font-black text-white uppercase tracking-tight">Context Abundance</h2>
-                        <p className="text-xl text-slate-400 font-medium max-w-2xl italic">"The bottleneck has shifted from 'can I fit this?' to 'can I afford to keep this in memory?'"</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-                        <div className="lg:col-span-12">
-                            <Card className="bg-slate-900/50 border-white/5 overflow-hidden shadow-2xl">
-                                <div className="p-6 border-b border-white/5 flex flex-wrap justify-between items-center gap-4 bg-black/20">
-                                    <div className="flex items-center gap-3">
-                                        <History className="w-5 h-5 text-emerald-400" />
-                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Context Window Evolution</h4>
-                                    </div>
-                                    <div className="flex gap-1 bg-black/40 p-1 rounded-lg border border-white/5">
-                                        {ERAS.map((era, i) => (
-                                            <button 
-                                                key={i}
-                                                onClick={() => setActiveEra(i)}
-                                                className={cn(
-                                                    "px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded transition-all",
-                                                    activeEra === i ? "bg-emerald-500 text-black shadow-lg" : "text-slate-500 hover:text-white"
-                                                )}
-                                            >
-                                                {era.year}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="p-10 md:p-16 grid grid-cols-1 lg:grid-cols-2 gap-16 min-h-[400px]">
-                                    <div className="space-y-8 animate-in fade-in slide-in-from-left-4 duration-700" key={`era-text-${activeEra}`}>
-                                        <div className="space-y-2">
-                                            <h5 className="text-3xl font-black text-white uppercase tracking-tighter">{ERAS[activeEra].name}</h5>
-                                            <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest font-mono">{ERAS[activeEra].year} ERA STANDARD</p>
-                                        </div>
-                                        <div className="text-6xl font-black text-white font-mono tracking-tighter tabular-nums">
-                                            {ERAS[activeEra].tokens}
-                                        </div>
-                                        <p className="text-lg text-slate-400 leading-relaxed font-medium">
-                                            {ERAS[activeEra].desc}
-                                        </p>
-                                        <div className="flex gap-12 pt-4 border-t border-white/5">
-                                            <div className="space-y-1">
-                                                <span className="text-2xl font-black text-emerald-400 font-mono tracking-tighter">{ERAS[activeEra].cost}</span>
-                                                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{ERAS[activeEra].costLabel}</p>
-                                            </div>
-                                            <div className="space-y-1">
-                                                <span className="text-2xl font-black text-white uppercase tracking-tighter font-mono">{ERAS[activeEra].overhead}</span>
-                                                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Engineering Overhead</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 gap-4 animate-in fade-in slide-in-from-right-4 duration-700" key={`era-grid-${activeEra}`}>
-                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Can it fit without RAG?</p>
-                                        {ERAS[activeEra].fits.map((f, i) => (
-                                            <div key={i} className={cn(
-                                                "p-6 rounded-2xl border flex items-center justify-between",
-                                                f.type === 'fits' ? "bg-emerald-500/5 border-emerald-500/20" : f.type === 'tight' ? "bg-amber-500/5 border-amber-500/20" : "bg-red-500/5 border-red-500/20"
-                                            )}>
-                                                <div className="flex items-center gap-4">
-                                                    <div className={cn(
-                                                        "w-8 h-8 rounded-full flex items-center justify-center font-bold",
-                                                        f.type === 'fits' ? "text-emerald-400 bg-emerald-500/10" : f.type === 'tight' ? "text-amber-400 bg-amber-500/10" : "text-red-400 bg-red-500/10"
-                                                    )}>
-                                                        {f.type === 'fits' ? '✓' : f.type === 'tight' ? '~' : '✗'}
-                                                    </div>
-                                                    <span className="text-sm font-bold text-slate-300">{f.label}</span>
-                                                </div>
-                                                <span className={cn(
-                                                    "text-[10px] font-black uppercase tracking-widest",
-                                                    f.type === 'fits' ? "text-emerald-400" : f.type === 'tight' ? "text-amber-400" : "text-red-400"
-                                                )}>{f.status}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </Card>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                        <div className="space-y-6">
-                            <h4 className="text-xl font-bold text-white flex items-center gap-3">
-                                <Layers className="w-5 h-5 text-emerald-400" />
-                                From RAG to "Long Context RAG"
-                            </h4>
-                            <p className="text-slate-400 leading-relaxed font-medium">
-                                RAG was primarily a workaround for small windows. As per-token costs fall, the tradeoff tilts toward sending everything and letting the model handle retrieval internally. This is more accurate but requires <strong>Context Budgeting</strong>.
-                            </p>
-                        </div>
-                        <div className="p-8 bg-emerald-500/5 border border-emerald-500/20 rounded-[32px] space-y-4">
-                            <h4 className="text-[10px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2">
-                                <Calculator className="w-4 h-4" /> Practical Pattern
-                            </h4>
-                            <p className="text-xs text-slate-300 leading-relaxed font-medium italic">
-                                "Use a tiered memory strategy: <strong>hot context</strong> (last 5 turns), <strong>warm context</strong> (semantic retrieval), <strong>cold storage</strong> (archived). This gives the feel of infinite memory at a fraction of the cost."
-                            </p>
-                        </div>
-                    </div>
-                </section>
-
-                {/* LESSON 3.4: FORECASTING */}
-                <section id="lesson-4" className="space-y-16 scroll-mt-32">
-                    <div className="space-y-4 text-right">
-                        <div className="flex items-center gap-4 justify-end">
-                            <div className="h-px flex-1 bg-white/5" />
-                            <span className="text-6xl font-black text-slate-800/50 font-serif">3.4</span>
-                        </div>
-                        <h2 className="text-4xl font-black text-white uppercase tracking-tight">Forecasting Token Costs</h2>
-                        <p className="text-xl text-slate-400 font-medium max-w-2xl ml-auto italic">"Intelligence is deflationary. Here's how to build that assumption into long-term planning."</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-                        <div className="lg:col-span-5 space-y-8">
-                            <p className="text-lg text-slate-300 leading-relaxed font-medium">
-                                Most AI budgets overstate future costs because they assume today's pricing is permanent.
-                            </p>
-                            <div className="space-y-6">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex justify-between">
-                                        Current Monthly Cost <span className="text-emerald-400 font-mono tracking-tighter">${baseCost.toLocaleString()}</span>
-                                    </label>
-                                    <input 
-                                        type="range" min="100" max="10000" step="100" value={baseCost}
-                                        onChange={(e) => setBaseCost(Number(e.target.value))}
-                                        className="w-full h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-emerald-500"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex justify-between">
-                                        Annual Volume Growth <span className="text-emerald-400 font-mono tracking-tighter">+{growthRate}%</span>
-                                    </label>
-                                    <input 
-                                        type="range" min="0" max="200" step="5" value={growthRate}
-                                        onChange={(e) => setGrowthRate(Number(e.target.value))}
-                                        className="w-full h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-emerald-500"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex justify-between">
-                                        Cost Halving Period <span className="text-emerald-400 font-mono tracking-tighter">{halvingPeriod} Months</span>
-                                    </label>
-                                    <input 
-                                        type="range" min="6" max="36" step="3" value={halvingPeriod}
-                                        onChange={(e) => setHalvingPeriod(Number(e.target.value))}
-                                        className="w-full h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-emerald-500"
-                                    />
-                                </div>
-                            </div>
-                            <div className="p-6 bg-slate-900/50 rounded-2xl border border-white/5 space-y-2">
-                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Projection Assumption</p>
-                                <p className="text-xs text-slate-400 leading-relaxed italic">
-                                    Assumes {halvingPeriod}-month cost halving · {growthRate}% annual volume growth. Base: ${baseCost.toLocaleString()}/mo today.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="lg:col-span-7">
-                            <Card className="p-8 bg-black/40 border-white/10 h-full flex flex-col justify-between space-y-8">
-                                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5 pb-4">5-Year Monthly Cost Forecast</h4>
-                                <div className="space-y-6">
-                                    {forecast.map((f, i) => (
-                                        <div key={i} className="space-y-2 group">
-                                            <div className="flex justify-between items-baseline text-xs font-bold font-mono">
-                                                <span className="text-slate-500 uppercase tracking-tighter">Year {f.yr}</span>
-                                                <div className="flex items-center gap-3">
-                                                    <span className={cn(
-                                                        "text-[9px] uppercase tracking-tighter",
-                                                        f.monthly > baseCost ? "text-red-400" : "text-emerald-400"
-                                                    )}>
-                                                        {f.monthly > baseCost ? `+${Math.round((f.monthly/baseCost - 1)*100)}%` : `-${Math.round((1 - f.monthly/baseCost)*100)}%`}
-                                                    </span>
-                                                    <span className="text-white text-base tracking-tighter">${Math.round(f.monthly).toLocaleString()}/mo</span>
-                                                </div>
-                                            </div>
-                                            <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                                                <div 
-                                                    className={cn("h-full rounded-full transition-all duration-1000", f.monthly > baseCost ? "bg-red-500/40" : "bg-emerald-500/40")} 
-                                                    style={{ width: `${Math.max(5, (f.monthly / maxForecastMonthly) * 100)}%` }} 
-                                                />
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl text-[10px] text-slate-500 italic text-center">
-                                    "Usage grows faster than costs fall. Budget for usage expansion, not just price decay."
-                                </div>
-                            </Card>
-                        </div>
-                    </div>
-                </section>
-
-                {/* MODULE SUMMARY */}
-                <section className="pt-32 border-t border-white/5 space-y-16">
-                    <div className="text-center space-y-4">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20">
-                            MODULE 3 COMPLETE
-                        </div>
-                        <h2 className="text-4xl font-black text-white uppercase tracking-tight">The Big Picture</h2>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {[
-                            { num: "01", text: "<strong>AI pricing is deflationary</strong> — expect 40–50% cost reduction per year for equivalent quality. Never budget based on today's prices." },
-                            { num: "02", text: "<strong>Flash tier solves 80% of tasks</strong> at 150× lower cost. Default to Flash, escalate to Frontier only when demonstrably necessary." },
-                            { num: "03", text: "<strong>Context abundance is here</strong> — the problem has shifted from fitting data to budgeting for its persistent memory costs." },
-                            { num: "04", text: "<strong>Build model-agnostic</strong> — abstract model names behind config variables to capture price improvements as they ship." },
-                            { num: "05", text: "<strong>Routing is high-leverage</strong> — a cheap classifier routing to tiers can cut mixed-workload costs by up to 70%." },
-                            { num: "06", text: "<strong>Scope expands with efficiency</strong> — teams that discover cheap AI tend to usage-scale aggressively. Budget for growth." }
-                        ].map((item, i) => (
-                            <Card key={i} className="p-6 bg-slate-900/50 border-white/5 flex gap-4 items-start">
-                                <span className="text-3xl font-black text-slate-800 font-serif leading-none">{item.num}</span>
-                                <p className="text-xs text-slate-400 leading-relaxed font-medium" dangerouslySetInnerHTML={{ __html: item.text }} />
-                            </Card>
-                        ))}
-                    </div>
-
-                    <div className="flex flex-col items-center gap-8 pt-12">
-                        <Button size="lg" className="h-16 px-12 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-tight gap-3 shadow-2xl shadow-emerald-500/20 group" asChild>
-                            <Link href="/tokenomics/module-4">
-                                Continue to Module 4
-                                <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                            </Link>
-                        </Button>
-                        <p className="text-sm text-slate-500 italic max-w-md text-center leading-relaxed">
-                            "Ready to move to Module 4: Prompt Engineering for Token Efficiency, where we learn how to get the same results using 50% fewer tokens?"
-                        </p>
-                    </div>
-                </section>
-            </main>
-
-            <footer className="border-t border-white/5 py-16">
-                <div className="max-w-5xl mx-auto px-4 text-center space-y-4">
-                    <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.4em]">Deflationary Intelligence · AI Economics Course</p>
-                    <p className="text-xs font-mono text-slate-500 uppercase tracking-[0.2em]">Module 3 · TokenSense Academy</p>
-                </div>
-            </footer>
+        {/* Navigation & Header */}
+        <div className="space-y-8 relative">
+          <Link 
+            href="/tokenomics" 
+            className="inline-flex items-center gap-2 text-sm font-bold text-indigo-400 hover:text-indigo-300 transition-colors group"
+          >
+            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+            BACK TO ACADEMY
+          </Link>
+          
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Badge variant="outline" className="px-3 py-1 border-indigo-500/30 bg-indigo-500/10 text-indigo-400 font-black text-[10px] tracking-[0.2em] uppercase">
+                Module 3
+              </Badge>
+              <Badge variant="outline" className="px-3 py-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-black text-[10px] tracking-[0.2em] uppercase">
+                Intermediate · Core Concept
+              </Badge>
+            </div>
+            <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight leading-tight uppercase">
+              Context <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">Windows</span>
+            </h1>
+            <p className="text-xl text-slate-400 font-medium max-w-2xl leading-relaxed">
+              Master the concept of AI memory, understand the invisible computing costs of large documents, and learn how to prevent the AI from "forgetting" critical information.
+            </p>
+          </div>
         </div>
-    );
+
+        {/* Learning Objectives */}
+        <Card className="p-8 bg-slate-900/50 border-white/5 space-y-6 shadow-2xl shadow-indigo-500/5">
+            <h4 className="flex items-center gap-2 text-sm font-black text-white uppercase tracking-widest">
+                <Target className="w-4 h-4 text-indigo-400" />
+                Learning Objectives
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                    "Understand the physical limits of LLM working memory.",
+                    "Analyze the quadratic scaling costs of Attention.",
+                    "Mitigate context degradation (Lost in the Middle).",
+                    "Manage stateless sessions and compounding costs."
+                ].map((obj, i) => (
+                    <div key={i} className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                        <span className="text-sm text-slate-300 font-medium">{obj}</span>
+                    </div>
+                ))}
+            </div>
+        </Card>
+
+        {/* Lesson 3.1 */}
+        <section className="space-y-12">
+          <div className="flex items-center gap-4 border-l-4 border-indigo-500 pl-6 py-2">
+            <div className="space-y-1">
+              <h2 className="text-sm font-black text-indigo-400 uppercase tracking-[0.3em]">Lesson 3.1</h2>
+              <h3 className="text-3xl font-bold text-white tracking-tight">The Context Window Explained</h3>
+            </div>
+          </div>
+
+          <div className="prose prose-invert max-w-none space-y-8">
+            <div className="bg-slate-900/80 border border-white/5 rounded-3xl p-8 space-y-6">
+                <div className="flex items-center gap-3 text-indigo-400">
+                    <Layers className="w-6 h-6" />
+                    <h4 className="text-lg font-black uppercase tracking-tighter">The Core Concept</h4>
+                </div>
+                <p className="text-lg text-slate-300 leading-relaxed font-medium">
+                    If an LLM is a brilliant worker, the context window is the size of their physical desk. It is the model's <span className="text-white font-bold">"working memory"</span> for a single interaction. Everything the AI needs to know to answer your prompt must fit on that desk.
+                </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="p-6 bg-slate-900/50 border border-white/5 rounded-2xl space-y-3">
+                    <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                        <History className="w-5 h-5 text-red-400" />
+                    </div>
+                    <h5 className="font-bold text-white">The "No Hard Drive" Rule</h5>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                        LLMs are essentially amnesiacs. They have zero permanent memory between sessions. When you start a new prompt, the AI wakes up with a blank slate.
+                    </p>
+                </div>
+                <div className="p-6 bg-slate-900/50 border border-white/5 rounded-2xl space-y-3">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+                        <Maximize2 className="w-5 h-5 text-indigo-400" />
+                    </div>
+                    <h5 className="font-bold text-white">Sizing the Window</h5>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                        Legacy models had 4K limits (~3k words). Modern models like GPT-4o handle 128K (300 pages), while Gemini Pro 1.5 reaches <span className="text-white font-bold">2M+ tokens</span>.
+                    </p>
+                </div>
+                <div className="p-6 bg-slate-900/50 border border-white/5 rounded-2xl space-y-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                        <AlertTriangle className="w-5 h-5 text-amber-400" />
+                    </div>
+                    <h5 className="font-bold text-white">Input vs. Output Caps</h5>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                        If your prompt is 120K tokens on a 128K desk, the AI only has 8K tokens of "desk space" left to write its response before cutting off mid-sentence.
+                    </p>
+                </div>
+            </div>
+
+            {/* Video Element Placeholder */}
+            <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 bg-slate-950 shadow-2xl">
+                <iframe 
+                    width="100%" 
+                    height="100%" 
+                    src="https://www.youtube.com/embed/5sLYAQS9s8U" 
+                    title="What is an LLM Context Window?" 
+                    frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowFullScreen
+                    className="absolute inset-0"
+                ></iframe>
+                <div className="absolute top-6 left-6 flex items-center gap-2 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full border border-white/10">
+                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                    <span className="text-[10px] font-black text-white uppercase tracking-widest">Visual Scale Guide</span>
+                </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Lesson 3.2 */}
+        <section className="space-y-12">
+          <div className="flex items-center gap-4 border-l-4 border-indigo-500 pl-6 py-2">
+            <div className="space-y-1">
+              <h2 className="text-sm font-black text-indigo-400 uppercase tracking-[0.3em]">Lesson 3.2</h2>
+              <h3 className="text-3xl font-bold text-white tracking-tight">The Compute Cost of Attention</h3>
+            </div>
+          </div>
+
+          <div className="prose prose-invert max-w-none space-y-8">
+            <div className="bg-slate-900/80 border border-white/5 rounded-3xl p-8 space-y-6">
+                <div className="flex items-center gap-3 text-indigo-400">
+                    <Cpu className="w-6 h-6" />
+                    <h4 className="text-lg font-black uppercase tracking-tighter">Why isn't context infinite?</h4>
+                </div>
+                <p className="text-lg text-slate-300 leading-relaxed font-medium">
+                    Because of a mechanism called <span className="text-white font-bold underline decoration-indigo-500/50">"Self-Attention,"</span> which gets exponentially harder for the computer to process as the text gets longer.
+                </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-8">
+                <div className="space-y-6">
+                    <h5 className="text-xl font-bold text-white flex items-center gap-2">
+                        <Zap className="w-5 h-5 text-indigo-400" />
+                        The Math of Scaling: O(N²)
+                    </h5>
+                    <p className="text-slate-400 text-sm leading-relaxed">
+                        In Transformers, every token looks at every other token to find context. Historically, if you double the tokens ($N$), the compute quadruples.
+                    </p>
+                    <div className="p-6 bg-black rounded-2xl border border-white/5 font-mono text-center">
+                        <div className="text-2xl text-indigo-400 font-black mb-2" dangerouslySetInnerHTML={{ __html: "O(N<sup>2</sup>)" }} />
+                        <p className="text-[10px] text-slate-500 uppercase tracking-[0.2em]">Quadratic Complexity</p>
+                    </div>
+                </div>
+                <div className="space-y-4 flex flex-col justify-center">
+                    <Badge className="w-fit bg-red-500/10 text-red-400 border-none font-black uppercase tracking-widest">The Cost Reality</Badge>
+                    <p className="text-sm text-slate-400 leading-relaxed">
+                        A 100K token prompt requires vastly more processing power and RAM than ten 10K prompts. This is why sending a 100-page document for a simple, unrelated question is a massive waste of credits.
+                    </p>
+                </div>
+            </div>
+
+            {/* Graphic Illustration */}
+            <div className="bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-transparent border border-white/5 rounded-[32px] p-12 text-center space-y-6">
+                <div className="flex justify-center gap-16">
+                    <div className="space-y-4">
+                        <div className="w-24 h-24 rounded-full border border-indigo-500/30 bg-indigo-500/5 flex items-center justify-center">
+                            <div className="grid grid-cols-2 gap-2">
+                                {[...Array(4)].map((_, i) => <div key={i} className="w-2 h-2 rounded-full bg-indigo-400" />)}
+                            </div>
+                        </div>
+                        <p className="text-[10px] font-black text-slate-500 uppercase">Short (Linear)</p>
+                    </div>
+                    <div className="space-y-4">
+                        <div className="w-24 h-24 rounded-full border border-cyan-500/30 bg-cyan-500/5 flex items-center justify-center">
+                            <div className="w-12 h-12 relative">
+                                {[...Array(12)].map((_, i) => <div key={i} className="absolute inset-0 border border-cyan-400/20 rounded-full" style={{ transform: `rotate(${i * 30}deg)` }} />)}
+                            </div>
+                        </div>
+                        <p className="text-[10px] font-black text-slate-500 uppercase">Long (Exponential)</p>
+                    </div>
+                </div>
+                <p className="text-xs text-slate-500 italic max-w-md mx-auto">Visualizing "Attention" connections as context length grows.</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Lesson 3.3 */}
+        <section className="space-y-12">
+          <div className="flex items-center gap-4 border-l-4 border-indigo-500 pl-6 py-2">
+            <div className="space-y-1">
+              <h2 className="text-sm font-black text-indigo-400 uppercase tracking-[0.3em]">Lesson 3.3</h2>
+              <h3 className="text-3xl font-bold text-white tracking-tight">Lost in the Middle</h3>
+            </div>
+          </div>
+
+          <div className="prose prose-invert max-w-none space-y-8">
+            <div className="bg-slate-900/80 border border-white/5 rounded-3xl p-8 space-y-6">
+                <div className="flex items-center gap-3 text-indigo-400">
+                    <Search className="w-6 h-6" />
+                    <h4 className="text-lg font-black uppercase tracking-tighter">The U-Curve of Recall</h4>
+                </div>
+                <p className="text-lg text-slate-300 leading-relaxed font-medium">
+                    Research shows that LLMs suffer from a <span className="text-white font-bold underline decoration-indigo-500/50">"Lost in the Middle"</span> phenomenon. They recall information best at the very beginning (Primacy) or very end (Recency) of a prompt.
+                </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div className="space-y-4">
+                    <h5 className="font-bold text-white flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                        The Black Hole
+                    </h5>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                        Information buried in the exact middle of a massive prompt has the highest chance of being hallucinated, skipped, or completely ignored.
+                    </p>
+                </div>
+                <div className="space-y-4">
+                    <h5 className="font-bold text-white flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        The Developer Fix
+                    </h5>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                        Put critical instructions (system prompts, JSON schemas) at the <span className="text-white font-bold uppercase">absolute top or bottom</span>. Never in the middle of reference data.
+                    </p>
+                </div>
+            </div>
+
+            {/* U-Curve Graphic */}
+            <div className="relative h-48 w-full border border-white/10 rounded-2xl bg-slate-950 overflow-hidden group">
+                <div className="absolute inset-0 flex items-center justify-center opacity-10">
+                    <div className="w-full h-[1px] bg-white/20" />
+                </div>
+                {/* U-Curve Path */}
+                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1000 200" preserveAspectRatio="none">
+                    <path 
+                        d="M 50 20 Q 500 250 950 20" 
+                        fill="none" 
+                        stroke="url(#u-gradient)" 
+                        strokeWidth="4" 
+                        strokeLinecap="round"
+                    />
+                    <defs>
+                        <linearGradient id="u-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#10b981" />
+                            <stop offset="50%" stopColor="#ef4444" />
+                            <stop offset="100%" stopColor="#10b981" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <div className="absolute top-4 left-4 text-[10px] font-black text-emerald-400 uppercase">High Recall</div>
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] font-black text-red-400 uppercase">The Black Hole (Low Recall)</div>
+                <div className="absolute top-4 right-4 text-[10px] font-black text-emerald-400 uppercase">High Recall</div>
+            </div>
+          </div>
+        </section>
+
+        {/* Lesson 3.4 */}
+        <section className="space-y-12">
+          <div className="flex items-center gap-4 border-l-4 border-indigo-500 pl-6 py-2">
+            <div className="space-y-1">
+              <h2 className="text-sm font-black text-indigo-400 uppercase tracking-[0.3em]">Lesson 3.4</h2>
+              <h3 className="text-3xl font-bold text-white tracking-tight">Anatomy of a Chat Session</h3>
+            </div>
+          </div>
+
+          <div className="prose prose-invert max-w-none space-y-8">
+            <div className="bg-slate-900/80 border border-white/5 rounded-3xl p-8 space-y-6">
+                <div className="flex items-center gap-3 text-indigo-400">
+                    <History className="w-6 h-6" />
+                    <h4 className="text-lg font-black uppercase tracking-tighter">The Snowball Effect</h4>
+                </div>
+                <p className="text-lg text-slate-300 leading-relaxed font-medium">
+                    APIs are completely <span className="text-white font-bold underline decoration-indigo-500/50">"Stateless."</span> They don't remember you. You are paying to re-read the entire history on every single turn.
+                </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="p-6 bg-slate-900 border border-white/5 rounded-2xl space-y-4">
+                    <h5 className="font-bold text-white flex items-center gap-2">Compounding Waste</h5>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                        In Message 10, your app bundles Messages 1-9 AND the AI answers 1-9 into a massive new payload. A long session doesn't scale linearly; it explodes.
+                    </p>
+                </div>
+                <div className="p-6 bg-slate-900 border border-white/5 rounded-2xl space-y-4">
+                    <h5 className="font-bold text-white flex items-center gap-2">Pruning & Management</h5>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                        Developers must build logic to prune old messages, summarize past context, or set a <span className="text-white font-bold">Sliding Window</span> to stop costs from bankrupting the app.
+                    </p>
+                </div>
+            </div>
+
+            <div className="py-12">
+                <ContextCompoundingSimulator />
+            </div>
+          </div>
+        </section>
+
+        {/* Module Summary */}
+        <section className="pt-20 border-t border-white/5 text-center space-y-10">
+          <div className="max-w-xl mx-auto space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-[10px] font-black uppercase tracking-widest border border-indigo-500/20">
+                MODULE 3 COMPLETE
+            </div>
+            <h3 className="text-3xl font-black text-white uppercase tracking-tight">The Big Picture</h3>
+            <p className="text-slate-400 font-medium leading-relaxed">
+              You now understand how AI memory works, why it's expensive, and how to manage it. Ready to actually <span className="text-white">slash those bills</span> using professional techniques?
+            </p>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Button size="lg" className="h-16 px-10 bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-tight gap-2 shadow-2xl shadow-indigo-500/20" asChild>
+              <Link href="/tokenomics/module-4">
+                Continue to Module 4
+                <ChevronRight className="w-5 h-5" />
+              </Link>
+            </Button>
+            <Button variant="outline" size="lg" className="h-16 px-10 border-white/10 hover:bg-white/5 text-white font-black uppercase tracking-tight" asChild>
+              <Link href="/tokenomics">Back to Academy</Link>
+            </Button>
+          </div>
+        </section>
+      </main>
+
+      <footer className="border-t border-white/5 py-12 mt-24">
+        <div className="max-w-5xl mx-auto px-4 text-center">
+          <p className="text-xs font-mono text-slate-500 uppercase tracking-[0.3em]">Module 3 Complete • TokenSense Academy</p>
+        </div>
+      </footer>
+    </div>
+  );
 }
