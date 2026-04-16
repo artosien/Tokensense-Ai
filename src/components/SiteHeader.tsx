@@ -13,20 +13,14 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import OptimizationProgressHUD from "@/components/OptimizationProgressHUD";
-import glossaryNames from "../../data/glossary-names.json";
-import blogRecent from "../../data/blog-recent.json";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
     DropdownMenuSub,
     DropdownMenuSubTrigger,
     DropdownMenuSubContent,
     DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
+import OptimizationProgressHUD from "@/components/OptimizationProgressHUD";
+import glossaryNames from "../../data/glossary-names.json";
+import blogRecent from "../../data/blog-recent.json";
 
 export default function SiteHeader() {
     const tHeader = useTranslations("header");
