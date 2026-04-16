@@ -17,17 +17,14 @@ import {
     Clock,
     DollarSign,
     Layers,
-    Globe,
-    MessageSquare
+    Globe
 } from "lucide-react";
 import { triggerHaptic } from "@/lib/utils";
-import { slackService } from "@/lib/slackService";
 
 export default function AccountHistory() {
     const { data: session } = useSession();
     const [history, setHistory] = useState<CalculationEntry[]>([]);
     const [isExportingSheets, setIsExportingSheets] = useState(false);
-    const [isSharingSlack, setIsSharingSlack] = useState(false);
     const [sheetsUrl, setSheetsUrl] = useState<string | null>(null);
 
     const loadHistory = () => {
@@ -79,33 +76,6 @@ export default function AccountHistory() {
             alert(error.message || "Failed to export to Google Sheets");
         } finally {
             setIsExportingSheets(false);
-        }
-    };
-
-    const handleShareToSlack = async () => {
-        const userId = (session?.user as any)?.id || session?.user?.email;
-        if (!userId) {
-            alert("Please sign in to share to Slack.");
-            return;
-        }
-
-        const webhookUrl = localStorage.getItem(`user_slack_webhook_${userId}`);
-        if (!webhookUrl) {
-            alert("Slack Webhook not configured. Please add it in your Account settings.");
-            return;
-        }
-
-        setIsSharingSlack(true);
-        triggerHaptic(20);
-        try {
-            await slackService.sendCalculationHistory(webhookUrl, history);
-            triggerHaptic(100);
-            alert("History summary shared to Slack!");
-        } catch (error: any) {
-            console.error(error);
-            alert("Failed to share to Slack. Check your Webhook URL.");
-        } finally {
-            setIsSharingSlack(false);
         }
     };
 
@@ -173,19 +143,6 @@ export default function AccountHistory() {
                                 </a>
                             </Button>
                         )}
-
-                        <Button 
-                            onClick={handleShareToSlack}
-                            disabled={isSharingSlack}
-                            className="h-10 bg-[#4A154B] hover:bg-[#3b113c] text-white font-bold"
-                        >
-                            {isSharingSlack ? (
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            ) : (
-                                <MessageSquare className="w-4 h-4 mr-2" />
-                            )}
-                            Share to Slack
-                        </Button>
                     </div>
                 </div>
             </div>

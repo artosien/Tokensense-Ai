@@ -15,6 +15,18 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import OptimizationProgressHUD from "@/components/OptimizationProgressHUD";
+import glossaryNames from "../../data/glossary-names.json";
+import blogRecent from "../../data/blog-recent.json";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+    DropdownMenuSub,
+    DropdownMenuSubTrigger,
+    DropdownMenuSubContent,
+    DropdownMenuPortal,
+} from "@/components/ui/dropdown-menu";
 
 export default function SiteHeader() {
     const tHeader = useTranslations("header");
@@ -155,33 +167,52 @@ export default function SiteHeader() {
                         </DropdownMenu>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="text-muted-foreground hover:text-indigo-400 border border-transparent hover:border-indigo-500/30 hover:border-indigo-500/30 hover:bg-indigo-500/10 transition-all font-medium gap-1">
+                                <Button variant="ghost" className="text-muted-foreground hover:text-indigo-400 border border-transparent hover:border-indigo-500/30 hover:bg-indigo-500/10 transition-all font-medium gap-1">
                                     {tNav("learn") || "Learn"} <ChevronDown className="h-4 w-4" />
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start" className="min-w-[12rem] p-2 space-y-1">
+                            <DropdownMenuContent align="start" className="min-w-[14rem] p-2 space-y-1 bg-card/95 backdrop-blur-xl border-border/40">
                                 <DropdownMenuItem asChild className="rounded-lg cursor-pointer focus:bg-indigo-500/10 focus:text-indigo-400 transition-colors">
                                     <Link href="/tokenomics" className="flex items-center gap-2 py-2">
                                         <div className="w-8 h-8 rounded-md bg-indigo-500/10 flex items-center justify-center">
                                             <Bot className="w-4 h-4 text-indigo-400" />
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-sm font-semibold">Tokenomics</span>
+                                            <span className="text-sm font-semibold">Tokenomics Academy</span>
                                             <span className="text-[10px] text-muted-foreground">Master AI economics</span>
                                         </div>
                                     </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem asChild className="rounded-lg cursor-pointer focus:bg-indigo-500/10 focus:text-indigo-400 transition-colors">
-                                    <Link href="/glossary" className="flex items-center gap-2 py-2">
-                                        <div className="w-8 h-8 rounded-md bg-indigo-500/10 flex items-center justify-center">
-                                            <BookOpen className="w-4 h-4 text-indigo-400" />
+                                
+                                <DropdownMenuSub>
+                                    <DropdownMenuSubTrigger className="rounded-lg cursor-pointer focus:bg-indigo-500/10 focus:text-indigo-400 transition-colors py-2">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 rounded-md bg-indigo-500/10 flex items-center justify-center">
+                                                <BookOpen className="w-4 h-4 text-indigo-400" />
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-sm font-semibold">{tNav("glossary") || "LLM Glossary"}</span>
+                                                <span className="text-[10px] text-muted-foreground">{glossaryNames.length}+ Terms defined</span>
+                                            </div>
                                         </div>
-                                        <div className="flex flex-col">
-                                            <span className="text-sm font-semibold">{tNav("glossary") || "LLM Glossary"}</span>
-                                            <span className="text-[10px] text-muted-foreground">Every AI term defined</span>
-                                        </div>
-                                    </Link>
-                                </DropdownMenuItem>
+                                    </DropdownMenuSubTrigger>
+                                    <DropdownMenuPortal>
+                                        <DropdownMenuSubContent className="max-h-[400px] overflow-y-auto min-w-[15rem] bg-card/95 backdrop-blur-xl border-border/40 p-2">
+                                            <DropdownMenuItem asChild className="mb-2 font-bold text-indigo-400">
+                                                <Link href="/glossary">View All Glossary Terms</Link>
+                                            </DropdownMenuItem>
+                                            <div className="h-px bg-border/40 my-1" />
+                                            {glossaryNames.map((term: any) => (
+                                                <DropdownMenuItem key={term.id} asChild className="rounded-md cursor-pointer py-1.5 px-3 hover:bg-indigo-500/10 transition-colors">
+                                                    <Link href={`/glossary/${term.id}`} className="text-xs truncate max-w-[180px]">
+                                                        {term.term}
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                            ))}
+                                        </DropdownMenuSubContent>
+                                    </DropdownMenuPortal>
+                                </DropdownMenuSub>
+
                                 <DropdownMenuItem asChild className="rounded-lg cursor-pointer focus:bg-indigo-500/10 focus:text-indigo-400 transition-colors">
                                     <Link href="/faq" className="flex items-center gap-2 py-2">
                                         <div className="w-8 h-8 rounded-md bg-purple-500/10 flex items-center justify-center">
@@ -207,9 +238,27 @@ export default function SiteHeader() {
                             </DropdownMenuContent>
                         </DropdownMenu>
 
-                        <Button variant="ghost" className="text-muted-foreground hover:text-indigo-400 border border-transparent hover:border-indigo-500/30 hover:bg-indigo-500/10 transition-all font-medium" asChild>
-                            <Link href="/blog">{tNav("blog")}</Link>
-                        </Button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="text-muted-foreground hover:text-indigo-400 border border-transparent hover:border-indigo-500/30 hover:bg-indigo-500/10 transition-all font-medium gap-1">
+                                    {tNav("blog")} <ChevronDown className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start" className="min-w-[16rem] p-2 space-y-1 bg-card/95 backdrop-blur-xl border-border/40">
+                                <DropdownMenuItem asChild className="rounded-lg cursor-pointer focus:bg-indigo-500/10 focus:text-indigo-400 transition-colors font-bold text-indigo-400">
+                                    <Link href="/blog" className="py-2 px-3 block">View All Posts</Link>
+                                </DropdownMenuItem>
+                                <div className="h-px bg-border/40 my-1" />
+                                <div className="px-3 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Recent Posts</div>
+                                {blogRecent.map((post: any) => (
+                                    <DropdownMenuItem key={post.slug} asChild className="rounded-md cursor-pointer py-2 px-3 hover:bg-indigo-500/10 transition-colors">
+                                        <Link href={`/blog/${post.slug}`} className="text-xs line-clamp-2 leading-snug">
+                                            {post.title}
+                                        </Link>
+                                    </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
 
                         <div className="w-px h-6 bg-border/40 mx-2" />
 

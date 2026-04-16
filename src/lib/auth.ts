@@ -1,7 +1,6 @@
 import { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
-import SlackProvider from "next-auth/providers/slack";
 
 /**
  * NextAuth Configuration Options
@@ -10,7 +9,7 @@ import SlackProvider from "next-auth/providers/slack";
  * the authentication system.
  */
 export const authOptions: AuthOptions = {
-  // Use Google, GitHub and Slack as authentication providers
+  // Use Google and GitHub as authentication providers
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
@@ -28,11 +27,6 @@ export const authOptions: AuthOptions = {
       // Supporting both GITHUB_ID (guide) and GITHUB_CLIENT_ID (common practice)
       clientId: (process.env.GITHUB_ID || process.env.GITHUB_CLIENT_ID) as string,
       clientSecret: (process.env.GITHUB_SECRET || process.env.GITHUB_CLIENT_SECRET) as string,
-    }),
-    SlackProvider({
-      clientId: process.env.SLACK_CLIENT_ID as string,
-      clientSecret: process.env.SLACK_CLIENT_SECRET as string,
-      allowUntitledTeams: true,
     }),
   ],
   
