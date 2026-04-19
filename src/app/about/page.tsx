@@ -298,10 +298,3 @@ export default function AboutPage() {
         </div>
     );
 }
-              <BugReportForm />
-                </div>
-            </main>
-
-        </div>
-    );
-}
