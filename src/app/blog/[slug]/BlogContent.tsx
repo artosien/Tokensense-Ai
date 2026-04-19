@@ -70,7 +70,7 @@ export default function BlogContent({ content }: BlogContentProps) {
   if (content.includes('{{TOKENIZER_PLAYGROUND}}')) {
     const parts = content.split('{{TOKENIZER_PLAYGROUND}}');
     const newElements: React.ReactNode[] = [];
-    parts.forEach((part, i) => {
+    parts.forEach((part: string, i: number) => {
       newElements.push(<div key={`tp-part-${i}`} dangerouslySetInnerHTML={{ __html: part }} />);
       if (i < parts.length - 1) {
         newElements.push(
@@ -85,12 +85,12 @@ export default function BlogContent({ content }: BlogContentProps) {
 
   // Multilingual Simulator
   const midElements: React.ReactNode[] = [];
-  renderedContent.forEach((node, nodeIdx) => {
+  renderedContent.forEach((node: React.ReactNode, nodeIdx: number) => {
     if (React.isValidElement(node) && (node.props as any).dangerouslySetInnerHTML) {
       const html = (node.props as any).dangerouslySetInnerHTML.__html;
       if (html.includes('{{MULTILINGUAL_SIMULATOR}}')) {
         const parts = html.split('{{MULTILINGUAL_SIMULATOR}}');
-        parts.forEach((part, i) => {
+        parts.forEach((part: string, i: number) => {
           midElements.push(<div key={`ms-part-${nodeIdx}-${i}`} dangerouslySetInnerHTML={{ __html: part }} />);
           if (i < parts.length - 1) {
             midElements.push(
@@ -110,12 +110,12 @@ export default function BlogContent({ content }: BlogContentProps) {
 
   // Output Cost Simulator
   const outElements: React.ReactNode[] = [];
-  midElements.forEach((node, nodeIdx) => {
+  midElements.forEach((node: React.ReactNode, nodeIdx: number) => {
     if (React.isValidElement(node) && (node.props as any).dangerouslySetInnerHTML) {
       const html = (node.props as any).dangerouslySetInnerHTML.__html;
       if (html.includes('{{OUTPUT_COST_SIMULATOR}}')) {
         const parts = html.split('{{OUTPUT_COST_SIMULATOR}}');
-        parts.forEach((part, i) => {
+        parts.forEach((part: string, i: number) => {
           outElements.push(<div key={`ocs-part-${nodeIdx}-${i}`} dangerouslySetInnerHTML={{ __html: part }} />);
           if (i < parts.length - 1) {
             outElements.push(
@@ -135,12 +135,12 @@ export default function BlogContent({ content }: BlogContentProps) {
 
   // Reverse Budget Planner
   const rbpElements: React.ReactNode[] = [];
-  outElements.forEach((node, nodeIdx) => {
+  outElements.forEach((node: React.ReactNode, nodeIdx: number) => {
     if (React.isValidElement(node) && (node.props as any).dangerouslySetInnerHTML) {
       const html = (node.props as any).dangerouslySetInnerHTML.__html;
       if (html.includes('{{REVERSE_BUDGET_PLANNER}}')) {
         const parts = html.split('{{REVERSE_BUDGET_PLANNER}}');
-        parts.forEach((part, i) => {
+        parts.forEach((part: string, i: number) => {
           rbpElements.push(<div key={`rbp-part-${nodeIdx}-${i}`} dangerouslySetInnerHTML={{ __html: part }} />);
           if (i < parts.length - 1) {
             rbpElements.push(
@@ -160,12 +160,12 @@ export default function BlogContent({ content }: BlogContentProps) {
 
   // Prompt Compression Demo
   const pcdElements: React.ReactNode[] = [];
-  rbpElements.forEach((node, nodeIdx) => {
+  rbpElements.forEach((node: React.ReactNode, nodeIdx: number) => {
     if (React.isValidElement(node) && (node.props as any).dangerouslySetInnerHTML) {
       const html = (node.props as any).dangerouslySetInnerHTML.__html;
       if (html.includes('{{PROMPT_COMPRESSION_DEMO}}')) {
         const parts = html.split('{{PROMPT_COMPRESSION_DEMO}}');
-        parts.forEach((part, i) => {
+        parts.forEach((part: string, i: number) => {
           pcdElements.push(<div key={`pcd-part-${nodeIdx}-${i}`} dangerouslySetInnerHTML={{ __html: part }} />);
           if (i < parts.length - 1) {
             pcdElements.push(
@@ -185,12 +185,12 @@ export default function BlogContent({ content }: BlogContentProps) {
 
   // Agent Loop Simulator
   const alsElements: React.ReactNode[] = [];
-  pcdElements.forEach((node, nodeIdx) => {
+  pcdElements.forEach((node: React.ReactNode, nodeIdx: number) => {
     if (React.isValidElement(node) && (node.props as any).dangerouslySetInnerHTML) {
       const html = (node.props as any).dangerouslySetInnerHTML.__html;
       if (html.includes('{{AGENT_LOOP_SIMULATOR}}')) {
         const parts = html.split('{{AGENT_LOOP_SIMULATOR}}');
-        parts.forEach((part, i) => {
+        parts.forEach((part: string, i: number) => {
           alsElements.push(<div key={`als-part-${nodeIdx}-${i}`} dangerouslySetInnerHTML={{ __html: part }} />);
           if (i < parts.length - 1) {
             alsElements.push(
@@ -210,12 +210,12 @@ export default function BlogContent({ content }: BlogContentProps) {
 
   // Multimodal Estimator
   const meElements: React.ReactNode[] = [];
-  alsElements.forEach((node, nodeIdx) => {
+  alsElements.forEach((node: React.ReactNode, nodeIdx: number) => {
     if (React.isValidElement(node) && (node.props as any).dangerouslySetInnerHTML) {
       const html = (node.props as any).dangerouslySetInnerHTML.__html;
       if (html.includes('{{MULTIMODAL_ESTIMATOR}}')) {
         const parts = html.split('{{MULTIMODAL_ESTIMATOR}}');
-        parts.forEach((part, i) => {
+        parts.forEach((part: string, i: number) => {
           meElements.push(<div key={`me-part-${nodeIdx}-${i}`} dangerouslySetInnerHTML={{ __html: part }} />);
           if (i < parts.length - 1) {
             meElements.push(
@@ -235,12 +235,12 @@ export default function BlogContent({ content }: BlogContentProps) {
 
   // Mini Token Calculator
   const miniElements: React.ReactNode[] = [];
-  meElements.forEach((node, nodeIdx) => {
+  meElements.forEach((node: React.ReactNode, nodeIdx: number) => {
     if (React.isValidElement(node) && (node.props as any).dangerouslySetInnerHTML) {
       const html = (node.props as any).dangerouslySetInnerHTML.__html;
       if (html.includes('{{MINI_CALCULATOR}}')) {
         const parts = html.split('{{MINI_CALCULATOR}}');
-        parts.forEach((part, i) => {
+        parts.forEach((part: string, i: number) => {
           miniElements.push(<div key={`mini-part-${nodeIdx}-${i}`} dangerouslySetInnerHTML={{ __html: part }} />);
           if (i < parts.length - 1) {
             miniElements.push(
@@ -260,12 +260,12 @@ export default function BlogContent({ content }: BlogContentProps) {
 
   // Lite Model Comparison
   const finalElements: React.ReactNode[] = [];
-  miniElements.forEach((node, nodeIdx) => {
+  miniElements.forEach((node: React.ReactNode, nodeIdx: number) => {
     if (React.isValidElement(node) && (node.props as any).dangerouslySetInnerHTML) {
       const html = (node.props as any).dangerouslySetInnerHTML.__html;
       if (html.includes('{{LITE_MODEL_COMPARISON}}')) {
         const parts = html.split('{{LITE_MODEL_COMPARISON}}');
-        parts.forEach((part, i) => {
+        parts.forEach((part: string, i: number) => {
           finalElements.push(<div key={`lite-part-${nodeIdx}-${i}`} dangerouslySetInnerHTML={{ __html: part }} />);
           if (i < parts.length - 1) {
             finalElements.push(
