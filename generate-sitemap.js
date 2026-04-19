@@ -76,5 +76,5 @@ glossaryData.forEach(term => {
 xml += `
 </urlset>`;
 
-fs.writeFileSync('sitemap.xml', xml.trim());
-console.log('sitemap.xml updated successfully with ' + (urls.length + blogPosts.length + glossaryData.length) + ' URLs.');
+fs.writeFileSync('public/sitemap.xml', xml.trim());
+console.log('public/sitemap.xml updated successfully with ' + (urls.length + blogPosts.length + glossaryData.length) + ' URLs.');

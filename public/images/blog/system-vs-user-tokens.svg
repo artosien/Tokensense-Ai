@@ -1,0 +1,56 @@
+<svg width="800" height="500" viewBox="0 0 800 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="500" rx="24" fill="#0F172A"/>
+  
+  <!-- Grid Lines -->
+  <path d="M100 100H700" stroke="#1E293B" stroke-width="1"/>
+  <path d="M100 200H700" stroke="#1E293B" stroke-width="1"/>
+  <path d="M100 300H700" stroke="#1E293B" stroke-width="1"/>
+  <path d="M100 400H700" stroke="#334155" stroke-width="2"/>
+
+  <!-- Legend -->
+  <rect x="520" y="40" width="12" height="12" rx="2" fill="#6366F1"/>
+  <text x="540" y="51" fill="#94A3B8" font-family="sans-serif" font-size="12" font-weight="bold">SYSTEM PROMPT (FIXED)</text>
+  
+  <rect x="520" y="65" width="12" height="12" rx="2" fill="#F43F5E"/>
+  <text x="540" y="76" fill="#94A3B8" font-family="sans-serif" font-size="12" font-weight="bold">USER PROMPT (RECURRING)</text>
+
+  <!-- Turn 1 -->
+  <text x="150" y="430" fill="#64748B" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle">TURN 1</text>
+  <rect x="125" y="320" width="50" height="80" rx="4" fill="#6366F1"/> <!-- System -->
+  <rect x="125" y="300" width="50" height="20" rx="4" fill="#F43F5E"/> <!-- User -->
+  <text x="150" y="290" fill="white" font-family="sans-serif" font-size="10" font-weight="bold" text-anchor="middle">250 TOTAL</text>
+
+  <!-- Turn 2 -->
+  <text x="300" y="430" fill="#64748B" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle">TURN 2</text>
+  <rect x="275" y="320" width="50" height="80" rx="4" fill="#6366F1"/> <!-- System -->
+  <rect x="275" y="300" width="50" height="20" rx="4" fill="#F43F5E"/> <!-- User -->
+  <text x="300" y="290" fill="white" font-family="sans-serif" font-size="10" font-weight="bold" text-anchor="middle">500 CUMULATIVE</text>
+  <path d="M175 310L275 310" stroke="#334155" stroke-width="1" stroke-dasharray="4 4"/>
+
+  <!-- Turn 3 -->
+  <text x="450" y="430" fill="#64748B" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle">TURN 3</text>
+  <rect x="425" y="320" width="50" height="80" rx="4" fill="#6366F1"/> <!-- System -->
+  <rect x="425" y="300" width="50" height="20" rx="4" fill="#F43F5E"/> <!-- User -->
+  <text x="450" y="290" fill="white" font-family="sans-serif" font-size="10" font-weight="bold" text-anchor="middle">750 CUMULATIVE</text>
+
+  <!-- Turn 10 (Projected) -->
+  <text x="650" y="430" fill="#64748B" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle">TURN 10 (EST.)</text>
+  <rect x="625" y="320" width="50" height="80" rx="4" fill="#6366F1" opacity="0.5"/> <!-- System -->
+  <rect x="625" y="100" width="50" height="220" rx="4" fill="#F43F5E"/> <!-- User stacks up -->
+  <text x="650" y="90" fill="#F43F5E" font-family="sans-serif" font-size="14" font-weight="black" text-anchor="middle">2,500 TOTAL</text>
+  
+  <!-- Arrow for growth -->
+  <path d="M500 250Q560 200 620 150" stroke="#F43F5E" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#arrowhead)"/>
+
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#F43F5E" />
+    </marker>
+  </defs>
+
+  <!-- Title & Subtitle -->
+  <text x="40" y="50" fill="white" font-family="sans-serif" font-size="24" font-weight="black">THE RECURRING TOKEN TAX</text>
+  <text x="40" y="75" fill="#94A3B8" font-family="sans-serif" font-size="14">Why System Prompts dominate multi-turn conversation costs</text>
+  <rect x="40" y="85" width="80" height="4" rx="2" fill="#6366F1"/>
+</svg>

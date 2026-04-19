@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useTokenSenseStore } from "@/lib/store";
 import { getModelById } from "@/lib/models";
 import { calculateCost } from "@/lib/costEngine";
-import { Check, Copy, ArrowRight } from "lucide-react";
+import { Check, Copy, ArrowRight, X } from "lucide-react";
 import { cn, triggerHaptic } from "@/lib/utils";
 
 import { usePathname } from "next/navigation";
@@ -27,9 +27,18 @@ export function StickyResultsBar() {
   const [hasCalculated, setHasCalculated] = useState(false);
   const [copied, setCopied] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [manuallyHidden, setManuallyHidden] = useState(false);
 
   const totalInputTokens = inputTokenCount + fileTokenCount;
   const model = getModelById(selectedModelId);
+
+  // Track previous inputs to detect changes and show the bar again
+  useEffect(() => {
+      if (totalInputTokens > 0 && model) {
+          setManuallyHidden(false);
+          setVisible(true);
+      }
+  }, [totalInputTokens, expectedOutputTokens, selectedModelId]);
 
   const cost =
     model && totalInputTokens > 0
@@ -71,8 +80,21 @@ export function StickyResultsBar() {
     navigator.clipboard.writeText(text).then(() => {
       triggerHaptic([20, 10, 20]);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      
+      // Automatically hide after a short delay so they see the "Copied" state
+      setTimeout(() => {
+        setCopied(false);
+        setVisible(false);
+        setManuallyHidden(true);
+      }, 1000);
     });
+  };
+
+  const handleClose = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setVisible(false);
+      setManuallyHidden(true);
+      triggerHaptic(10);
   };
 
   const handleTabSwitch = () => {
@@ -84,7 +106,7 @@ export function StickyResultsBar() {
     }
   };
 
-  if (!hasCalculated || !cost || !model) return null;
+  if (!hasCalculated || !cost || !model || manuallyHidden) return null;
 
   // Hide when on results tab of home page to avoid duplication
   const isHidden = pathname === "/" && activeTab === "results";
@@ -123,30 +145,41 @@ export function StickyResultsBar() {
               </span>
             </div>
 
-            <button
-              type="button"
-              onClick={handleCopy}
-              title="Copy estimate to clipboard"
-              className={cn(
-                "shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider",
-                "border transition-all duration-200",
-                copied
-                  ? "border-green-500/50 bg-green-500/10 text-green-400"
-                  : "border-plasma-500/30 bg-plasma-500/8 text-plasma-400/70 hover:text-plasma-400 hover:border-plasma-400/60 hover:bg-plasma-500/15"
-              )}
-            >
-              {copied ? (
-                <>
-                  <Check className="w-3.5 h-3.5" />
-                  <span>Copied</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Copy</span>
-                </>
-              )}
-            </button>
+            <div className="flex items-center gap-2">
+                <button
+                type="button"
+                onClick={handleCopy}
+                title="Copy estimate to clipboard"
+                className={cn(
+                    "shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider",
+                    "border transition-all duration-200",
+                    copied
+                    ? "border-green-500/50 bg-green-500/10 text-green-400"
+                    : "border-plasma-500/30 bg-plasma-500/8 text-plasma-400/70 hover:text-plasma-400 hover:border-plasma-400/60 hover:bg-plasma-500/15"
+                )}
+                >
+                {copied ? (
+                    <>
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Copied</span>
+                    </>
+                ) : (
+                    <>
+                    <Copy className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Copy</span>
+                    </>
+                )}
+                </button>
+
+                <button
+                    type="button"
+                    onClick={handleClose}
+                    title="Close"
+                    className="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-white/5 transition-all"
+                >
+                    <X className="w-4 h-4" />
+                </button>
+            </div>
           </div>
         </div>
       </div>

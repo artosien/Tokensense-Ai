@@ -1,0 +1,795 @@
+================================================================================
+LLM GLOSSARY — PART 1 OF 4
+Terms: Agent through GELU
+================================================================================
+
+--------------------------------------------------------------------------------
+AGENT
+--------------------------------------------------------------------------------
+An AI agent is an autonomous or semi-autonomous system built on top of a large
+language model that can perceive its environment, plan multi-step actions, and
+execute tasks over an extended period — often without requiring human input at
+every step. Unlike a standard chatbot that responds to a single prompt and stops,
+an agent operates in a loop: it receives a goal or instruction, reasons about
+what needs to be done, selects and uses tools (such as web search, code
+execution, file access, or external APIs), observes the results of those actions,
+and then updates its plan accordingly.
+
+Agents typically rely on a combination of an LLM for reasoning and language
+understanding, a memory system (short-term working memory within the context
+window, or long-term memory via a vector database), a set of tools the model
+can invoke, and an orchestration layer that manages the loop. Popular agent
+frameworks include LangChain, AutoGPT, and Anthropic's own agentic capabilities
+built into Claude.
+
+Key concepts in agent design include: task decomposition (breaking a large goal
+into smaller sub-tasks), self-reflection (the model critiquing and revising its
+own outputs), tool calling (structured invocation of external functions), and
+termination conditions (criteria for deciding when the task is complete). Agents
+can fail in several characteristic ways — they may get stuck in loops, hallucinate
+tool outputs, lose track of the original goal across long contexts, or make
+irreversible real-world actions based on incorrect reasoning.
+
+Safety considerations for agents are especially important because an agent acting
+autonomously can have real-world consequences — sending emails, writing code,
+purchasing goods, or modifying files. Researchers study "minimal footprint"
+principles to ensure agents request only the permissions they need and prefer
+reversible over irreversible actions.
+
+--------------------------------------------------------------------------------
+ALIGNMENT
+--------------------------------------------------------------------------------
+Alignment refers to the challenge of ensuring that an AI system's goals,
+behaviors, and outputs are consistent with the intentions, values, and interests
+of the humans it is meant to serve. A model is "aligned" when it reliably does
+what we actually want — not just what we literally asked for — and avoids
+harmful, deceptive, or unintended behaviors even in situations it was not
+explicitly trained to handle.
+
+The alignment problem arises partly because specifying human values precisely
+and completely is extremely difficult. A model optimizing for a poorly specified
+objective can find unexpected, undesirable solutions that technically satisfy
+the objective while violating its spirit — a phenomenon sometimes called
+"reward hacking" or "specification gaming." At a deeper level, researchers worry
+about models developing internal goals that diverge from intended goals,
+especially as models become more capable.
+
+Alignment research encompasses several distinct but related problems:
+
+1. Value alignment — making the model's values match human values broadly.
+2. Intent alignment — making the model pursue the user's actual intent, not a
+   misinterpretation of their literal words.
+3. Robustness — maintaining aligned behavior under adversarial conditions,
+   distribution shift, or novel situations.
+4. Scalable oversight — developing techniques to supervise AI systems even when
+   their capabilities exceed the human ability to directly evaluate their outputs.
+
+Practical alignment techniques currently in wide use include Reinforcement
+Learning from Human Feedback (RLHF), Constitutional AI (CAI), Direct Preference
+Optimization (DPO), and red-teaming. Anthropic was founded specifically around
+the mission of AI safety and alignment research, and publishes extensive research
+on the topic including papers on "model organisms of misalignment" and
+interpretability.
+
+--------------------------------------------------------------------------------
+AUTOREGRESSIVE MODEL
+--------------------------------------------------------------------------------
+An autoregressive model is a generative model that produces outputs one element
+at a time, where each element is predicted conditioned on all previously generated
+elements. In the context of large language models, this means generating text
+one token at a time: the model takes the entire sequence of tokens so far as
+input and predicts a probability distribution over the next token, samples from
+that distribution, appends the chosen token to the sequence, and repeats.
+
+Mathematically, an autoregressive model defines the joint probability of a
+sequence x₁, x₂, ..., xₙ as the product of conditional probabilities:
+
+    P(x₁, x₂, ..., xₙ) = P(x₁) × P(x₂|x₁) × P(x₃|x₁,x₂) × ... × P(xₙ|x₁,...,xₙ₋₁)
+
+This factorization via the chain rule of probability means training is
+straightforward: given a sequence of text, simply train the model to predict
+each token from all preceding tokens using cross-entropy loss. No separate
+labeling step is required, which is why autoregressive pre-training can leverage
+virtually unlimited unlabeled text.
+
+Nearly all modern large language models — GPT-4, Claude, Llama, Mistral, Gemini —
+are autoregressive transformer-based models. The autoregressive approach is
+powerful but has a key limitation: generation is inherently sequential. You
+cannot generate token n+1 until token n is finalized, which creates a bottleneck
+at inference time. Techniques like speculative decoding attempt to partially
+address this by generating multiple candidate tokens in parallel.
+
+--------------------------------------------------------------------------------
+BACKPROPAGATION
+--------------------------------------------------------------------------------
+Backpropagation (short for "backpropagation of errors") is the algorithm used to
+compute the gradient of a loss function with respect to every parameter in a
+neural network. It is the foundational learning algorithm that makes training
+deep neural networks practical.
+
+The algorithm works in two phases:
+
+1. Forward pass: Input data flows through the network layer by layer, producing
+   an output (prediction). The loss function then measures how wrong the
+   prediction is by comparing it to the target label.
+
+2. Backward pass: Using the chain rule of calculus, gradients of the loss are
+   computed backwards through the network — from the output layer back to the
+   input layer. Each parameter receives a gradient indicating the direction and
+   magnitude by which it should be adjusted to reduce the loss.
+
+Once gradients are computed, an optimizer (such as Adam or SGD) uses them to
+update the model weights. Backpropagation itself just computes the gradients;
+the weight update step is handled by the optimizer.
+
+In large language models, backpropagation must flow through billions of
+parameters and hundreds of transformer layers. Practical training requires
+significant engineering: mixed-precision arithmetic (using float16 or bfloat16)
+to reduce memory, gradient checkpointing to trade computation for memory,
+and distributed training across thousands of GPUs with careful gradient
+synchronization. Numerical stability is critical — gradient vanishing (gradients
+becoming too small to usefully update early layers) and gradient explosion
+(gradients growing uncontrollably large) are both risks, partially mitigated by
+residual connections and layer normalization.
+
+--------------------------------------------------------------------------------
+BATCH SIZE
+--------------------------------------------------------------------------------
+Batch size refers to the number of training examples processed together in a
+single forward-and-backward pass during training. Instead of updating model
+weights after each individual example (online learning) or after the entire
+dataset (batch gradient descent), most modern training uses mini-batch gradient
+descent with a batch size typically ranging from dozens to thousands of samples.
+
+Choosing the right batch size involves significant trade-offs:
+
+- Larger batch sizes provide a more accurate estimate of the true gradient
+  (less noisy), enable better hardware utilization (GPUs thrive on parallelism),
+  and allow faster throughput in terms of samples processed per second.
+
+- Smaller batch sizes introduce more gradient noise, which can act as a form of
+  regularization — the stochasticity helps the optimizer escape local minima and
+  saddle points. In practice, models trained with smaller batch sizes often
+  generalize better, though they require more gradient update steps.
+
+- Memory is the hard constraint: every example in a batch must fit in GPU VRAM
+  simultaneously (including activations for backpropagation), so batch size is
+  often limited by hardware.
+
+For LLM pre-training, "batch size" is often expressed in terms of tokens rather
+than sequences. A global batch size of 4 million tokens per step is common in
+large-scale training. Gradient accumulation is a technique to simulate a large
+batch size by accumulating gradients across multiple smaller batches before
+performing a weight update — useful when GPU memory limits the physical batch size.
+
+--------------------------------------------------------------------------------
+BEAM SEARCH
+--------------------------------------------------------------------------------
+Beam search is a heuristic search algorithm used for text generation that
+maintains multiple candidate sequences (called "beams") simultaneously and
+expands the most promising ones at each step. It is a middle ground between
+greedy decoding (keeping only the single best token at each step) and exhaustive
+search (exploring every possible sequence).
+
+The algorithm works as follows: at each generation step, for each of the B beams
+(where B is the "beam width"), the model scores all possible next tokens. The
+top B candidate sequences across all beams and all next tokens are kept, and the
+rest are pruned. This process continues until all beams have produced an end-of-
+sequence token or a maximum length is reached.
+
+Beam search tends to produce more coherent, grammatically correct output than
+greedy decoding because it considers multiple hypotheses and can recover from
+locally poor token choices. With a beam width of 1, beam search reduces to
+greedy decoding. With a very large beam width, it approaches an exhaustive search
+but becomes computationally prohibitive.
+
+However, beam search has known failure modes in open-ended text generation: it
+tends to produce repetitive, generic, high-probability text, and the highest-
+scoring sequences under the model are often not the most natural or useful
+outputs. For this reason, many modern LLM inference pipelines use sampling-based
+methods (top-p, top-k, temperature) rather than beam search for open-ended
+generation. Beam search remains popular for structured tasks with clear ground
+truth, such as translation, summarization, or code generation evaluated by
+functional correctness.
+
+--------------------------------------------------------------------------------
+BENCHMARK
+--------------------------------------------------------------------------------
+A benchmark is a standardized evaluation dataset and scoring methodology used
+to measure and compare the capabilities of AI models in a consistent, reproducible
+way. Benchmarks serve as a shared "ruler" that allows researchers, developers,
+and the public to assess model progress over time and across organizations.
+
+Well-known LLM benchmarks include:
+
+- MMLU (Massive Multitask Language Understanding): Tests knowledge across 57
+  academic subjects from STEM to law and social science. Scored as multiple-choice
+  accuracy.
+
+- HumanEval: Tests code generation ability by asking models to complete Python
+  functions, scored by whether the generated code passes unit tests.
+
+- HellaSwag: Tests commonsense reasoning and natural language inference.
+
+- GSM8K: Grade-school math word problems, testing arithmetic reasoning.
+
+- MATH: Advanced mathematical problem solving.
+
+- TruthfulQA: Tests whether models produce factually accurate answers vs. hallucinated
+  but plausible-sounding ones.
+
+- BIG-Bench: A large collection of diverse, often challenging tasks.
+
+- GPQA: Graduate-level science questions designed to be hard for non-experts.
+
+A key limitation of benchmarks is "benchmark contamination" — if training data
+includes benchmark questions and answers (often unavoidably, given the scale of
+web scraping), model scores may reflect memorization rather than genuine
+capability. Additionally, models can appear to "saturate" benchmarks (score near
+100%) without actually solving the underlying task, prompting the development
+of harder benchmarks. Good benchmark design also guards against "benchmark gaming,"
+where optimizing for benchmark scores diverges from optimizing for real-world
+usefulness.
+
+--------------------------------------------------------------------------------
+BYTE PAIR ENCODING (BPE)
+--------------------------------------------------------------------------------
+Byte Pair Encoding is a subword tokenization algorithm that forms the basis of
+many modern language model vocabularies, including those used by GPT models and
+the tiktoken tokenizer. Originally a compression algorithm, BPE was adapted for
+NLP to create a vocabulary of tokens that balances coverage of the full language
+with a manageable vocabulary size.
+
+The BPE algorithm works as follows:
+
+1. Start with a base vocabulary of all individual characters (or bytes) that
+   appear in the training corpus.
+
+2. Count all adjacent pairs of symbols in the corpus.
+
+3. Merge the most frequent pair into a new single symbol, adding it to the
+   vocabulary.
+
+4. Repeat steps 2-3 for a fixed number of merge operations (typically 30,000 to
+   100,000 merges).
+
+The result is a vocabulary where common words become single tokens, common
+subwords or morphemes become their own tokens, and rare or novel words are
+split into smaller pieces that are still in the vocabulary. For example, the word
+"unhappiness" might be tokenized as ["un", "happiness"] or ["un", "happy", "ness"]
+depending on training corpus frequencies.
+
+BPE has several important advantages: it handles out-of-vocabulary words
+gracefully (every string can be tokenized, since the base vocabulary covers all
+bytes), it produces efficient representations for common words (one token
+instead of many characters), and it captures morphological structure. Its
+limitation is that the segmentation is determined purely by statistical
+frequency in the training data, not by linguistic meaning.
+
+--------------------------------------------------------------------------------
+CHAIN-OF-THOUGHT PROMPTING
+--------------------------------------------------------------------------------
+Chain-of-Thought (CoT) prompting is a technique in which a language model is
+prompted or trained to produce intermediate reasoning steps before arriving at
+a final answer. Rather than jumping directly from question to answer, the model
+"thinks out loud," decomposing the problem into a series of logical steps that
+lead to the solution. This technique was first demonstrated in a landmark 2022
+paper by Wei et al. showing that simply including reasoning traces in few-shot
+examples dramatically improved performance on arithmetic, commonsense, and
+symbolic reasoning tasks.
+
+CoT prompting comes in several variants:
+
+- Few-shot CoT: Provide examples of questions + step-by-step reasoning + answers,
+  then ask the model to follow the same format on a new question.
+
+- Zero-shot CoT: Simply appending "Let's think step by step" to a prompt
+  encourages the model to generate its own reasoning chain without examples.
+
+- Self-consistency: Generate multiple independent reasoning chains and take a
+  majority vote over final answers, improving reliability.
+
+- Tree of Thoughts (ToT): Explore multiple reasoning paths simultaneously in a
+  tree structure, allowing backtracking.
+
+- Scratchpad prompting: Encourage the model to use a visible working space.
+
+CoT works because LLMs process tokens sequentially, and generating intermediate
+computation tokens effectively gives the model additional "compute" time to work
+through a problem — similar to how a human might work through math on a piece of
+scratch paper. Performance gains are most pronounced for problems that require
+multiple logical steps, arithmetic, or planning. For simple lookup tasks, CoT
+adds little benefit and wastes tokens.
+
+Modern reasoning models like OpenAI's o1/o3 and Anthropic's Claude extended
+thinking build CoT deeply into training rather than relying solely on prompting.
+
+--------------------------------------------------------------------------------
+COMPLETION TOKENS
+--------------------------------------------------------------------------------
+Completion tokens (also called output tokens or generation tokens) are the tokens
+that a language model generates in response to a prompt. They form the second
+half of a prompt/completion pair and represent the model's output: the text of
+an answer, a generated story, code, a translation, or any other content produced
+by the model.
+
+In the context of API pricing and rate limiting, the total number of tokens in a
+request-response cycle is split into prompt tokens (input) and completion tokens
+(output). Completion tokens are typically priced higher than prompt tokens because
+each completion token requires a full forward pass through the model (autoregressive
+generation), while prompt tokens can be processed in parallel during the prefill
+phase.
+
+The maximum number of completion tokens a model can produce is bounded by its
+context window minus the number of prompt tokens used. Many API providers also
+allow setting a separate max_tokens parameter that caps the maximum completion
+length, providing cost control and preventing runaway generation. Token budgeting —
+understanding roughly how many prompt tokens a given input consumes and how many
+completion tokens different types of outputs require — is an important practical
+skill when building LLM-powered applications.
+
+--------------------------------------------------------------------------------
+CONSTITUTIONAL AI
+--------------------------------------------------------------------------------
+Constitutional AI (CAI) is a training methodology developed by Anthropic to
+guide AI systems toward helpful, harmless, and honest behavior using a set of
+explicit principles (the "constitution") rather than relying entirely on direct
+human feedback. The approach was introduced in Anthropic's 2022 paper "Constitutional
+AI: Harmlessness from AI Feedback."
+
+The CAI pipeline works in two main stages:
+
+1. Supervised Learning from AI Feedback (SL-CAI): The model is first prompted
+   to generate responses, then asked to critique and revise those responses
+   according to a set of constitutional principles (e.g., "Is this response
+   harmful? Revise it to be more helpful and less dangerous."). The revised
+   responses are used as training data.
+
+2. Reinforcement Learning from AI Feedback (RLAIF): A preference model (reward
+   model) is trained using AI-generated preference labels — the constitutional
+   model evaluates pairs of responses and labels which is more consistent with
+   the constitution. The main model is then fine-tuned using this AI-generated
+   preference data.
+
+The key innovation is that alignment judgments are made by an AI system guided
+by explicit, inspectable principles, rather than requiring human labelers to
+evaluate every response. This makes the process more scalable, consistent, and
+transparent. The "constitution" itself can be inspected, debated, and revised —
+unlike the implicit values encoded in human preference data.
+
+CAI has been central to Anthropic's development of Claude models, contributing
+to their characteristically balanced approach to safety: being genuinely helpful
+while avoiding harm, without being unnecessarily restrictive.
+
+--------------------------------------------------------------------------------
+CONTEXT LENGTH EXTENSION
+--------------------------------------------------------------------------------
+Context length extension refers to techniques used to increase the maximum
+context window of a language model beyond what it was originally trained with.
+Most transformer-based LLMs are pre-trained on sequences up to a fixed length
+(e.g., 4,096 or 8,192 tokens), but there are strong practical reasons to support
+longer contexts — processing long documents, entire codebases, extended
+conversations, and more.
+
+Simply providing sequences longer than the training length at inference time
+does not work well: positional encodings the model hasn't seen during training
+may produce poor results, and the attention patterns learned during pre-training
+may not generalize to new positions.
+
+Several techniques enable context length extension:
+
+- Position interpolation: Scale the position indices to fit within the originally
+  trained range, then fine-tune briefly. This allows the model to generalize
+  existing positional knowledge to longer sequences.
+
+- RoPE extension (YaRN, LongRoPE): For models using Rotary Position Embedding,
+  various methods adjust the RoPE frequency basis to support longer sequences
+  more cleanly.
+
+- Long-context fine-tuning: Continue training on long-sequence data after
+  position encoding adjustments.
+
+- Sliding window / memory mechanisms: Use architectural changes to handle
+  effectively unlimited context lengths at the cost of some limitations on
+  long-range attention.
+
+Anthropic's Claude models support extremely long context windows (up to 200K
+tokens in Claude 3), achieved through a combination of architectural and training
+innovations. Achieving good long-context performance (correctly retrieving and
+using information from anywhere in a long context) is distinct from simply
+supporting a large context window — many models exhibit a "lost in the middle"
+phenomenon where information in the middle of a long context is underutilized.
+
+--------------------------------------------------------------------------------
+CONTEXT WINDOW
+--------------------------------------------------------------------------------
+The context window (also called the context length or context size) is the maximum
+number of tokens a language model can process in a single inference call — the
+total span of text the model can "see" and reason about simultaneously. It
+encompasses all input tokens (system prompt, conversation history, documents,
+user message) plus all output tokens generated during that response.
+
+The context window size is a fundamental architectural constraint: transformer
+attention has a computational and memory cost that scales quadratically with
+sequence length (O(n²) in standard attention), making very long contexts
+expensive. Efficient attention mechanisms like Flash Attention, grouped query
+attention, and sliding window attention reduce this cost.
+
+Context window sizes have grown dramatically:
+- GPT-2 (2019): 1,024 tokens
+- GPT-3 (2020): 4,096 tokens
+- GPT-4 (2023): 8K–128K tokens (depending on variant)
+- Claude 3 (2024): 200,000 tokens
+- Gemini 1.5 (2024): 1,000,000 tokens
+
+A large context window enables powerful capabilities: processing entire books,
+maintaining long conversations without summarizing history, analyzing whole
+codebases, and doing complex multi-document reasoning. However, having a large
+context window does not guarantee the model uses all of it equally well — as
+mentioned under "context length extension," performance can degrade for
+information positioned in the middle of very long contexts.
+
+The context window is also a key cost driver in API pricing: larger contexts
+require more memory and compute, both for prefilling the prompt and for
+generating each output token (since the KV cache grows with context length).
+
+--------------------------------------------------------------------------------
+CROSS-ENTROPY LOSS
+--------------------------------------------------------------------------------
+Cross-entropy loss is the standard training objective used for language models.
+It measures how well the model's predicted probability distribution over the
+vocabulary matches the actual next token at each position in the training
+sequence. Minimizing cross-entropy is equivalent to maximizing the log-likelihood
+of the training data under the model.
+
+For a single prediction, the cross-entropy loss is:
+
+    L = -log P(correct token)
+
+where P(correct token) is the probability the model assigns to the token that
+actually appeared in the training text. If the model is very confident and
+correct (P ≈ 1.0), the loss approaches 0. If the model assigns low probability
+to the correct token (P ≈ 0.01), the loss is large (≈ 4.6 in natural log units).
+
+Averaged over all positions in all training sequences, this loss captures the
+model's overall ability to predict text. The relationship between cross-entropy
+loss and perplexity is:
+
+    Perplexity = e^(average cross-entropy loss)
+
+Cross-entropy loss is appealing for several reasons: it is a proper scoring rule
+(rewarding calibrated probability estimates, not just correct argmax predictions),
+it is differentiable everywhere, and it naturally handles the multinomial
+prediction task over a large vocabulary. During pre-training on next-token
+prediction, cross-entropy loss is the only objective needed — no labels are
+required beyond the text itself, enabling self-supervised learning on any corpus.
+
+--------------------------------------------------------------------------------
+DECODER-ONLY ARCHITECTURE
+--------------------------------------------------------------------------------
+A decoder-only architecture is a type of transformer model that consists only of
+decoder layers, each of which uses causal (masked) self-attention. Causal
+attention means each token can only attend to itself and all previous tokens in
+the sequence — never to tokens that come later. This design makes decoder-only
+models naturally suited for autoregressive text generation.
+
+The original transformer (Vaswani et al., 2017) had both an encoder and a decoder.
+The encoder reads the full input sequence bidirectionally (each token can attend
+to all others), and the decoder generates the output token by token, attending
+to both the encoder's output and its own previously generated tokens via
+cross-attention. This encoder-decoder structure is ideal for sequence-to-sequence
+tasks like translation.
+
+Decoder-only models simplify this by removing the encoder entirely. At training
+time, the entire text sequence is processed in parallel using causal masking (a
+lower-triangular attention mask prevents attending to future tokens). This
+makes pre-training on raw text extremely efficient. At inference time, text is
+generated autoregressively one token at a time.
+
+Nearly all the largest and most capable modern LLMs — GPT-2, GPT-3, GPT-4,
+Claude, Llama, Mistral, Gemini, Falcon, Grok — use decoder-only architectures.
+The success of this approach suggests that training a model to predict the next
+token from a vast corpus of text causes it to implicitly learn rich representations
+of language, world knowledge, and reasoning — without requiring encoder-decoder
+separation.
+
+--------------------------------------------------------------------------------
+DIRECT PREFERENCE OPTIMIZATION
+--------------------------------------------------------------------------------
+Direct Preference Optimization (DPO) is an alignment training algorithm introduced
+by Rafailov et al. (2023) as a simpler and more stable alternative to Proximal
+Policy Optimization (PPO)-based RLHF. Rather than training a separate reward
+model and then using RL to optimize the policy against it, DPO directly optimizes
+the language model on human preference data using a supervised loss derived from
+an implicit reward function.
+
+The key insight in DPO is that the optimal policy under RLHF can be expressed
+analytically in terms of a reference model and a reward function. This allows
+reparameterizing the problem: instead of training a reward model r(x,y) and then
+doing RL, DPO directly optimizes the policy using preference pairs (a "chosen"
+response and a "rejected" response for the same prompt) through a binary
+cross-entropy loss.
+
+The DPO loss function increases the probability of the chosen response relative
+to the rejected response, while staying close to the reference model (preventing
+the model from degenerating). Crucially, no separate reward model is needed,
+no RL training loop is required, and no reward hacking is possible in the
+traditional RL sense.
+
+DPO advantages:
+- Simpler and more computationally efficient than PPO-based RLHF
+- More stable training (no RL instabilities or reward model errors)
+- Easier to implement and reproduce
+
+DPO limitations:
+- Can be less flexible than full RLHF for complex reward functions
+- Requires high-quality preference datasets
+- Some researchers find PPO produces better results on certain tasks
+
+Many modern models use DPO or variants (such as IPO, KTO, or ORPO) as part of
+their alignment pipeline.
+
+--------------------------------------------------------------------------------
+EMBEDDING
+--------------------------------------------------------------------------------
+An embedding is a dense, continuous numerical representation of a discrete object
+— such as a token, word, sentence, or document — in a high-dimensional vector
+space. Embeddings map similar objects to nearby points in the vector space,
+enabling mathematical operations that reflect semantic relationships.
+
+In transformer LLMs, embeddings appear in multiple places:
+
+1. Token embeddings (input layer): Each token in the vocabulary is assigned a
+   learned vector of dimension d_model (typically 768 to 12,288 for modern LLMs).
+   When processing text, the input tokens are looked up in the embedding table
+   and their vectors are fed into the transformer.
+
+2. Positional embeddings: Added to token embeddings to encode each token's
+   position in the sequence (see "Positional Encoding").
+
+3. Output embeddings: The final layer's hidden states are projected onto the
+   vocabulary to produce logits. In many models, the output embedding matrix
+   is the same (tied) to the input token embedding matrix.
+
+4. Sentence/document embeddings: The output of the final layer (or a pooled
+   representation) can serve as an embedding for the entire text, capturing its
+   overall semantic content. These are used for semantic search, retrieval,
+   clustering, and classification tasks.
+
+Embedding quality is often measured by tasks like word analogy ("king - man +
+woman = queen"), semantic similarity, or information retrieval benchmarks (MTEB).
+The dimensionality of embeddings trades off expressiveness against computational
+cost. Embeddings trained on large corpora capture rich semantic, syntactic, and
+even world-knowledge structure — the "word2vec" insight that "you shall know a
+word by the company it keeps" remains foundational.
+
+--------------------------------------------------------------------------------
+ENCODER-DECODER ARCHITECTURE
+--------------------------------------------------------------------------------
+An encoder-decoder architecture (also called a sequence-to-sequence or seq2seq
+architecture) consists of two separate components: an encoder that reads and
+represents the input, and a decoder that generates the output. The original
+transformer paper ("Attention Is All You Need," Vaswani et al., 2017) introduced
+this architecture for machine translation.
+
+The encoder processes the entire input sequence using bidirectional (non-causal)
+self-attention, allowing each token to attend to all other tokens in the input.
+This produces a rich, contextual representation of each input token. The decoder
+then generates the output sequence autoregressively. Each decoder layer attends
+to its own previously generated tokens (via causal self-attention) and to the
+encoder's output (via cross-attention), enabling it to condition on the full input.
+
+Encoder-decoder models excel at tasks where the input and output are different
+sequences — particularly translation, summarization, question answering, and
+similar conditional generation tasks. Notable encoder-decoder LLMs include T5
+(Text-to-Text Transfer Transformer), BART, and Google's early Bard/PaLM-2
+variants.
+
+Compared to decoder-only models, encoder-decoder models are generally better at
+faithfully conditioning on a full input when producing output (because the encoder
+sees the whole input bidirectionally), but are more complex to train and serve.
+The dominant modern trend has been toward decoder-only models for general-purpose
+language modeling, though encoder-decoder models remain important for structured
+generation tasks and are often more efficient for classification and regression
+tasks when only an encoder is needed.
+
+--------------------------------------------------------------------------------
+EPOCH
+--------------------------------------------------------------------------------
+An epoch is one complete pass through the entire training dataset during model
+training. After one epoch, the model has seen every training example exactly once
+(assuming no data augmentation). Training is typically run for multiple epochs,
+with the model seeing the data multiple times, using a different random order
+(shuffling) each time to prevent the model from memorizing the sequence of examples.
+
+For large language models, the concept of an "epoch" is complicated by the scale
+of training data. Pre-training datasets for frontier LLMs (such as the Llama or
+GPT series) often contain trillions of tokens — far more data than can be seen
+multiple times within a practical training budget. As a result, LLM pre-training
+is often described in terms of total training tokens seen (e.g., "trained on 2
+trillion tokens") rather than epochs. In many cases, the model sees each document
+less than once — effectively less than one epoch over the full dataset.
+
+Multiple epochs become more relevant during fine-tuning phases, where the
+fine-tuning dataset is much smaller. Running too many epochs during fine-tuning
+risks catastrophic forgetting (the model overwrites pre-trained knowledge) or
+overfitting (the model memorizes the fine-tuning data rather than generalizing).
+Early stopping — halting training when validation performance stops improving —
+is a common technique to find the optimal epoch count.
+
+--------------------------------------------------------------------------------
+FEW-SHOT LEARNING
+--------------------------------------------------------------------------------
+Few-shot learning is the ability of a model to perform a new task correctly given
+only a small number of examples of that task in the prompt — typically 2 to 20
+examples. Rather than updating model weights (as in fine-tuning), few-shot
+learning happens entirely within the context window during inference, making it
+a form of in-context learning.
+
+A typical few-shot prompt includes:
+- K examples of the format (input → output) that demonstrates the task
+- The actual new input for which the model should produce an output
+
+For example, a few-shot sentiment classification prompt might look like:
+    "The movie was great. Sentiment: Positive
+     The film was dull and slow. Sentiment: Negative
+     The acting was superb. Sentiment: ???"
+
+Few-shot learning was a landmark capability demonstrated in GPT-3 (Brown et al.,
+2020), which showed that a sufficiently large model could adapt to diverse tasks
+from just a few examples — without any gradient updates. The key finding was that
+this ability emerged with scale: smaller models required task-specific fine-tuning,
+while GPT-3's 175B parameters enabled flexible few-shot generalization.
+
+The quality of few-shot learning depends on:
+- The representativeness and quality of the examples chosen
+- Example ordering (models can be sensitive to the order of examples)
+- The format consistency between examples and the test input
+- Model scale (larger models are generally better few-shot learners)
+
+Few-shot learning blurs the line between a "pre-trained model" and "task-specific
+model" — the model adapts to new tasks at inference time without any training.
+
+--------------------------------------------------------------------------------
+FINE-TUNING
+--------------------------------------------------------------------------------
+Fine-tuning is the process of continuing to train a pre-trained model on a
+smaller, more targeted dataset to adapt it for a specific task, domain, style,
+or behavior. Rather than training from scratch (which requires massive compute
+and data), fine-tuning starts with a pre-trained model's weights and updates
+them through additional gradient descent steps.
+
+Fine-tuning serves several purposes:
+- Task adaptation: Teaching a general-purpose language model to excel at a
+  specific task (e.g., medical question answering, legal document review).
+- Instruction following: Teaching the model to follow human instructions in a
+  helpful, conversational way (instruction tuning).
+- Style and tone: Adapting the model's output style to match a company's voice,
+  a specific domain's vocabulary, or a desired format.
+- Alignment: Reducing harmful outputs and increasing helpfulness through RLHF,
+  DPO, or similar techniques.
+- Data injection: Incorporating proprietary knowledge not present in the
+  pre-training data.
+
+Fine-tuning requires careful management of the learning rate (typically much
+lower than pre-training), training duration (too many steps causes overfitting
+or forgetting), and data quality (bad fine-tuning data can severely degrade
+model capability). Catastrophic forgetting — where fine-tuning overwrites
+broadly useful pre-trained knowledge — is a key risk, mitigated by parameter-
+efficient methods like LoRA.
+
+Modern fine-tuning approaches include:
+- Full fine-tuning: Update all model parameters
+- LoRA / QLoRA: Low-rank adapters for parameter-efficient fine-tuning
+- RLHF / DPO: Preference-based alignment fine-tuning
+- Continued pre-training: Fine-tuning on domain-specific text in an unsupervised way
+
+--------------------------------------------------------------------------------
+FLASH ATTENTION
+--------------------------------------------------------------------------------
+Flash Attention is a computationally and memory-efficient implementation of the
+self-attention mechanism in transformers, introduced by Dao et al. (2022). It
+achieves the exact same mathematical result as standard attention but with
+dramatically reduced memory usage and improved speed, enabling training and
+inference on much longer sequences than standard implementations allow.
+
+Standard self-attention computes:
+
+    Attention(Q, K, V) = softmax(QKᵀ / √d_k) V
+
+The intermediate attention matrix QKᵀ has size (n × n) where n is the sequence
+length. For n = 100,000 tokens, this matrix alone requires tens of gigabytes of
+memory, which is prohibitive. Standard implementations also involve multiple
+reads and writes of large matrices to GPU memory (HBM), creating memory bandwidth
+bottlenecks.
+
+Flash Attention's key innovation is "tiling" — it splits the computation into
+blocks that fit in the GPU's faster on-chip SRAM (cache memory), processes each
+block there, and accumulates results without ever materializing the full n×n
+attention matrix in HBM. Using a clever mathematical reformulation with online
+softmax normalization, it produces the exact same result.
+
+Benefits:
+- Reduces attention memory from O(n²) to O(n) per layer
+- Reduces attention FLOP memory traffic dramatically, speeding up training
+- Enables training on sequences 5-10x longer within the same hardware
+- Speeds up training walltime by 2-4x
+- Exact (not approximate) — no quality trade-off
+
+Flash Attention 2 (2023) brought further improvements in parallelism and reduced
+non-attention bottlenecks. Flash Attention 3 (2024) added support for H100
+hardware features. Flash Attention is now essentially universally used in state-
+of-the-art LLM training and inference.
+
+--------------------------------------------------------------------------------
+FUNCTION CALLING / TOOL USE
+--------------------------------------------------------------------------------
+Function calling (also called tool use) is a capability of language models to
+generate structured requests to invoke external functions, APIs, or tools during
+a conversation, enabling the model to extend its capabilities beyond pure text
+generation. Instead of simply producing text, a model with function calling can
+identify when an external action is needed, generate a structured call (specifying
+the function name and arguments), receive the result, and incorporate it into
+its response.
+
+The typical function calling workflow:
+1. The developer provides the model with a list of available tools, each
+   described with a name, description, and parameter schema (in JSON Schema or
+   similar format).
+2. The model processes the user's message and determines whether any tool should
+   be called.
+3. If a tool call is needed, the model outputs a structured tool call object
+   rather than (or in addition to) text.
+4. The application executes the tool call and returns the result to the model.
+5. The model incorporates the tool result into its final response.
+
+Common use cases include:
+- Fetching real-time data (weather, stock prices, web search results)
+- Querying databases or knowledge bases
+- Running code and returning output
+- Writing and reading files
+- Sending emails or calendar invites
+- Calling third-party APIs
+
+Function calling is a critical building block for AI agents, allowing models to
+take actions in the world rather than just generating text about possible actions.
+The reliability of function calling — the model correctly deciding when and how
+to call tools, generating valid JSON arguments, and handling tool errors gracefully —
+is a key capability dimension for frontier models.
+
+--------------------------------------------------------------------------------
+GELU
+--------------------------------------------------------------------------------
+GELU (Gaussian Error Linear Unit) is an activation function commonly used in
+transformer neural networks, introduced by Hendrycks and Gimpel (2016). It is
+the activation function used in GPT models, BERT, and many other LLMs.
+
+The GELU function is defined as:
+
+    GELU(x) = x × Φ(x)
+
+where Φ(x) is the cumulative distribution function of the standard normal
+distribution. Intuitively, this multiplies the input by the probability that a
+standard normal random variable is less than x — so inputs with large positive
+values pass through near-unchanged, large negative values are suppressed toward
+zero, and values near zero are smoothly attenuated.
+
+An efficient approximation commonly used in practice is:
+
+    GELU(x) ≈ 0.5 × x × (1 + tanh(√(2/π) × (x + 0.044715x³)))
+
+Compared to ReLU (which is simply max(0,x)), GELU is:
+- Smooth and differentiable everywhere (no kink at x=0)
+- Non-zero for negative inputs (unlike ReLU, which zeroes out negatives entirely)
+- Stochastically regularizing in spirit (though deterministic in practice)
+
+These properties make GELU particularly well-suited for transformer architectures,
+where the feed-forward network layers use GELU (or variants like SwiGLU or
+GeGLU) as their activation function. The smoothness helps optimization, and the
+soft suppression of negative inputs is a more nuanced form of gating than the
+hard zero of ReLU. Modern LLMs like LLaMA use SwiGLU rather than standard GELU,
+but both are members of the same family of gated linear unit activations.
+
+================================================================================
+END OF PART 1
+================================================================================

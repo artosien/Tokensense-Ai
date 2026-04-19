@@ -1,0 +1,44 @@
+<svg width="800" height="400" viewBox="0 0 800 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="400" rx="24" fill="#0F172A"/>
+  <text x="40" y="50" fill="white" font-family="sans-serif" font-size="24" font-weight="black">RLHF ALIGNMENT</text>
+  <rect x="40" y="65" width="80" height="4" rx="2" fill="#8B5CF6"/>
+
+  <!-- Step 1: Human Ranking -->
+  <g transform="translate(60, 120)">
+    <rect width="200" height="150" rx="16" fill="#1E293B" stroke="#334155"/>
+    <text x="100" y="30" fill="#94A3B8" font-family="sans-serif" font-size="10" font-weight="bold" text-anchor="middle">1. HUMAN RANKING</text>
+    <rect x="30" y="50" width="140" height="30" rx="4" fill="#10B981" fill-opacity="0.2" stroke="#10B981"/>
+    <text x="100" y="70" fill="white" font-family="sans-serif" font-size="10" text-anchor="middle">Choice A (Best)</text>
+    <rect x="30" y="90" width="140" height="30" rx="4" fill="#F43F5E" fill-opacity="0.2" stroke="#F43F5E"/>
+    <text x="100" y="110" fill="white" font-family="sans-serif" font-size="10" text-anchor="middle">Choice B (Worse)</text>
+  </g>
+
+  <!-- Step 2: Reward Model -->
+  <g transform="translate(300, 120)">
+    <rect width="200" height="150" rx="16" fill="#581C87" fill-opacity="0.1" stroke="#8B5CF6" stroke-width="2"/>
+    <text x="100" y="30" fill="#8B5CF6" font-family="sans-serif" font-size="10" font-weight="bold" text-anchor="middle">2. REWARD MODEL</text>
+    <path d="M60 80L80 100L140 60" stroke="#8B5CF6" stroke-width="4" stroke-linecap="round"/>
+    <text x="100" y="130" fill="#D8B4FE" font-family="sans-serif" font-size="9" text-anchor="middle">Learns human preferences</text>
+  </g>
+
+  <!-- Step 3: Optimization -->
+  <g transform="translate(540, 120)">
+    <rect width="200" height="150" rx="16" fill="#064E3B" fill-opacity="0.1" stroke="#10B981" stroke-width="2"/>
+    <text x="100" y="30" fill="#10B981" font-family="sans-serif" font-size="10" font-weight="bold" text-anchor="middle">3. OPTIMIZATION</text>
+    <circle cx="100" cy="80" r="30" fill="#10B981" fill-opacity="0.3" stroke="#10B981"/>
+    <text x="100" y="85" fill="white" font-family="sans-serif" font-size="12" font-weight="black" text-anchor="middle">LLM</text>
+    <text x="100" y="130" fill="#A7F3D0" font-family="sans-serif" font-size="9" text-anchor="middle">Aligned to human values</text>
+  </g>
+
+  <!-- Flow Arrows -->
+  <path d="M265 200H295" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M505 200H535" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#334155" />
+    </marker>
+  </defs>
+
+  <text x="400" y="360" fill="#94A3B8" font-family="sans-serif" font-size="14" text-anchor="middle">The bridge between raw model capabilities and helpful, safe human assistants.</text>
+</svg>

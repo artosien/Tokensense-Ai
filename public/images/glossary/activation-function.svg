@@ -1,0 +1,37 @@
+<svg width="800" height="400" viewBox="0 0 800 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="400" rx="24" fill="#0F172A"/>
+  
+  <text x="40" y="50" fill="white" font-family="sans-serif" font-size="24" font-weight="black">ACTIVATION FUNCTION</text>
+  <rect x="40" y="65" width="80" height="4" rx="2" fill="#00e5ff"/>
+
+  <!-- Left: Linear (Input) -->
+  <g transform="translate(100, 150)">
+    <path d="M0 100L100 0" stroke="#334155" stroke-width="3" stroke-dasharray="4 4"/>
+    <text x="50" y="130" fill="#64748B" font-family="sans-serif" font-size="12" text-anchor="middle">LINEAR INPUT</text>
+  </g>
+
+  <!-- Middle: The Function -->
+  <g transform="translate(300, 100)">
+    <rect width="200" height="200" rx="20" fill="#00e5ff" fill-opacity="0.1" stroke="#00e5ff" stroke-width="2"/>
+    <path d="M40 160C40 160 100 160 100 100C100 40 160 40 160 40" stroke="#00e5ff" stroke-width="4" stroke-linecap="round"/>
+    <text x="100" y="190" fill="#00e5ff" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">NON-LINEAR MAPPING</text>
+  </g>
+
+  <!-- Right: Complex Result -->
+  <g transform="translate(600, 150)">
+    <path d="M0 100C30 80 70 120 100 0" stroke="#10B981" stroke-width="4"/>
+    <text x="50" y="130" fill="#10B981" font-family="sans-serif" font-size="12" text-anchor="middle">COMPLEX REASONING</text>
+  </g>
+
+  <!-- Arrow -->
+  <path d="M220 200H280" stroke="#334155" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <path d="M520 200H580" stroke="#334155" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#334155" />
+    </marker>
+  </defs>
+
+  <text x="400" y="360" fill="#94A3B8" font-family="sans-serif" font-size="14" text-anchor="middle">Acts as the "on/off" switch for neural complexity, enabling LLMs to learn beyond basic math.</text>
+</svg>

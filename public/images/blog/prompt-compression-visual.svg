@@ -1,0 +1,40 @@
+<svg width="800" height="400" viewBox="0 0 800 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="400" rx="24" fill="#0F172A"/>
+  
+  <!-- Left Side: Raw block of text/stone -->
+  <rect x="80" y="100" width="200" height="200" rx="12" fill="#1E293B" stroke="#334155" stroke-width="2"/>
+  <path d="M100 130H260M100 160H260M100 190H260M100 220H200M100 250H240" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+  <text x="180" y="330" fill="#64748B" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">RAW CONVERSATION</text>
+  <text x="180" y="350" fill="#475569" font-family="sans-serif" font-size="10" text-anchor="middle">Inefficient &amp; Costly</text>
+
+  <!-- Middle: The Action (Arrow + Sparkles) -->
+  <path d="M320 200H480" stroke="url(#arrowGradient)" stroke-width="4" stroke-dasharray="8 8" marker-end="url(#arrowhead)"/>
+  <circle cx="400" cy="200" r="40" fill="#10B981" fill-opacity="0.1"/>
+  <path d="M385 185L415 215M415 185L385 215" stroke="#10B981" stroke-width="3" stroke-linecap="round"/>
+  <text x="400" y="150" fill="#10B981" font-family="sans-serif" font-size="12" font-weight="black" text-anchor="middle">THE REFINEMENT</text>
+
+  <!-- Right Side: The Diamond/Polished Prompt -->
+  <path d="M600 120L660 160L600 280L540 160L600 120Z" fill="#10B981" fill-opacity="0.2" stroke="#10B981" stroke-width="3"/>
+  <path d="M540 160H660M600 120V280" stroke="#10B981" stroke-width="1" opacity="0.5"/>
+  <text x="600" y="330" fill="#10B981" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">OPTIMIZED PROMPT</text>
+  <text x="600" y="350" fill="#059669" font-family="sans-serif" font-size="10" text-anchor="middle">Precise &amp; High-Value</text>
+
+  <!-- Floating Stats -->
+  <rect x="520" y="60" width="160" height="30" rx="15" fill="#064E3B" stroke="#059669" stroke-width="1"/>
+  <text x="600" y="80" fill="#10B981" font-family="sans-serif" font-size="10" font-weight="bold" text-anchor="middle">75% TOKEN REDUCTION</text>
+
+  <defs>
+    <linearGradient id="arrowGradient" x1="320" y1="200" x2="480" y2="200" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#334155"/>
+      <stop offset="1" stop-color="#10B981"/>
+    </linearGradient>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#10B981" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="40" y="50" fill="white" font-family="sans-serif" font-size="24" font-weight="black">THE ART OF PROMPT COMPRESSION</text>
+  <rect x="40" y="65" width="100" height="4" rx="2" fill="#10B981"/>
+</svg>

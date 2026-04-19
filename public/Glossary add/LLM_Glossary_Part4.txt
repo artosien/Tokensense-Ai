@@ -1,0 +1,936 @@
+================================================================================
+LLM GLOSSARY — PART 4 OF 4
+Terms: Sampling through tiktoken
+================================================================================
+
+--------------------------------------------------------------------------------
+SAMPLING
+--------------------------------------------------------------------------------
+Sampling is the process of selecting the next token to generate by drawing
+randomly from the model's predicted probability distribution over the vocabulary,
+rather than deterministically picking the highest-probability token (as in greedy
+decoding). Sampling introduces randomness (stochasticity) into generation,
+enabling diverse, creative, and varied outputs.
+
+The basic sampling procedure:
+1. Compute logits from the model's final layer
+2. Apply temperature scaling: logits_scaled = logits / T
+3. Apply any filtering (top-k, top-p, repetition penalty, etc.)
+4. Normalize to probabilities via softmax
+5. Sample one token from the resulting distribution (e.g., using numpy.random.choice)
+
+With sampling, lower-probability tokens can still be selected, introducing
+variability. Running the same prompt multiple times with sampling produces
+different outputs each time (unlike greedy decoding, which is deterministic).
+
+The trade-off with sampling is between diversity and coherence:
+- High temperature → flat distribution → high diversity → lower coherence
+- Low temperature → peaked distribution → low diversity → higher coherence
+- Temperature = 0 → approaches greedy decoding (argmax)
+
+Pure (unfiltered) sampling can produce incoherent outputs by occasionally
+sampling very low-probability tokens that lead generation astray. For this reason,
+sampling is almost always combined with filtering strategies (top-k, top-p, min-p)
+that restrict the sampling pool to plausible tokens before drawing the random
+sample.
+
+Sampling is the default approach for open-ended generation (chat, creative writing,
+brainstorming) while greedy or very low-temperature sampling is preferred for
+structured tasks requiring high reliability.
+
+--------------------------------------------------------------------------------
+SEED
+--------------------------------------------------------------------------------
+A seed is an integer value provided to the random number generator that controls
+the sequence of random numbers produced during sampling, making generation
+deterministic and reproducible. Given the same prompt, same model, same sampling
+parameters, and same seed, the model will produce the same output every time.
+
+In language model generation, randomness enters during the token sampling step —
+when selecting a token from the probability distribution, a random number is
+drawn. This random number depends on the state of the random number generator,
+which can be initialized (seeded) to a fixed value for reproducibility.
+
+Why seeds matter:
+- Debugging and testing: When a model produces an unexpected or incorrect output,
+  setting a seed allows you to reproduce the exact error reliably.
+- Evaluation: Reproducible benchmark comparisons require consistent outputs.
+- User experience: Some applications want consistent outputs for the same input
+  (e.g., for caching or content moderation review).
+- Research: Comparing different prompting strategies on exactly the same samples.
+
+Seed support in practice: Most LLM inference frameworks and some APIs (e.g.,
+OpenAI's API with the seed parameter) support seeded generation. When seeds are
+not supported or when multiple GPUs introduce non-determinism (due to floating-
+point operation ordering in parallel computations), perfect reproducibility may
+require additional measures like fixed hardware topology and careful synchronization.
+
+Setting seed=0 (or any fixed value) when temperature > 0 doesn't make generation
+deterministic in all implementations — hardware-level floating point nondeterminism
+can still introduce variation. True reproducibility often requires temperature=0.
+
+--------------------------------------------------------------------------------
+SELF-ATTENTION
+--------------------------------------------------------------------------------
+Self-attention is the core computational mechanism in transformer models that
+allows each token in a sequence to dynamically attend to (and gather information
+from) every other token in the same sequence. The "self" refers to the fact that
+the queries, keys, and values all come from the same sequence, in contrast to
+cross-attention where queries come from one sequence (e.g., decoder) and keys/
+values come from another (e.g., encoder output).
+
+The self-attention computation for a sequence of token representations X:
+
+    Q = XW_Q    (queries)
+    K = XW_K    (keys)
+    V = XW_V    (values)
+    Attention(Q, K, V) = softmax(QKᵀ / √d_k) V
+
+Step by step:
+1. For each token, compute a query vector (what am I looking for?), key vector
+   (what do I contain?), and value vector (what information do I convey?).
+2. Compute dot products between all query-key pairs (QKᵀ) to measure how relevant
+   each token is to every other token. Scale by √d_k to prevent dot products
+   from becoming too large.
+3. Apply softmax to get attention weights (a probability distribution over tokens).
+4. Weight the value vectors by attention weights and sum — each token's output
+   is a weighted combination of all tokens' value vectors, where the weights
+   reflect relevance.
+
+Self-attention is powerful because it can capture arbitrary long-range dependencies
+regardless of distance in the sequence — a token can attend to any other token
+with the same computational cost. This is a major advantage over RNNs, which
+process sequences step by step and struggle with long-range dependencies.
+
+In decoder-only models, causal masking is applied to the attention weights so
+each token can only attend to preceding tokens, preserving the autoregressive
+property.
+
+--------------------------------------------------------------------------------
+SEMANTIC SEARCH
+--------------------------------------------------------------------------------
+Semantic search is a retrieval approach that finds documents or passages based
+on their meaning and conceptual similarity to a query, rather than matching exact
+keywords. It uses dense vector representations (embeddings) to capture semantic
+content, enabling retrieval of relevant results even when no exact words are shared
+between the query and the document.
+
+Traditional keyword search (BM25, TF-IDF) matches based on lexical overlap —
+if you search for "automobile repair," a document about "car maintenance" with
+no overlap may not be returned. Semantic search captures the conceptual
+relationship and would correctly retrieve it.
+
+How semantic search works:
+1. An embedding model (such as Sentence-BERT, E5, BGE, or text-embedding-3-large)
+   converts each document/passage into a dense vector (e.g., 1536 dimensions).
+2. Vectors are stored in a vector database with approximate nearest neighbor
+   (ANN) indexing (FAISS, HNSW, etc.).
+3. At query time, the query is embedded with the same model.
+4. ANN search finds the k documents whose embeddings are closest to the query
+   embedding (by cosine similarity or dot product).
+5. Retrieved documents are returned (and optionally re-ranked by a cross-encoder).
+
+Semantic search is the retrieval backbone of RAG systems. Embedding model quality
+directly determines retrieval accuracy — the model must embed similar-meaning
+text close together in the vector space regardless of surface form. Benchmarks
+like MTEB (Massive Text Embedding Benchmark) measure embedding model retrieval
+quality across diverse tasks and languages.
+
+Hybrid search combines keyword and semantic search signals, often outperforming
+either alone.
+
+--------------------------------------------------------------------------------
+SLIDING WINDOW ATTENTION
+--------------------------------------------------------------------------------
+Sliding Window Attention (SWA) is an approximate attention mechanism that restricts
+each token to attend only to a fixed window of nearby tokens (e.g., the preceding
+and following W tokens), rather than attending to the entire sequence. This reduces
+the computational and memory complexity of attention from O(n²) to O(n × W),
+enabling practical processing of very long sequences.
+
+The motivation: full attention allows each token to directly attend to every other
+token in the sequence, but this is O(n²) in both time and memory — for a sequence
+of 100,000 tokens, the attention matrix contains 10 billion entries. For many
+tasks, tokens primarily need to attend to nearby context (locally coherent text),
+and long-range dependencies can be captured indirectly through multiple stacked layers.
+
+How SWA works:
+- Define a window size W (e.g., 4,096)
+- Each token attends only to the W tokens before and after it
+- At layer L, the effective receptive field is L × W — information from W tokens
+  away at layer 1 can be at L×W tokens away after L layers
+
+Used in: Mistral 7B (combined with rolling buffer KV cache), Longformer,
+BigBird (which combines local window attention with random global attention).
+
+Trade-offs:
+- Reduces complexity from O(n²) to O(n)
+- Sacrifices direct long-range attention (addressed by stacking layers)
+- Less expressive than full attention for tasks requiring direct long-range
+  comparison
+- Often combined with a few "global" attention tokens that attend to the full
+  sequence (like the CLS token in Longformer)
+
+--------------------------------------------------------------------------------
+SOFTMAX
+--------------------------------------------------------------------------------
+Softmax is a mathematical function that converts a vector of arbitrary real
+numbers (logits) into a valid probability distribution — non-negative values
+that sum to 1. It is used throughout deep learning wherever a probability
+distribution over discrete categories is needed, and is especially central to
+transformer attention and language model token prediction.
+
+For a vector z = [z₁, z₂, ..., zₙ]:
+
+    softmax(zᵢ) = exp(zᵢ) / Σⱼ exp(zⱼ)
+
+Properties:
+- Output values are in (0, 1) — all positive
+- Output values sum to exactly 1
+- Monotone: higher input → higher output
+- Differentiable everywhere — critical for backpropagation
+- Translation invariant: softmax(z) = softmax(z + c) for any constant c
+  (useful for numerical stability: subtract max(z) before computing)
+
+Temperature-scaled softmax: Dividing logits by temperature T before applying
+softmax controls distribution sharpness:
+- T < 1: Sharpens the distribution (larger probability mass on top tokens)
+- T = 1: Standard softmax
+- T > 1: Flattens the distribution (more uniform)
+- T → 0: Approaches a one-hot distribution (like argmax/greedy decoding)
+- T → ∞: Approaches uniform distribution
+
+In transformers, softmax appears in:
+1. Attention weights: softmax(QKᵀ/√d_k) converts raw attention scores to
+   a probability distribution over tokens to attend to.
+2. Output prediction: softmax over logits converts raw scores to token
+   probabilities for sampling or loss computation.
+
+Numerical stability note: Computing exp of large numbers overflows; implementations
+use the log-sum-exp trick (subtract the maximum value before exponentiating).
+
+--------------------------------------------------------------------------------
+SPECULATIVE DECODING
+--------------------------------------------------------------------------------
+Speculative decoding is an inference optimization technique that uses a small,
+fast "draft" model to speculatively generate multiple candidate tokens at once,
+which are then verified in parallel by the large target model — potentially
+accepting multiple tokens from a single forward pass of the large model and
+dramatically improving generation speed.
+
+The problem it solves: Standard autoregressive decoding requires one full forward
+pass of the large model to generate each single token. This is memory-bandwidth
+bound — the bottleneck is reading the model's billions of parameters from GPU
+memory for each token, even though modern GPUs have far more compute capacity
+than is utilized. If we could generate multiple tokens per large model pass, we'd
+approach better hardware utilization.
+
+The algorithm:
+1. A small draft model (e.g., a 7B model used for a 70B target) generates k
+   candidate tokens autoregressively (cheaply).
+2. The large target model processes all k candidate tokens in parallel in a
+   single forward pass (since they can be evaluated simultaneously given the
+   known context).
+3. Compare draft and target token probabilities. Accept draft tokens where the
+   target model agrees (using a rejection sampling scheme that guarantees the
+   final output distribution matches the target model exactly).
+4. If the first m tokens are accepted and the (m+1)th is rejected, fall back
+   to sampling from the target model's distribution at position m+1.
+5. Repeat.
+
+Expected speedup: Roughly proportional to the expected acceptance rate. If the
+draft model correctly predicts the target model's output 80% of the time, and
+we draft 5 tokens per pass, we might generate on average 4+ tokens per large
+model pass, achieving ~4x speedup.
+
+Variants include SpecInfer, Medusa (multiple draft heads on the target model
+itself), and draft models derived from the target model through distillation.
+
+--------------------------------------------------------------------------------
+STOP SEQUENCE
+--------------------------------------------------------------------------------
+A stop sequence is a string or token (or list thereof) that, when generated by
+the model, causes generation to halt immediately — preventing the model from
+generating any tokens beyond that point. Stop sequences give developers and users
+precise control over when the model should stop generating.
+
+When a stop sequence is encountered during generation, the model stops producing
+tokens at that point. The stop sequence itself may or may not be included in the
+returned text, depending on the API's behavior.
+
+Common use cases:
+
+1. Structured output: When generating JSON, the stop sequence "]" or "}" marks
+   the end of a complete structure.
+
+2. Multi-turn conversation: In few-shot conversation examples, "User:" or
+   "Human:" can be used as stop sequences so the model stops after generating
+   its response and before starting to simulate the next user turn.
+
+3. Code generation: Language-specific delimiters or end-of-function markers.
+
+4. Bounded extraction: "EOF" or a custom delimiter to mark end of extracted content.
+
+5. Safety: Custom stop sequences in safety-critical applications to prevent
+   specific outputs.
+
+Stop sequences are distinct from the end-of-sequence (EOS) token, which is a
+special token in the model's vocabulary that the model generates to signal it
+has naturally completed its response. Stop sequences are externally applied
+constraints; the EOS token is internally generated.
+
+Most LLM APIs (OpenAI, Anthropic, etc.) support up to 4-8 stop sequences
+simultaneously. Stop sequences must be specified as actual strings that might
+appear in the model's output; partial matches at the end of a response may
+prevent the final response chunk from being returned until it's clear whether
+the sequence matches.
+
+--------------------------------------------------------------------------------
+STREAMING
+--------------------------------------------------------------------------------
+Streaming is a technique for returning language model output to the client
+incrementally — token by token (or small chunks) — as they are generated, rather
+than waiting for the complete response before returning anything. This dramatically
+improves perceived responsiveness for interactive applications.
+
+Without streaming: The user stares at a blank screen while the model generates
+its complete response (which may take 10-30+ seconds for long outputs), then
+suddenly receives the entire text at once.
+
+With streaming: The first token appears almost immediately (after the prefill
+phase), and text flows into the UI at the model's generation rate — typically
+30-100 tokens/second for modern models. Users can begin reading the response
+while it's still being generated, providing a much better user experience.
+
+Technical implementation: Streaming uses HTTP Server-Sent Events (SSE) or
+WebSockets. The server pushes each token (or small group of tokens) as a JSON
+event as soon as it's generated. The client listens for these events and
+appends tokens to the displayed text in real time.
+
+Streaming considerations:
+- The user can see the model's reasoning as it unfolds, including any errors
+  or changes in direction
+- It's harder to post-process the full response before displaying (e.g., for
+  safety filtering or reformatting)
+- Token-by-token streaming can expose model "thinking" that might look uncertain
+  or rambling
+- Some APIs provide chunk-level streaming (groups of tokens) rather than
+  token-level streaming
+
+All major LLM API providers support streaming. Application frameworks like
+LangChain and LlamaIndex have streaming-aware interfaces. Handling streaming
+correctly in UI requires careful state management and progressive rendering.
+
+--------------------------------------------------------------------------------
+SUBWORD TOKENIZATION
+--------------------------------------------------------------------------------
+Subword tokenization is a family of text preprocessing algorithms that split
+words into smaller, meaningful units (subwords) rather than treating words as
+atomic tokens (word-level tokenization) or individual characters (character-level
+tokenization). It occupies a middle ground that balances vocabulary size,
+coverage, and representation efficiency.
+
+The key insight: most languages have a combinatorial structure — many words share
+common prefixes, suffixes, and stems. By representing these shared elements as
+their own tokens, a relatively small vocabulary can efficiently represent a very
+large number of distinct words.
+
+Examples of subword segmentation:
+- "unbelievable" → ["un", "believ", "able"]
+- "tokenization" → ["token", "ization"]
+- "transformer" → ["transform", "er"]
+- "フォームズ" → ["フォ", "ームズ"] (Japanese)
+
+Major subword tokenization algorithms:
+1. Byte Pair Encoding (BPE): Iteratively merges the most frequent character pair.
+   Used by GPT-2, GPT-3, GPT-4 (via tiktoken), RoBERTa.
+
+2. WordPiece: Similar to BPE but merges pairs that maximize the language model
+   likelihood (rather than raw frequency). Used by BERT.
+
+3. Unigram Language Model: Starts with a large vocabulary and iteratively prunes
+   subwords that least affect likelihood. Produces a probabilistic segmentation.
+   Used by SentencePiece (XLNet, ALBERT, LLaMA, T5).
+
+Subword tokenization is now universal in LLMs, having displaced both pure
+word-level and character-level tokenization. The tokenizer is trained on a
+representative text corpus before model training and remains fixed for the
+model's lifetime.
+
+--------------------------------------------------------------------------------
+SWIGLU
+--------------------------------------------------------------------------------
+SwiGLU is an activation function used in the feed-forward network (FFN) layers
+of many modern transformer-based LLMs, including LLaMA, PaLM, Mistral, and
+other state-of-the-art models. It was introduced by Noam Shazeer (2020) and
+empirically shown to improve performance compared to standard ReLU or GELU
+activations in transformer FFN layers.
+
+SwiGLU is a variant of the Gated Linear Unit (GLU) family, which splits the
+input into two halves and uses one half to "gate" the other:
+
+    SwiGLU(x, W, V, b, c) = Swish(xW + b) ⊙ (xV + c)
+
+Where Swish is the activation Swish(x) = x × sigmoid(x), and ⊙ is elementwise
+multiplication. In practice, applied as:
+
+    FFN_SwiGLU(x) = (Swish(xW₁) ⊙ xW₃) W₂
+
+This requires three weight matrices instead of the standard two, but the hidden
+dimension is typically reduced by 2/3 to keep total parameter count the same
+(e.g., 4 × d_model × 2/3 per weight for SwiGLU vs. 4 × d_model for standard).
+
+Why SwiGLU works better:
+- The gating mechanism allows the FFN to selectively pass or block information,
+  creating a learned feature-dependent non-linearity
+- Smooth gradients throughout (Swish is differentiable everywhere, unlike ReLU)
+- Empirically produces ~0.5-1% lower perplexity than comparable GELU/ReLU models
+  for the same parameter budget
+- The gating mechanism provides implicit multiplicative interactions between
+  features, adding expressivity
+
+SwiGLU is now the de facto standard FFN activation in the LLaMA family and
+most open-source LLMs released after 2023.
+
+--------------------------------------------------------------------------------
+SYSTEM PROMPT
+--------------------------------------------------------------------------------
+The system prompt (also called the system message, system instruction, or system
+turn) is a special input to a language model that sets the overall context,
+persona, capabilities, constraints, and behavioral guidelines for the model
+before any user interaction begins. It is typically set by the application
+developer or operator and is not visible to the end user in the chat interface,
+though it shapes every response the model produces.
+
+The system prompt is typically processed before any user messages and sits at
+the beginning of the context window with higher authority than the user turn
+in aligned models. It enables developers to:
+
+- Define the model's role and persona: "You are a helpful customer service agent
+  for Acme Corp, specializing in software products."
+- Set behavioral constraints: "Always respond in Spanish. Never discuss
+  competitors by name. Do not provide legal or financial advice."
+- Provide context and knowledge: "The current date is [date]. The user's account
+  tier is [tier]. Your knowledge of our products includes: [knowledge]."
+- Specify output format: "Always structure responses with a brief summary first,
+  followed by detailed steps."
+- Safety instructions: "Do not engage with requests for personal information.
+  If the user seems distressed, provide appropriate support resources."
+- Few-shot examples: Demonstrating desired response patterns.
+
+System prompts can range from a few words to tens of thousands of tokens for
+complex enterprise applications. In Claude's architecture, the system prompt
+represents the "operator" layer of the principal hierarchy — instructions from
+the organization deploying Claude that users cannot override.
+
+Prompt injection attacks specifically target system prompt integrity, trying to
+override system instructions with user-controlled content.
+
+--------------------------------------------------------------------------------
+TEMPERATURE
+--------------------------------------------------------------------------------
+Temperature is a sampling hyperparameter that controls the "randomness" or
+"creativity" of a language model's output by scaling the logits before applying
+the softmax function to produce a probability distribution. Temperature is one
+of the most commonly used inference parameters in LLM applications.
+
+Mathematically, temperature T is applied as:
+
+    P(token i) = exp(logitᵢ / T) / Σⱼ exp(logitⱼ / T)
+
+Effects at different temperature values:
+
+T < 1 (e.g., 0.2-0.7):
+- Amplifies probability differences between tokens
+- The highest-probability tokens become much more likely; low-probability tokens
+  become negligibly likely
+- Output is more focused, deterministic, consistent, and "confident"
+- Good for: factual Q&A, code generation, structured data extraction
+
+T = 1 (default):
+- No scaling; the softmax is applied directly to the raw logits
+- The model's trained probability distribution is used as-is
+
+T > 1 (e.g., 1.2-2.0):
+- Compresses probability differences — distribution becomes more uniform
+- Low-probability tokens become more likely; high-probability tokens lose their
+  dominance
+- Output is more random, creative, diverse, and surprising
+- Good for: creative writing, brainstorming, generating varied options
+
+T → 0: Approaches greedy decoding (same output every time)
+T → ∞: Approaches uniform random sampling from vocabulary
+
+Temperature is best thought of as a "confidence dial" — low temperature makes
+the model more conservative and reliable; high temperature makes it more
+exploratory and unpredictable. Most LLM APIs default to T=1.0, with the
+recommended range being 0.0 to 2.0.
+
+--------------------------------------------------------------------------------
+TIME TO FIRST TOKEN
+--------------------------------------------------------------------------------
+Time to First Token (TTFT) is a latency metric measuring the elapsed time between
+submitting a request to a language model API and receiving the first token of
+the model's response. It represents the user-perceived delay before the model
+"starts talking" and is a critical component of interactive application responsiveness.
+
+TTFT encompasses:
+1. Network round-trip time from client to server
+2. Request queuing time (if the server is under load)
+3. Prefill time: Processing all input prompt tokens through the model in parallel
+4. Sampling and generating the first output token
+5. Network transmission of the first response event
+
+The dominant factor in TTFT (beyond network latency) is the prefill phase: all
+input tokens must be processed before the first output token can be generated.
+This means TTFT scales with prompt length — a 100,000-token prompt takes much
+longer to prefill than a 1,000-token prompt. Prefill is compute-bound (many
+tokens processed in parallel), so it benefits from high GPU FLOP/s.
+
+Typical TTFT values for production systems:
+- Short prompts (< 1,000 tokens): 200ms - 1,500ms
+- Medium prompts (1,000-10,000 tokens): 500ms - 5,000ms
+- Long prompts (>50,000 tokens): 2,000ms - 20,000ms+
+
+TTFT directly affects user experience in chat applications — humans perceive
+delays over ~500ms as sluggish. Streaming mitigates this by revealing the
+response as it generates, so TTFT is the key "wait before seeing anything" delay.
+
+Optimizations targeting TTFT: prompt caching (skip prefill for cached prefixes),
+chunked prefill (interleave prefill and decode for better scheduling), prefill
+parallelism across multiple GPUs, and hardware with higher FLOP/s (H100 vs A100).
+
+--------------------------------------------------------------------------------
+TOKEN
+--------------------------------------------------------------------------------
+A token is the fundamental unit of text that a language model processes and
+generates. Text is not processed as characters, words, or sentences — it is first
+split into tokens by the tokenizer, and the model works entirely in the space
+of tokens. Everything the model reads and writes is a sequence of token IDs
+(integers representing positions in the vocabulary).
+
+What constitutes a token depends on the tokenizer:
+- Common short words are often a single token: "the", "and", "is", "a"
+- Longer or less-frequent words may be split: "tokenization" → ["token", "ization"]
+- Punctuation and whitespace often form their own tokens or are merged with
+  adjacent characters
+- Numbers may be split digit by digit: "12345" → ["1", "2", "3", "4", "5"]
+- Code tokens respect language-specific patterns: spaces for indentation may
+  be merged into tokens of varying width
+- Unicode characters outside common English may require multiple tokens
+
+A rough rule of thumb: 1 token ≈ 4 characters ≈ 0.75 English words. A typical
+page of text is approximately 400-500 tokens.
+
+Tokens matter practically for:
+- Context window limits: "100,000 token context" means the model can process
+  roughly 75,000 English words or 400,000 characters at once
+- API pricing: Most LLM APIs charge per input and output token
+- Performance: More tokens = more computation = higher latency
+
+The word "token" is also used metaphorically to refer to any discrete element
+in the input space — image patches, audio frames, or structured data fields
+can all be "tokenized" for multimodal or non-text models.
+
+--------------------------------------------------------------------------------
+TOKENIZER
+--------------------------------------------------------------------------------
+A tokenizer is the software component that converts raw text (a string of
+characters) into a sequence of token IDs (integers) that can be fed into a
+language model, and conversely, converts token IDs back into text. Every
+language model has an associated tokenizer that must be used consistently during
+both training and inference.
+
+The tokenizer pipeline typically consists of:
+
+1. Normalization: Optional text preprocessing — Unicode normalization, lowercasing,
+   accent removal, whitespace standardization. BERT applies NFC Unicode normalization;
+   many modern tokenizers use minimal normalization to preserve the original text
+   as faithfully as possible.
+
+2. Pre-tokenization: Split text into initial "words" or chunks based on whitespace,
+   punctuation, and special characters. This defines the boundaries within which
+   the subword algorithm operates.
+
+3. Subword model: Apply BPE, WordPiece, or Unigram merging/splitting to produce
+   the final token sequence.
+
+4. Encoding: Map each subword token to its integer ID in the vocabulary. The
+   vocabulary is typically a fixed-size lookup table (e.g., 32,000 to 128,000
+   entries) built during tokenizer training.
+
+Important tokenizer properties:
+- Invertibility: Decoding should recover the original text (modulo normalization)
+- Handling of unknown characters: Byte-level BPE (used by GPT models) can
+  tokenize any Unicode string by falling back to individual bytes
+- Special tokens: [BOS] (beginning of sequence), [EOS] (end of sequence),
+  [PAD] (padding), [SEP] (separator), [MASK], and model-specific chat template
+  tokens must be handled correctly
+
+Tokenizer choice affects model behavior: arithmetic is harder when numbers are
+split by digit; code generation is affected by how indentation is tokenized;
+multilingual capability depends on how well non-English text is covered.
+
+--------------------------------------------------------------------------------
+TOP-K SAMPLING
+--------------------------------------------------------------------------------
+Top-k sampling is a text generation strategy that restricts token sampling to
+only the k highest-probability tokens at each generation step, zeroing out
+probabilities for all other tokens before renormalizing and sampling. It prevents
+the model from ever selecting very low-probability tokens that can derail
+generation into incoherence.
+
+Algorithm:
+1. Compute logits and convert to probabilities via softmax
+2. Sort tokens by probability (descending)
+3. Keep only the top k tokens; set all others to probability 0
+4. Renormalize the remaining k probabilities to sum to 1
+5. Sample from the truncated distribution
+
+For example, with k=50 and a vocabulary of 50,000 tokens, only the 50 most
+likely next tokens are candidates for selection — the other 49,950 are excluded.
+
+Top-k vs. greedy vs. pure sampling:
+- Greedy (k=1): Always picks highest-probability token. Deterministic, no diversity.
+- Top-k (k=50): Samples from top 50. Balance of quality and diversity.
+- Pure sampling (k=full vocab): Full diversity, but can sample incoherent tokens.
+
+The limitation of top-k: k is a fixed count, which may be too restrictive or
+too permissive depending on the shape of the probability distribution at any
+given step. At some steps, the top 5 tokens may account for 99% of probability
+mass — including the other 45 low-probability tokens adds noise. At other steps,
+50 tokens may not cover enough of a flat, high-uncertainty distribution.
+
+This motivates top-p (nucleus) sampling, which adapts the number of candidates
+based on the cumulative probability mass rather than a fixed count.
+
+Common defaults: k=40-50 in many applications. Temperature is often applied in
+combination with top-k.
+
+--------------------------------------------------------------------------------
+TOP-P SAMPLING (NUCLEUS SAMPLING)
+--------------------------------------------------------------------------------
+Top-p sampling (also called nucleus sampling) is a text generation strategy
+introduced by Holtzman et al. (2019) that restricts sampling to the smallest
+set of tokens whose cumulative probability mass exceeds a threshold p — adapting
+the number of candidates dynamically based on the distribution's shape at each
+step.
+
+Algorithm:
+1. Compute probabilities via softmax (with temperature scaling)
+2. Sort tokens by probability (descending)
+3. Compute cumulative sum of probabilities
+4. Find the smallest k such that the cumulative sum ≥ p
+5. Keep only these top k tokens; set all others to 0
+6. Renormalize and sample from the truncated distribution
+
+For example, with p=0.9:
+- At a confident step (token A has 95% probability): only token A (and perhaps
+  one or two others) form the nucleus. k ≈ 1-3.
+- At an uncertain step (probability spread across many tokens): k may be 50-200
+  tokens to accumulate 90% probability mass.
+
+Top-p sampling elegantly handles the main failure mode of top-k: it is adaptive.
+When the model is confident, it draws from a small pool; when uncertain, it draws
+from a larger pool. This maintains coherence in high-confidence contexts while
+preserving appropriate diversity in uncertain ones.
+
+Typical p values:
+- p=0.9 to 0.95: Most common range. High quality with moderate diversity.
+- p=1.0: No filtering — equivalent to pure sampling.
+- p < 0.5: Very restrictive — often too focused/repetitive.
+
+Top-p and top-k are frequently used together: tokens must be in both the top k
+and the top p nucleus to be eligible for sampling. Temperature, top-k, and top-p
+together form the most common sampling configuration in production LLM deployments.
+
+--------------------------------------------------------------------------------
+TRANSFORMER
+--------------------------------------------------------------------------------
+The Transformer is the neural network architecture that underlies virtually all
+modern large language models, introduced by Vaswani et al. in the landmark 2017
+paper "Attention Is All You Need." It replaced recurrent neural networks (RNNs
+and LSTMs) as the dominant architecture for sequence modeling by relying entirely
+on attention mechanisms and feed-forward networks, with no recurrence.
+
+The key components of a transformer decoder layer (decoder-only architecture):
+
+1. Token Embedding + Positional Encoding:
+   Input tokens are mapped to vectors, and position information is added.
+
+2. Multi-Head Self-Attention:
+   Each token attends to other tokens in the sequence (causally masked for
+   decoder models). This captures contextual dependencies at any range.
+
+3. Residual Connection + Layer Normalization:
+   The attention output is added to the input (residual connection) and
+   normalized.
+
+4. Feed-Forward Network (FFN):
+   Two (or three for gated variants) linear transformations with a non-linear
+   activation (GELU, SwiGLU) applied independently to each token position.
+
+5. Residual Connection + Layer Normalization (again).
+
+This "transformer block" is stacked many times (e.g., 32 layers for 7B models,
+80 layers for 70B models). The output of the final layer is projected onto the
+vocabulary to produce logits.
+
+Why transformers work so well:
+- Parallelism: Unlike RNNs which process tokens sequentially, all attention
+  computations can be parallelized across the sequence length during training.
+- Long-range dependencies: Attention has O(1) path length between any two tokens.
+- Scale efficiency: Performance scales predictably and dramatically with more
+  parameters, data, and compute.
+- Flexible context: The attention mechanism naturally handles variable-length inputs.
+
+The transformer is arguably the most important architectural innovation in modern AI.
+
+--------------------------------------------------------------------------------
+UNIGRAM LANGUAGE MODEL TOKENIZER
+--------------------------------------------------------------------------------
+The Unigram Language Model Tokenizer is a subword tokenization algorithm developed
+as part of the SentencePiece library (Kudo and Richardson, 2018). Unlike BPE
+(which builds a vocabulary up through merging) and WordPiece (similar), the
+Unigram method starts with a large candidate vocabulary and iteratively prunes
+it down to the desired size, keeping tokens that best explain the training corpus
+under a unigram language model assumption.
+
+The algorithm:
+1. Start with a large initial vocabulary (all substrings up to a certain length,
+   plus all individual characters).
+2. Train a unigram language model: assign probabilities to each token in the
+   vocabulary such that the training corpus log-likelihood is maximized.
+3. Compute the "loss" of removing each token — the increase in loss if that token
+   were removed from the vocabulary.
+4. Remove the x% of tokens with the lowest loss (those whose removal affects
+   corpus likelihood least).
+5. Repeat steps 2-4 until the vocabulary reaches the desired size.
+
+The Unigram approach naturally produces a probabilistic tokenization: a string
+may have multiple valid segmentations, each with a probability under the unigram
+model. This is in contrast to BPE, which produces a single deterministic
+segmentation. The most likely segmentation (Viterbi algorithm) is used by default,
+but subword regularization (training with multiple sampled segmentations) can
+improve model robustness.
+
+Unigram tokenization is used in SentencePiece and is the tokenization method
+for LLaMA (early versions), ALBERT, T5, XLNet, and mT5. It tends to produce
+slightly different vocabulary coverage characteristics than BPE, particularly
+in multilingual settings.
+
+--------------------------------------------------------------------------------
+VECTOR DATABASE
+--------------------------------------------------------------------------------
+A vector database is a specialized data storage and retrieval system designed
+to efficiently store, index, and query high-dimensional numerical vectors
+(embeddings). It is the infrastructure backbone of semantic search, Retrieval-
+Augmented Generation (RAG), and similarity-based recommendation systems.
+
+Traditional relational databases index scalar values and support exact lookups
+and range queries. Vector databases are optimized for a different query type:
+"find me the k vectors in the database most similar to this query vector,"
+measured by cosine similarity, Euclidean distance, or dot product. This is called
+the k-Nearest Neighbor (kNN) or Approximate Nearest Neighbor (ANN) problem.
+
+For databases with millions to billions of vectors, exact kNN search is too slow.
+Vector databases use approximate nearest neighbor (ANN) algorithms:
+
+- HNSW (Hierarchical Navigable Small World): Builds a multi-layer graph structure
+  for fast traversal. Excellent recall and speed, widely used.
+- IVF (Inverted File Index): Clusters vectors into buckets and searches only
+  nearby clusters.
+- FAISS (Facebook AI Similarity Search): A library with multiple ANN algorithms,
+  often used as a backend.
+- ScaNN (Google): High-performance ANN with quantization.
+
+Popular vector database systems:
+- Pinecone: Managed cloud vector database
+- Weaviate: Open-source with hybrid search
+- Chroma: Lightweight, developer-friendly
+- Qdrant: Open-source, Rust-based
+- Milvus: Large-scale open-source
+- pgvector: PostgreSQL extension for vector search
+
+Vector databases are essential for RAG: document embeddings are stored in the
+vector database, and at query time, the query embedding is used to retrieve the
+most relevant documents via ANN search.
+
+--------------------------------------------------------------------------------
+VOCABULARY
+--------------------------------------------------------------------------------
+The vocabulary of a language model is the complete, fixed set of all tokens the
+model knows — every token that can appear in inputs or outputs. It is typically
+stored as a lookup table mapping token strings to integer IDs (0 to V-1, where
+V is the vocabulary size), and inversely from IDs back to strings.
+
+The vocabulary is determined during tokenizer training (before model training)
+and remains fixed for the model's lifetime. Every text processed by the model
+must be representable using tokens from this vocabulary — the tokenizer's job
+is to split arbitrary text into sequences of vocabulary tokens.
+
+Vocabulary sizes in modern LLMs:
+- BERT: 30,522 tokens (WordPiece, English)
+- GPT-2: 50,257 tokens (BPE)
+- LLaMA 1: 32,000 tokens (SentencePiece Unigram)
+- LLaMA 2: 32,000 tokens
+- LLaMA 3: 128,256 tokens (tiktoken BPE, expanded for multilingual)
+- GPT-4 (cl100k_base): 100,277 tokens
+- Gemma: 256,000 tokens
+
+Larger vocabularies:
++ Allow common words to be a single token (reducing sequence length)
++ Better multilingual coverage (more tokens per language)
++ More efficient encoding (fewer tokens per piece of text)
+- Require larger embedding tables (more memory)
+- Sparse usage: many vocabulary tokens may rarely appear in practice
+
+The output layer of the model (logit projection) has dimensions d_model × V,
+which can be a significant fraction of total parameter count for large vocabularies.
+Weight tying (sharing input embedding matrix with output projection matrix) is
+commonly used to reduce parameter count.
+
+--------------------------------------------------------------------------------
+WEIGHT
+--------------------------------------------------------------------------------
+A weight (also called a model weight or model parameter) is an individual
+learnable numerical value inside a neural network. "Weights" and "parameters"
+are used nearly interchangeably, though "weights" often refers specifically to
+matrix entries (as opposed to "biases," which are additive offset parameters).
+
+Weights are stored as matrices and vectors organized by layer:
+- Embedding weights: d_vocab × d_model — map token IDs to vectors
+- Attention weights: Multiple matrices per layer (W_Q, W_K, W_V, W_O)
+- FFN weights: Multiple matrices per layer (W₁, W₂, and W₃ for gated variants)
+- LayerNorm weights: Gain (γ) and bias (β) vectors per layer
+
+Weight initialization matters: weights are typically initialized using methods
+like Xavier/Glorot or Kaiming initialization, which calibrate the scale of
+random values based on layer dimensions to prevent vanishing/exploding activations
+at the start of training.
+
+After training, weights encode all learned knowledge:
+- Embedding weights encode token semantics and syntax
+- Attention weights encode how to route and combine information
+- FFN weights store factual associations and feature transformations
+- Interpretability research attempts to map specific weights or groups of weights
+  to human-interpretable concepts
+
+Weights are stored in specific formats for different purposes:
+- Training: fp32 or bf16
+- Inference: bf16, fp16, int8, int4
+- Checkpointing: Saved periodically during training
+
+"Loading a model" means reading its weight file into GPU memory. "Merging models"
+(as in model merging/model soups) means combining weights from multiple checkpoints.
+
+--------------------------------------------------------------------------------
+WORDPIECE
+--------------------------------------------------------------------------------
+WordPiece is a subword tokenization algorithm used by BERT and several related
+models (DistilBERT, ELECTRA, MobileBERT). It is conceptually similar to BPE but
+differs in the criterion used to select which pairs to merge: while BPE merges
+the most frequent pair, WordPiece merges the pair that maximizes the likelihood
+of the training corpus under a language model.
+
+The WordPiece likelihood criterion:
+
+    score(AB) = freq(AB) / (freq(A) × freq(B))
+
+This score measures how much more often A and B appear together than expected if
+they were independent. Pairs that frequently co-occur relative to their individual
+frequencies are merged first — this is equivalent to maximizing pointwise mutual
+information between merged subword units.
+
+WordPiece characteristics:
+- Prefers merging units that form meaningful linguistic units (since meaningful
+  morphemes tend to occur together more than chance)
+- Uses a ## prefix convention for non-initial subword tokens: "playing" might
+  be tokenized as ["play", "##ing"] to indicate that "##ing" is a continuation
+  of a word, not a word-initial token.
+- Built via a greedy algorithm (one merge at a time, like BPE)
+- Standard vocabulary size for BERT: 30,522 tokens
+
+WordPiece was developed by Google for the internal neural machine translation
+systems before being published with BERT. While BPE (especially the byte-level
+BPE variant used by GPT models) has become more dominant in recent years due
+to its simplicity and full-coverage guarantee, WordPiece remains important for
+understanding BERT-family models and is still used in production systems.
+
+--------------------------------------------------------------------------------
+ZERO-SHOT LEARNING
+--------------------------------------------------------------------------------
+Zero-shot learning (ZSL) is the ability of a model to perform a task it has
+never explicitly seen examples of, based solely on a natural language description
+of the task. No examples of the task are provided in the prompt — the model must
+rely entirely on its pre-trained knowledge and instruction-following ability to
+understand and execute the task correctly.
+
+A zero-shot prompt consists only of:
+- A description of the task or question
+- The input to process
+
+No demonstration examples are included. For instance:
+    "Classify the sentiment of the following review as Positive, Negative, or
+    Neutral: 'The battery life on this phone is terrible.'"
+
+Zero-shot capability depends heavily on:
+1. Model scale: Smaller models require examples (few-shot) or fine-tuning to
+   perform most tasks; zero-shot ability emerges at larger scales.
+2. Instruction tuning: Models trained to follow instructions (SFT + RLHF/DPO)
+   are dramatically better at zero-shot tasks than base models.
+3. Task familiarity: Tasks similar to tasks encountered implicitly in training
+   (sentiment analysis, summarization, Q&A) are much easier zero-shot than
+   highly specialized or novel tasks.
+
+Zero-shot performance is a measure of a model's general intelligence and
+instruction-following — its ability to understand what a task requires and
+execute it without explicit examples. GPT-3 demonstrated surprising zero-shot
+capability, and instruction-tuned models (InstructGPT, ChatGPT, Claude) pushed
+zero-shot performance dramatically further.
+
+Zero-shot evaluation is important for benchmarking because it removes the
+confound of whether performance reflects genuine understanding vs. pattern
+matching from provided examples.
+
+--------------------------------------------------------------------------------
+TIKTOKEN
+--------------------------------------------------------------------------------
+tiktoken is the tokenizer library developed and open-sourced by OpenAI,
+implementing the Byte Pair Encoding (BPE) algorithm used by GPT-2, GPT-3,
+GPT-3.5-turbo, GPT-4, and related models. It is designed for speed (implemented
+in Rust with Python bindings), correctness, and ease of use in Python applications.
+
+tiktoken implements several tokenizer vocabularies:
+- r50k_base (50,256 tokens): Used by GPT-2, text-davinci-002 and earlier
+- p50k_base (50,280 tokens): Used by Codex models
+- cl100k_base (100,277 tokens): Used by GPT-3.5-turbo, GPT-4, text-embedding-ada-002
+- o200k_base (200,019 tokens): Used by GPT-4o and newer models
+
+The jump from ~50K to ~100K to ~200K vocabulary sizes improves efficiency
+(especially for code and non-English text) and reduces average tokens per word.
+
+Key features:
+- Fast: ~5-10x faster than Python-native tokenizer implementations due to Rust
+- Exact: Matches the exact tokenization used during model training
+- Simple API: encode(text) → list of int, decode(tokens) → str
+- Byte-level BPE: Every possible byte sequence is representable, guaranteeing
+  that any Unicode text can be tokenized
+
+Practical uses of tiktoken in application development:
+- Count tokens before sending API requests to check context window limits
+- Estimate API costs before making calls
+- Split or truncate text at token boundaries rather than character boundaries
+- Implement prompt budget management in LLM applications
+
+tiktoken is available via pip (pip install tiktoken) and is a standard dependency
+in LLM application development. Hugging Face's tokenizers library provides
+similar functionality for models using SentencePiece or WordPiece.
+
+================================================================================
+END OF PART 4 — END OF LLM GLOSSARY
+================================================================================
+Total terms defined: 95
+Parts: 4
+Format: Plain text, ready for use in glossary page builds
+================================================================================

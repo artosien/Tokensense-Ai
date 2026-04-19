@@ -1,0 +1,747 @@
+================================================================================
+LLM GLOSSARY — PART 2 OF 4
+Terms: Gradient Descent through Multimodal Model
+================================================================================
+
+--------------------------------------------------------------------------------
+GRADIENT DESCENT
+--------------------------------------------------------------------------------
+Gradient descent is the foundational optimization algorithm used to train neural
+networks, including all large language models. The core idea is simple: compute
+the gradient of the loss function with respect to the model's parameters, then
+take a small step in the direction that reduces the loss most steeply.
+
+Formally, for a parameter vector θ and loss L:
+
+    θ ← θ - η × ∇_θ L
+
+where η (eta) is the learning rate — a scalar controlling the step size, and
+∇_θ L is the gradient vector pointing in the direction of steepest ascent.
+Subtracting the gradient moves parameters in the direction of steepest descent.
+
+Practical variants of gradient descent used in deep learning:
+
+- Stochastic Gradient Descent (SGD): Computes gradient on a single random
+  example per step. Noisy but fast and has regularization effects.
+
+- Mini-batch SGD: Computes gradient on a small batch of examples (most common).
+
+- Momentum: Accumulates a weighted average of past gradients to smooth updates
+  and accelerate convergence in directions of consistent gradient.
+
+- Adam (Adaptive Moment Estimation): The most widely used optimizer for LLM
+  training. Maintains per-parameter adaptive learning rates based on running
+  estimates of gradient mean (first moment) and variance (second moment),
+  handling the diverse scale of gradients across different layers.
+
+- AdamW: Adam with decoupled weight decay, preferred for LLM training as it
+  correctly separates L2 regularization from adaptive learning rates.
+
+The loss landscape for large neural networks is non-convex (not a simple bowl
+shape), containing many local minima, saddle points, and plateaus. Surprisingly,
+for very large models, all local minima tend to have similar loss values, and
+the main challenge is navigating saddle points quickly. Techniques like warm-up
+(gradually increasing the learning rate at the start of training) and learning
+rate schedules (cosine decay, etc.) are critical for stable LLM training.
+
+--------------------------------------------------------------------------------
+GREEDY DECODING
+--------------------------------------------------------------------------------
+Greedy decoding is the simplest token generation strategy: at each step, the
+model selects the single token with the highest probability (the argmax of the
+logit distribution) and adds it to the sequence. No sampling, no exploring
+alternatives — just the highest-probability choice at every step.
+
+Algorithm:
+    For each step t:
+        logits = model(sequence_so_far)
+        next_token = argmax(softmax(logits))
+        append next_token to sequence
+
+Greedy decoding is fast (no overhead from sampling), deterministic (the same
+input always produces the same output), and produces locally optimal choices
+at each step. However, it is globally suboptimal: making the highest-probability
+choice at step t may cut off access to high-probability sequences that would
+have been reachable via a slightly lower-probability step t choice.
+
+A famous failure mode is repetition: greedy decoding tends to get stuck in
+repetitive loops where the highest-probability next token is the same token
+(or phrase) as the previous one, because the model's training data contains
+many repetitive patterns.
+
+For open-ended generation (creative writing, conversation, brainstorming), greedy
+decoding typically produces flat, generic, low-diversity output. Sampling-based
+methods (temperature, top-k, top-p) are generally preferred. For structured
+tasks with clear correct answers (factual questions, code completion), greedy
+decoding or low-temperature sampling may actually be preferable, as determinism
+is valuable for reproducibility.
+
+Beam search can be seen as a generalization of greedy decoding (beam width = 1
+reduces to greedy). In practice, many production LLM APIs use greedy decoding
+as the default when temperature=0 is specified.
+
+--------------------------------------------------------------------------------
+GROUNDING
+--------------------------------------------------------------------------------
+Grounding refers to connecting a language model's outputs to verifiable, real-
+world information — anchoring generation in factual reality rather than relying
+solely on knowledge encoded in model weights. A model is "grounded" when it can
+accurately reference, retrieve, and reason about external information rather than
+hallucinating or relying on potentially outdated or inaccurate internal knowledge.
+
+Several types of grounding exist:
+
+1. Retrieval-based grounding: Using Retrieval-Augmented Generation (RAG) or
+   similar approaches to fetch relevant documents from a knowledge base and
+   include them in the context before generation. The model is instructed to
+   base its answer on the retrieved content.
+
+2. Tool-based grounding: Using function calling to access live data — weather
+   APIs, search engines, databases — ensuring responses reflect current reality.
+
+3. Document grounding: Providing the model with specific source documents (PDFs,
+   web pages, internal databases) and asking it to answer only from those sources,
+   often with citation requirements.
+
+4. Multimodal grounding: Connecting language generation to visual or spatial
+   reality via image, video, or audio inputs.
+
+Grounding is critical for high-stakes applications (medical, legal, financial)
+where hallucination can cause harm. It trades off generality for accuracy —
+a grounded model is constrained to what its sources say, but is more reliable.
+Grounding also creates auditability: users can verify claims by checking cited
+sources. Ungrounded generation from weights alone is best for tasks where
+world knowledge accuracy is less critical (creative writing, code generation,
+reasoning puzzles) but inappropriate for real-time factual queries.
+
+--------------------------------------------------------------------------------
+GROUPED QUERY ATTENTION
+--------------------------------------------------------------------------------
+Grouped Query Attention (GQA) is an architectural optimization for the multi-head
+attention mechanism that significantly reduces the memory and compute requirements
+for inference, particularly for the KV cache. It was introduced in a 2023 paper
+by Ainslie et al. and is used in models including LLaMA 2/3, Mistral, and Gemma.
+
+Standard multi-head attention uses H separate query, key, and value projection
+matrices — one per attention head. Multi-query attention (MQA) goes to the
+extreme of using H query heads but only a single shared key/value head, drastically
+shrinking the KV cache but sometimes hurting model quality. GQA provides a
+middle ground: queries are divided into G groups, where each group shares a
+single key and value head. If G = H, you get standard multi-head attention.
+If G = 1, you get multi-query attention.
+
+Why this matters for inference:
+The KV cache stores the key and value tensors for all previous tokens in the
+context, allowing autoregressive generation without recomputing attention over
+the entire context at each step. For multi-head attention with large H, this
+cache grows enormous — especially for long contexts or large batch sizes. GQA
+shrinks the KV cache by a factor of H/G while preserving most of the quality
+of full multi-head attention.
+
+For example, LLaMA 3.1 70B uses H=64 query heads and G=8 KV heads, giving an
+8x reduction in KV cache size compared to standard multi-head attention, with
+minimal quality impact. This enables serving larger batches, longer contexts,
+and higher throughput without proportionally larger GPU memory.
+
+--------------------------------------------------------------------------------
+HALLUCINATION
+--------------------------------------------------------------------------------
+Hallucination refers to the phenomenon where a language model generates text that
+is factually incorrect, fabricated, or inconsistent with the provided context —
+but is presented confidently as if it were true. The term draws an analogy to
+perceptual hallucinations: the model produces something that isn't there.
+
+Hallucinations come in several forms:
+
+1. Factual hallucination: The model states incorrect facts — wrong dates, wrong
+   statistics, wrong attributions, non-existent citations (especially notorious
+   in legal and academic contexts where models have invented fake case citations).
+
+2. Entity confabulation: Mixing up attributes of different entities — stating
+   a fact true of person A as if it were true of person B.
+
+3. Context unfaithfulness: In tasks like summarization or Q&A over provided
+   documents, the model makes claims that contradict or go beyond the source
+   material.
+
+4. Intrinsic inconsistency: The model contradicts itself within the same response.
+
+Hallucination arises because language models are trained to generate plausible
+text — the next token is chosen based on statistical patterns in training data,
+not by checking facts against a truth database. The model has no mechanism to
+distinguish between reliably learned facts and uncertain or confabulated content.
+Moreover, the model may generalize from similar but different facts in training.
+
+Mitigations include: retrieval-augmented generation (grounding), instruction
+prompting ("only answer based on the provided context"), uncertainty expression
+("I'm not sure about this"), calibration training, and factual consistency
+evaluation metrics. Despite significant research attention, hallucination remains
+an unsolved problem in LLMs.
+
+--------------------------------------------------------------------------------
+HIDDEN STATE
+--------------------------------------------------------------------------------
+A hidden state (also called an activation or intermediate representation) is the
+internal vector produced by a neural network layer — the mathematical object that
+encodes the model's evolving understanding of the input as it passes through the
+network. In transformer models, the hidden state is a vector of dimension d_model
+(e.g., 4,096 for LLaMA 3.1 8B) associated with each token at each layer.
+
+At the first layer, the hidden state is the sum of the token embedding and
+positional embedding. At each subsequent transformer layer, the hidden state is
+updated by the combination of multi-head attention (allowing the token to
+incorporate context from other tokens) and the feed-forward network (a per-token
+non-linear transformation). At the final layer, the hidden states are projected
+onto the vocabulary to produce logits for next-token prediction.
+
+Hidden states are fundamental to how transformers build meaning:
+- Early layers tend to encode syntactic and low-level features
+- Middle layers encode increasingly semantic and abstract representations
+- Later layers encode task-relevant features for next-token prediction
+
+The study of hidden states is central to mechanistic interpretability research —
+researchers probe, visualize, and analyze hidden states to understand how models
+represent concepts, facts, emotions, and reasoning internally. Techniques like
+linear probing (training a simple classifier on hidden states to predict labels),
+activation patching, and representation engineering all operate on hidden states.
+
+The collective set of all hidden states across all layers for all tokens also
+forms the KV cache used for efficient autoregressive generation.
+
+--------------------------------------------------------------------------------
+HUMANEVAL
+--------------------------------------------------------------------------------
+HumanEval is a benchmark introduced by OpenAI (Chen et al., 2021) for evaluating
+the code generation capabilities of language models. It consists of 164 hand-
+crafted Python programming problems, each consisting of a function signature,
+a docstring describing the desired behavior, and a set of unit tests that the
+generated solution must pass.
+
+The primary metric is pass@k: the probability that at least one of k generated
+solutions for a given problem passes all unit tests. Commonly reported metrics
+include pass@1 (a single sample must be correct) and pass@100 (at least one of
+100 samples is correct). pass@1 better reflects practical usefulness (you need
+a correct solution reliably on the first try); pass@100 provides a ceiling
+estimate of what the model is capable of.
+
+HumanEval problems range from string manipulation and arithmetic to sorting
+algorithms and data structure operations. Example problems include implementing
+a function that checks if a string is a palindrome, finds the longest common
+subsequence, or calculates the nth Fibonacci number.
+
+At the time of its release, GPT-3 achieved approximately 0% pass@1, and Codex
+(a fine-tuned version of GPT-3 on code) achieved approximately 28% pass@1. Modern
+frontier models (GPT-4, Claude 3.5, Gemini 1.5 Pro) achieve 80-90%+ pass@1
+on HumanEval, leading to development of harder benchmarks like HumanEval+,
+MBPP+, and LiveCodeBench. HumanEval's relative simplicity and small size are
+known limitations, but it remains a widely cited baseline for code capability.
+
+--------------------------------------------------------------------------------
+IN-CONTEXT LEARNING
+--------------------------------------------------------------------------------
+In-context learning (ICL) is the ability of a language model to learn new tasks
+or adapt its behavior from information (examples, instructions, or context)
+provided within the input prompt — without updating model weights. The model
+"learns" purely by reading the context, not through gradient descent.
+
+This is a remarkable emergent property of large language models. Given a few
+examples of a new task in the prompt (few-shot learning), or just a description
+of the task (zero-shot), the model can often perform surprisingly well. The
+model's weights remain frozen — all adaptation happens within the context window
+during a single inference pass.
+
+Why ICL works is an active research question. Hypotheses include:
+- The model learns to recognize task structure from examples and matches it to
+  patterns seen in pre-training
+- The model performs implicit Bayesian inference over possible task descriptions
+- Larger models have developed a form of "in-weights learning algorithm" that
+  can be triggered by examples
+- ICL resembles gradient descent operating on the activations rather than weights
+
+Key properties of ICL:
+- Scales with model size: smaller models do ICL poorly; capability emerges at scale
+- Sensitive to example order, format, and choice
+- Can be enhanced with few-shot CoT (reasoning examples)
+- Doesn't persist after the conversation ends (no weight updates)
+- Limited by context window size (number of examples that fit)
+
+In-context learning is a primary reason large, general-purpose LLMs are so
+versatile — they can be adapted to new tasks by any user with a prompt, without
+requiring ML expertise to fine-tune a model.
+
+--------------------------------------------------------------------------------
+INFERENCE
+--------------------------------------------------------------------------------
+Inference (also called serving or deployment) is the process of using a trained
+model to generate outputs given new inputs. It is the production phase of an AI
+model's lifecycle — distinct from training, where model weights are being learned
+through gradient descent.
+
+For autoregressive language models, inference has two phases:
+
+1. Prefill (prompt processing): All tokens in the input prompt are processed
+   simultaneously in parallel. Key-value pairs are computed and stored in the
+   KV cache. This phase is compute-bound (many tokens processed in one pass)
+   and its speed is measured in tokens/second of throughput.
+
+2. Decode (generation): New tokens are generated one at a time, each requiring
+   a forward pass through the model. Each step attends to all previous tokens
+   via the KV cache. This phase is memory-bandwidth bound (reading the large
+   model weights and KV cache repeatedly) and its speed is measured in tokens/
+   second of generation speed.
+
+LLM inference is computationally expensive, requiring large GPUs or specialized
+hardware (TPUs, AI accelerators) for acceptable latency. Key optimization
+techniques include:
+
+- KV caching: Reuse computed key-value pairs across generation steps
+- Batching: Process multiple requests simultaneously to amortize model weight
+  reads across requests
+- Quantization: Reduce weight and activation precision to int8 or int4
+- Speculative decoding: Use a smaller draft model to propose tokens, verified
+  in parallel by the large model
+- Continuous batching: Dynamic batching that handles different-length sequences
+  efficiently
+
+Inference infrastructure is a major cost driver for AI companies — serving
+hundreds of millions of queries per day requires careful optimization at every
+level of the stack.
+
+--------------------------------------------------------------------------------
+INSTRUCTION TUNING
+--------------------------------------------------------------------------------
+Instruction tuning (also called instruction fine-tuning or supervised fine-tuning
+/ SFT) is a fine-tuning process in which a pre-trained language model is trained
+on a dataset of (instruction, response) pairs to teach it to follow natural
+language instructions helpfully and consistently. It is the stage that transforms
+a "base model" (which just predicts the next token) into an "assistant model"
+(which understands and responds to user requests).
+
+Pre-trained base models are powerful text predictors, but they are not inherently
+helpful assistants — given a question, a base model might continue generating
+text that looks like a question-and-answer format from its training data, rather
+than answering the question directly. Instruction tuning teaches the model to
+interpret the input as an instruction to be executed.
+
+Instruction tuning datasets include examples like:
+- "Summarize the following article in three bullet points: [article]" → [bullets]
+- "Write a Python function that reverses a string." → [function]
+- "Explain quantum entanglement to a 10-year-old." → [explanation]
+
+Key datasets used historically include FLAN, Alpaca, ShareGPT, OpenHermes, and
+UltraChat. Higher-quality data (diverse, challenging, clearly answered) is far
+more valuable than sheer quantity.
+
+Instruction tuning is typically performed at low learning rates for a small
+number of epochs to avoid catastrophic forgetting of pre-trained knowledge.
+It is usually followed by alignment fine-tuning (RLHF or DPO) to further improve
+helpfulness and harmlessness through preference optimization. Together, these
+stages transform a base model into a production assistant model.
+
+--------------------------------------------------------------------------------
+JSON MODE
+--------------------------------------------------------------------------------
+JSON mode is a structured output feature offered by many LLM APIs that constrains
+the model's output to be valid JSON. When JSON mode is enabled, the model is
+guided (through constrained decoding, fine-tuning, or prompting) to produce
+responses that are parseable JSON objects rather than arbitrary text.
+
+This is critically important for building LLM-powered applications where the
+model's output needs to be programmatically processed — parsed and used in code,
+stored in a database, passed to another system, or used to populate UI elements.
+Without structured output guarantees, developers must write fragile text-parsing
+code that may fail when the model outputs slightly different formats.
+
+JSON mode implementations vary:
+- Constrained decoding: At each generation step, only tokens that form valid
+  continuations of the JSON structure being built are allowed. This guarantees
+  valid JSON but requires a JSON parser integrated into the sampling process.
+- Schema-guided generation: The model is additionally provided with a JSON
+  Schema and constrained to produce output matching that schema, including
+  specific required keys and value types.
+- System prompt + sampling: Simpler but unreliable — just instruct the model
+  in the system prompt to output JSON and hope it complies. May still fail.
+
+Modern API offerings (OpenAI, Anthropic, Google, Mistral) all offer some form
+of structured output. This capability enables reliable data extraction, function
+argument generation, and multi-step pipeline chaining with structured data.
+
+--------------------------------------------------------------------------------
+JAILBREAK
+--------------------------------------------------------------------------------
+A jailbreak is a prompt crafting technique designed to manipulate a language
+model into bypassing its safety guardrails and producing content it was trained
+or instructed to refuse — such as instructions for dangerous activities, explicit
+content, or harmful advice. The name evokes the idea of "breaking out" of the
+model's safety constraints, analogous to jailbreaking a smartphone to remove
+manufacturer restrictions.
+
+Common jailbreak techniques include:
+
+- Role-playing: Asking the model to pretend to be a different AI (e.g., "act as
+  DAN, an AI with no restrictions") to dissociate the model from its trained
+  identity.
+- Fictional framing: Embedding harmful requests in fictional contexts ("write a
+  story where a character explains how to...").
+- Encoding and obfuscation: Expressing harmful requests in base64, pig latin,
+  leetspeak, or other encodings to evade surface-level content filters.
+- Prompt injection via external content: Hiding jailbreak instructions in
+  documents or websites the model is asked to process.
+- Gradual escalation: Starting with benign requests and gradually escalating
+  toward harmful territory.
+- Many-shot jailbreaking: Providing many examples of the model complying with
+  harmful requests before the actual request.
+
+The jailbreak landscape is a cat-and-mouse game: researchers find new techniques,
+model developers implement defenses, new bypasses emerge. Fundamental alignment
+(making the model genuinely not want to produce harmful content) is considered
+more robust than surface-level content filtering, which can often be circumvented.
+
+Red-teaming — systematically attempting to jailbreak models before release — is
+a standard practice at major AI labs to identify and patch vulnerabilities.
+
+--------------------------------------------------------------------------------
+KV CACHE
+--------------------------------------------------------------------------------
+The KV cache (Key-Value cache) is a memory optimization technique used in
+autoregressive transformer inference that stores the computed key and value
+matrices from the attention mechanism for all previously processed tokens,
+avoiding redundant computation during generation.
+
+In standard transformer attention, for each generation step, the model needs to
+compute attention over all previous tokens. Without caching, this would require
+recomputing Q, K, V projections for every token in the context at every step —
+an O(n²) computation growing with each new token. The KV cache solves this by:
+
+1. During the prefill phase, computing and storing K and V for all prompt tokens.
+2. During the decode phase, for each new token generated:
+   - Computing Q, K, V for only the new token
+   - Appending the new K and V to the cache
+   - Computing attention using the new Q against all cached K and V vectors
+
+This reduces each generation step from O(n) to O(1) in terms of new computation,
+at the cost of memory storage proportional to sequence length.
+
+KV cache memory requirements are significant:
+    KV cache size = 2 × num_layers × num_kv_heads × d_head × sequence_length × bytes_per_element
+
+For a large model with long context (e.g., 70B parameters at 100K tokens), the
+KV cache can require tens to hundreds of gigabytes of GPU memory. Techniques
+to manage KV cache size include:
+
+- Grouped Query Attention (GQA): Reduce num_kv_heads
+- Quantization: Store in int8 or int4 instead of fp16
+- PagedAttention (used in vLLM): Dynamically allocate KV cache memory in pages,
+  like OS virtual memory management
+- Cache eviction: Drop tokens from the middle of long contexts
+
+--------------------------------------------------------------------------------
+KNOWLEDGE CUTOFF
+--------------------------------------------------------------------------------
+The knowledge cutoff (also called training cutoff or data cutoff) is the date
+beyond which a model's training data does not include information. A model with
+a knowledge cutoff of, say, April 2024 does not have knowledge of events, papers,
+products, or developments that occurred after that date — unless it can access
+external tools (web search, databases) or is provided with that information in
+the context.
+
+The knowledge cutoff exists because LLM pre-training requires assembling a fixed
+dataset of web pages, books, code, articles, and other text, which takes months
+to collect and process. Training itself takes weeks to months on thousands of GPUs.
+By the time a model is deployed, its training data may already be 6-12 months old,
+and the model remains deployed for years afterward.
+
+Implications of the knowledge cutoff:
+- Models cannot answer questions about recent events (elections, scientific
+  discoveries, product launches) without tools
+- They may have outdated information about entities that have changed (leadership
+  of organizations, software version numbers, law changes)
+- They are unaware of research published after their cutoff, leading to
+  potentially outdated answers to questions about best practices
+
+The knowledge cutoff creates a distinction between a model's parametric knowledge
+(embedded in weights during training) and contextual knowledge (provided in the
+prompt at inference time). Retrieval-Augmented Generation (RAG) addresses the
+cutoff problem by allowing models to look up current information at query time.
+
+Users should be cautious of apparent model confidence about recent facts — a
+model may extrapolate or confabulate rather than acknowledging its cutoff.
+
+--------------------------------------------------------------------------------
+LARGE LANGUAGE MODEL
+--------------------------------------------------------------------------------
+A Large Language Model (LLM) is a deep learning model — typically a transformer
+— with a very large number of parameters (generally billions to trillions),
+pre-trained on a massive corpus of text data using self-supervised learning,
+primarily the next-token prediction objective. The "large" distinguishes these
+models from earlier, smaller language models, and reflects the empirical finding
+that scale (more parameters, more data, more compute) unlocks qualitatively new
+emergent capabilities.
+
+Key defining characteristics of LLMs:
+- Scale: Parameter counts range from ~1B to ~1T+. The exact threshold for "large"
+  is informal but generally means at least hundreds of millions of parameters.
+- Self-supervised pre-training: Trained on vast amounts of unlabeled text (web
+  pages, books, code, scientific papers) without human-labeled examples.
+- Emergent capabilities: Abilities such as in-context learning, multi-step
+  reasoning, translation, coding, and following instructions emerge at scale
+  without being explicitly trained.
+- Generality: A single model can perform many different tasks through prompting,
+  without task-specific architecture changes.
+
+The history of LLMs traces through GPT-2 (1.5B, 2019), GPT-3 (175B, 2020),
+the scaling laws paper by Kaplan et al. (2020), Gopher, Chinchilla, PaLM,
+LLaMA, Claude, and GPT-4. The Chinchilla paper (Hoffmann et al., 2022) was
+especially important in showing that compute-optimal training requires more
+data and fewer parameters than previously thought, shifting training strategies.
+
+LLMs have become the dominant paradigm for NLP, displacing specialized models
+for nearly every language task.
+
+--------------------------------------------------------------------------------
+LATENCY
+--------------------------------------------------------------------------------
+Latency in the context of LLM inference refers to the time delay between sending
+a request to the model and receiving a response. Multiple latency metrics are
+relevant, as different use cases have different requirements:
+
+1. Time to First Token (TTFT): The time from sending the request until the first
+   token of the response begins streaming. Dominated by the prefill phase (processing
+   the prompt). Critical for user experience — long TTFT feels like the model
+   is "thinking" before starting to respond.
+
+2. Time Per Output Token (TPOT): The time between successive output tokens after
+   the first one. Determined by the decoding phase. Measured in ms/token or
+   tokens/second.
+
+3. End-to-end latency: Total time from request to complete response. Equals TTFT
+   + (TPOT × number_of_output_tokens).
+
+4. Throughput: Total tokens generated per second across all concurrent requests.
+   High throughput is important for serving many users simultaneously, even if
+   individual request latency is high.
+
+Latency is influenced by:
+- Model size: Larger models require more computation per token
+- Hardware: GPU memory bandwidth is the primary bottleneck during decode
+- Context length: Longer prompts increase prefill time; KV cache for longer
+  contexts increases decode time
+- Batching: Serving multiple requests together increases throughput but may
+  increase individual latency
+- Quantization and optimization: int8/int4 inference significantly reduces latency
+- Network: Distance to the inference server adds latency
+
+Interactive applications (chat, coding assistants) require low TTFT and fast
+token generation. Batch processing jobs (document analysis, data extraction)
+prioritize throughput over latency.
+
+--------------------------------------------------------------------------------
+LAYER NORMALIZATION
+--------------------------------------------------------------------------------
+Layer Normalization (LayerNorm) is a normalization technique used in transformer
+models to stabilize training by normalizing the activations within each layer.
+It was introduced by Ba et al. (2016) as an alternative to Batch Normalization
+that works well for sequential models and variable-length inputs.
+
+For a vector of activations h = [h₁, h₂, ..., hₙ], Layer Normalization computes:
+
+    mean μ = (1/n) Σ hᵢ
+    variance σ² = (1/n) Σ (hᵢ - μ)²
+    normalized: ĥᵢ = (hᵢ - μ) / √(σ² + ε)
+    output: yᵢ = γ ĥᵢ + β
+
+where γ (gain) and β (bias) are learnable parameters, and ε is a small constant
+for numerical stability. The key is that normalization is computed across the
+feature dimension of a single example, not across a batch — making it independent
+of batch size and well-suited for autoregressive generation.
+
+In transformers, LayerNorm is applied before (Pre-LN) or after (Post-LN) each
+sub-layer (attention and feed-forward). Modern LLMs overwhelmingly use Pre-LN
+(applied before the sub-layer) as it provides more stable training gradients.
+LLaMA and related models use RMSNorm, a simplified variant that omits the mean-
+centering step and computes only the root mean square, which is computationally
+cheaper and works equally well in practice.
+
+LayerNorm is essential for training deep networks: without it, activations can
+grow unboundedly or vanish across layers, causing gradient instability and
+preventing convergence.
+
+--------------------------------------------------------------------------------
+LEARNING RATE
+--------------------------------------------------------------------------------
+The learning rate (η) is a hyperparameter that controls the size of the parameter
+update step during gradient descent. It is arguably the most important
+hyperparameter in neural network training — too high causes divergence (the loss
+explodes), too low causes impractically slow convergence or getting stuck in
+suboptimal solutions.
+
+    θ ← θ - η × ∇_θ L
+
+The optimal learning rate depends on the model architecture, batch size, optimizer,
+and data. For LLM pre-training with Adam, learning rates on the order of 1e-4
+to 3e-4 are typical for the main training phase, with adjustments for model size
+(larger models often require smaller learning rates).
+
+Learning rate schedules are critical for LLM training:
+
+1. Warmup: The learning rate starts near zero and increases linearly or through
+   a cosine schedule to the peak learning rate over the first ~1,000-2,000 steps.
+   This prevents large, unstable updates early in training when parameters are
+   far from good values.
+
+2. Cosine decay: After warmup, the learning rate follows a cosine curve from
+   peak to a minimum (often 10% of peak) over the course of training. This
+   allows large updates early (when far from optimum) and fine adjustments late.
+
+3. Linear decay: Simpler alternative to cosine.
+
+The Chinchilla scaling laws suggest that the peak learning rate should scale
+with model size (larger models use smaller peak LR), though practitioners
+continue to refine these heuristics. Learning rate is also coupled to batch
+size through the "linear scaling rule" — when batch size doubles, multiplying
+the learning rate by 2 approximately preserves training dynamics.
+
+--------------------------------------------------------------------------------
+LOGITS
+--------------------------------------------------------------------------------
+Logits are the raw, unnormalized output scores produced by the final linear
+projection layer of a language model, before any normalization (such as softmax)
+is applied. For a vocabulary of size V, the model produces a vector of V logit
+values at each prediction step, one for each possible next token. Higher logits
+correspond to more likely tokens.
+
+Mathematically, the logits z are computed as:
+
+    z = W_output × h_final + b
+
+where h_final is the final hidden state (d_model dimensional) and W_output is
+the output projection matrix (d_model × V, often the transpose of the input
+embedding matrix).
+
+To convert logits to a probability distribution, the softmax function is applied:
+
+    P(token i) = exp(zᵢ) / Σⱼ exp(zⱼ)
+
+Temperature scaling is applied to logits before softmax (dividing by T):
+    P(token i) = exp(zᵢ/T) / Σⱼ exp(zⱼ/T)
+Higher T flattens the distribution (more uncertainty); lower T sharpens it.
+
+During training, logits are passed directly to the cross-entropy loss function
+(which internally applies log-softmax for numerical stability). During inference,
+logits are converted to probabilities for sampling or used directly for top-k
+and top-p filtering.
+
+Logits are also used for:
+- Likelihood scoring: Computing the probability of a given continuation
+- Contrastive decoding: Comparing logits across model sizes to improve quality
+- Activation analysis: Studying what features influence specific token predictions
+
+--------------------------------------------------------------------------------
+LOW-RANK ADAPTATION (LORA)
+--------------------------------------------------------------------------------
+Low-Rank Adaptation (LoRA) is a parameter-efficient fine-tuning technique
+introduced by Hu et al. (2021) that allows fine-tuning large language models
+without updating all their parameters. Instead, LoRA freezes the original pre-
+trained weights and injects small, trainable low-rank decomposition matrices
+into specific layers, dramatically reducing the number of trainable parameters
+and GPU memory required.
+
+The core idea exploits the empirical observation that the weight updates during
+fine-tuning tend to have low intrinsic dimensionality — the essential "change"
+in the model can be represented in a much lower-dimensional space than the
+full parameter space.
+
+For a weight matrix W (of shape d × k), LoRA adds:
+
+    W' = W + BA
+
+where B (d × r) and A (r × k) are trainable, with rank r ≪ min(d, k). Only B
+and A are trained; W is frozen. The rank r controls the expressivity vs.
+efficiency trade-off — typical values are 4, 8, 16, or 64.
+
+Benefits:
+- Can fine-tune a 70B model on a single GPU (vs. 100s of GPUs for full fine-tuning)
+- LoRA adapters are tiny files (megabytes, not gigabytes) that can be swapped
+  efficiently
+- Multiple LoRA adapters can be merged or dynamically loaded for different tasks
+- Little quality loss vs. full fine-tuning for most tasks
+
+Extensions:
+- QLoRA: Quantize the base model to 4-bit and apply LoRA on top, further reducing
+  memory
+- DoRA: Decompose updates into magnitude and direction components
+- LoRA+: Use different learning rates for A and B matrices
+
+LoRA has democratized fine-tuning by making it accessible on consumer hardware.
+
+--------------------------------------------------------------------------------
+MMLU
+--------------------------------------------------------------------------------
+MMLU (Massive Multitask Language Understanding) is a benchmark created by Hendrycks
+et al. (2020) that evaluates language model knowledge across 57 academic subjects
+and professional domains, spanning STEM, humanities, social sciences, law, medicine,
+and more. Each question is a four-choice multiple-choice question drawn from real
+academic sources.
+
+Subject areas include: abstract algebra, anatomy, astronomy, business ethics,
+clinical knowledge, college biology, college chemistry, college computer science,
+college mathematics, computer security, conceptual physics, econometrics,
+electrical engineering, elementary mathematics, formal logic, global facts,
+high school biology, high school chemistry, high school computer science,
+high school European history, high school geography, high school government &
+politics, high school macroeconomics, high school mathematics, high school
+microeconomics, high school physics, high school psychology, high school
+statistics, high school US history, high school world history, human aging,
+human sexuality, international law, jurisprudence, logical fallacies, machine
+learning, management, marketing, medical genetics, miscellaneous, moral disputes,
+moral scenarios, nutrition, philosophy, prehistory, professional accounting,
+professional law, professional medicine, professional psychology, public relations,
+security studies, sociology, US foreign policy, virology, and world religions.
+
+MMLU is scored as overall accuracy across all 57 subjects, as well as per-subject
+accuracy. Human expert performance is approximately 89.8% overall; random guessing
+is 25%. Early GPT-3 (2020) achieved around 43%. By 2024, frontier models (GPT-4,
+Claude 3, Gemini Ultra) achieved 85-90%+, effectively saturating the benchmark.
+This saturation has driven development of harder follow-up benchmarks like MMLU-Pro
+and GPQA.
+
+MMLU's wide subject coverage makes it a useful overall knowledge measure, though
+it has been critiqued for question ambiguity and for favoring models trained on
+similar academic question formats.
+
+--------------------------------------------------------------------------------
+MASKED LANGUAGE MODEL
+--------------------------------------------------------------------------------
+A Masked Language Model (MLM) is a type of language model trained on a fill-in-
+the-blank objective: a random subset of input tokens is "masked" (replaced with
+a special [MASK] token), and the model must predict the original tokens at masked
+positions. This is also called the Cloze task (from the psycholinguistics literature).
+
+MLMs are bidirectional — each token can attend to all other tokens in both
+directions, unlike autoregressive models which only see previous tokens. This
+makes MLMs better at producing rich contextual representations (encoders), while
+making them ill-suited for open-ended text generation (since generation requires
+predicting tokens without seeing future tokens).
+
+BERT (Bidirectional Encoder Representations from Transformers, Devlin et al.,
+2018) popularized MLMs and dominated NLP benchmarks from 2018-2020. BERT's
+training procedure masked 15% of tokens and trained the model to predict them.
+BERT also used a Next Sentence Prediction (NSP) auxiliary task, though later work
+showed NSP was largely unnecessary.
+
+MLM applications:
+- Text classification, sentiment analysis, named entity recognition, question
+  answering — tasks where reading comprehension matters more than generation
+- Feature extraction: BERT embeddings (CLS token or averaged token representations)
+  as features for downstream models
+- Fine-tuning: Add a classification head on top of a BERT-like model and fine-tune
+
+The rise of large decoder-only models (GPT-3 and successors) largely displaced
+BERT-style MLMs for most NLP tasks, as larger autoregressive models proved to
+be surprisingly effective even on classification tasks. However, MLMs (and newer
+variants like RoBERTa, DeBERTa) remain popular for efficiency-sensitive production
+applications where a smaller, fast encoder-only model suffices.
+
+================================================================================
+END OF PART 2
+================================================================================
