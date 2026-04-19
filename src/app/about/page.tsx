@@ -152,7 +152,7 @@ export default function AboutPage() {
                             <h3 className="text-lg font-bold text-foreground mb-2 flex items-center gap-2">
                                 <span>🧠</span> Context Caching Calculator
                             </h3>
-                            <p className="mb-2"><strong>Problem solved:</strong> APIs like Anthropic's Claude and Gemini Pro offer context caching, which charges a premium for writing to the cache but offers discounts for reading from it. Math gets tricky for break-even points.</p>
+                            <p className="mb-2"><strong>Problem solved:</strong> APIs like Anthropic&apos;s Claude and Gemini Pro offer context caching, which charges a premium for writing to the cache but offers discounts for reading from it. Math gets tricky for break-even points.</p>
                             <p><strong>Use case:</strong> Input your massive system prompt or RAG retrieval blob. Tokensense-Ai charts out how many subsequent turns or chats you need to execute for caching to become cheaper than standard API calls.</p>
                         </div>
 
@@ -208,59 +208,59 @@ export default function AboutPage() {
                         </div>
                         <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar text-foreground/80 selection:bg-plasma-500/30">
                              <p className="text-plasma-400 font-bold mb-3">[2026-04-15] v2.0.1 — Homepage Video Integration</p>
-                             <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Media: Replaced YouTube iframe with local high-performance promo video in 'Master Your AI Budget' section.</p>
+                             <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Media: Replaced YouTube iframe with local high-performance promo video in &apos;Master Your AI Budget&apos; section.</p>
 
-                             <p className="text-plasma-400 font-bold mb-3 mt-6">[2026-04-08] v2.0.0 — The "Performance & Media" Overhaul</p>
+                             <p className="text-plasma-400 font-bold mb-3 mt-6">[2026-04-08] v2.0.0 — The &quot;Performance &amp; Media&quot; Overhaul</p>
                              <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Clean Up: Successfully deleted /token-learning and /how-tokenizers-work pages and updated sitemaps.</p>
-                             <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Home Restructure: Relocated 'Optimization Journey' banner to bottom; updated all Lesson CTAs to point to /tokenomics.</p>
+                             <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Home Restructure: Relocated &apos;Optimization Journey&apos; banner to bottom; updated all Lesson CTAs to point to /tokenomics.</p>
                              <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Media Overhaul: Replaced hero image with autoplaying promo video; swapped local videos in Modules 1-4 for YouTube embeds.</p>
                              <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Performance: Compressed 15+ large blog images (PNG to WebP) with 95%+ size reduction; updated blog-posts.json.</p>
                              <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Author Bio: Created dedicated biography page for Angelo S. Enriquez at /about/angelo with integrated navigation.</p>
 
-                             <p className="text-plasma-400 font-bold mb-3 mt-6">[2026-03-27] v1.5.0 — The "Abundance" Update & CMS Release</p>
+                             <p className="text-plasma-400 font-bold mb-3 mt-6">[2026-03-27] v1.5.0 — The &quot;Abundance&quot; Update &amp; CMS Release</p>
                              <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Launched Local Blog Admin Dashboard with live preview, media management, and draft scheduling.</p>
-                             <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Integrated "Create Image (Gemini)" AI assistant into the blog workflow with auto-copy prompt logic.</p>
+                             <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Integrated &quot;Create Image (Gemini)&quot; AI assistant into the blog workflow with auto-copy prompt logic.</p>
                              <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Redesigned Homepage Hero and Feature Showcase for high-impact UX and tool discoverability.</p>
                              <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Implemented Sample Use Cases (Light/Medium/Heavy) in Prompt Editor for instant benchmarking.</p>
-                             <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Refactored Global Navigation with persistent "Tools" dropdown and better IA hierarchy.</p>
+                             <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Refactored Global Navigation with persistent &quot;Tools&quot; dropdown and better IA hierarchy.</p>
                              <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Standardized support badges: Resized Product Hunt badge to match GitHub Sponsors button.</p>
                              <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Optimized FAQ structure and removed friction points by relocating the bug report form.</p>
 
-                             <p className="text-plasma-400 font-bold mb-3 mt-6">[2026-03-23] v0.2.0 — UI/UX Refresh & Platform Update</p>                            <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Redesigned About page build log section into a scrollable terminal-style text area.</p>
+                             <p className="text-plasma-400 font-bold mb-3 mt-6">[2026-03-23] v0.2.0 — UI/UX Refresh &amp; Platform Update</p>                            <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Redesigned About page build log section into a scrollable terminal-style text area.</p>
                             <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Updated header social share icons: removed Facebook, added Reddit and GitHub with brand colors.</p>
                             <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Added GitHub repository link to the site navigation bar for developer accessibility.</p>
-                            <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Removed the "Join Community" Discord badge and invitation links from the Contact page.</p>
+                            <p className="pl-4 border-l border-plasma-500/20 py-0.5 hover:bg-plasma-500/5 transition-colors">Removed the &quot;Join Community&quot; Discord badge and invitation links from the Contact page.</p>
 
                             <div className="h-4" />
 
                             <p className="text-muted-foreground/60">[2026-03-17] Fix 7 — Verified mobile responsiveness: Headlines scale gracefully (5xl→6xl→7xl), badges wrap cleanly, CTA full-width on mobile, min-height preserved at 85vh.</p>
-                            <p className="text-muted-foreground/60">[2026-03-17] Fix 6 — Improve CTA button: Updated copy to "Estimate My First Prompt" (more action-forward), larger size (h-14 px-10), gradient hover with cyan glow.</p>
-                            <p className="text-muted-foreground/60">[2026-03-17] Fix 5 — Add social proof line: "Trusted by developers, AI engineers, and prompt designers worldwide" in italic below badges.</p>
+                            <p className="text-muted-foreground/60">[2026-03-17] Fix 6 — Improve CTA button: Updated copy to &quot;Estimate My First Prompt&quot; (more action-forward), larger size (h-14 px-10), gradient hover with cyan glow.</p>
+                            <p className="text-muted-foreground/60">[2026-03-17] Fix 5 — Add social proof line: &quot;Trusted by developers, AI engineers, and prompt designers worldwide&quot; in italic below badges.</p>
                             <p className="text-muted-foreground/60">[2026-03-17] Fix 4 — Hero image gradient overlay: Add bottom-to-top fade (from background → transparent) to elegantly blend image into page.</p>
                             <p className="text-muted-foreground/60">[2026-03-17] Fix 3 — Add trust badge row below CTA: Four cyan-bordered pills (100% Client-Side, No Sign-up, Free Forever, Open Source) with backdrop blur.</p>
                             <p className="text-muted-foreground/60">[2026-03-17] Fix 2 — Strengthen headline hierarchy: Split headline across two lines with second line in gradient (cyan→indigo→purple), bump font to 5xl-7xl.</p>
                             <p className="text-muted-foreground/60">[2026-03-17] Fix 1 — Increase hero section height: Set min-h-screen (85vh mobile, 100vh desktop) for vertical breathing room and proper centering.</p>
-                            <p className="text-muted-foreground/60">[2026-03-16] Add HTML link to tiktoken GitHub in "How It Works" FAQ section for developer credibility.</p>
+                            <p className="text-muted-foreground/60">[2026-03-16] Add HTML link to tiktoken GitHub in &quot;How It Works&quot; FAQ section for developer credibility.</p>
                             <p className="text-muted-foreground/60">[2026-03-16] Add 12 new FAQ questions covering: token counting architecture, model accuracy tiers, n8n vs Make pricing, prompt caching strategy, open-source transparency, and document processing workflows.</p>
                             <p className="text-muted-foreground/60">[2026-03-16] Pre-expand first question in each FAQ category on page load for better discoverability.</p>
                             <p className="text-muted-foreground/60">[2026-03-16] Add category subheadings to FAQ page for improved scannability and information architecture.</p>
-                            <p className="text-muted-foreground/60">[2026-03-16] Refactor FAQ page from 10 to 19 questions organized into 6 searchable categories (General, Models & Pricing, How It Works, Use Cases, Privacy & Trust, Workflow & Automation).</p>
+                            <p className="text-muted-foreground/60">[2026-03-16] Refactor FAQ page from 10 to 19 questions organized into 6 searchable categories (General, Models &amp; Pricing, How It Works, Use Cases, Privacy &amp; Trust, Workflow &amp; Automation).</p>
                             <p className="text-muted-foreground/60">[2026-03-16] Integrate HeroBadges below hero headline on homepage for stronger first impression with trust signals.</p>
-                            <p className="text-muted-foreground/60">[2026-03-16] Create HeroBadges component: Three product pills ("100% Client-Side", "No Sign-up", "Free Forever") with cyan borders and hover effects.</p>
+                            <p className="text-muted-foreground/60">[2026-03-16] Create HeroBadges component: Three product pills (&quot;100% Client-Side&quot;, &quot;No Sign-up&quot;, &quot;Free Forever&quot;) with cyan borders and hover effects.</p>
                             <p className="text-muted-foreground/60">[2026-03-16] Integrate TrustMessage across all 10 page footers (homepage, faq, about, multimodal, caching, workflow, comparison, contact, terms, privacy).</p>
                             <p className="text-muted-foreground/60">[2026-03-16] Create TrustMessage component: Reusable footer-friendly privacy indicator with lock icon. Replaces nav badge placement.</p>
                             <p className="text-muted-foreground/60">[2026-03-16] Fix nav layout: Remove TrustBadge from SiteHeader navigation (desktop + mobile), remove nav border-l for cleaner header.</p>
                             <p className="text-muted-foreground/60">[2026-03-16] Create SelfHostingTipCard component: Contextual n8n self-hosting opportunity card with ROI math and dismissible state.</p>
                             <p className="text-muted-foreground/60">[2026-03-16] Create BreakevenCallout component: Analyzes platform crossover points and cost differences; suggests n8n self-hosting for complex workflows.</p>
-                            <p className="text-muted-foreground/60">[2026-03-16] Implement dynamic "Smart Insight" callout in comparison showing best platform and monthly savings.</p>
+                            <p className="text-muted-foreground/60">[2026-03-16] Implement dynamic &quot;Smart Insight&quot; callout in comparison showing best platform and monthly savings.</p>
                             <p className="text-muted-foreground/60">[2026-03-16] Create PlatformComparisonTable component with desktop table + mobile cards; displays cost per 1K runs, monthly, annual, best-value badge.</p>
-                            <p className="text-muted-foreground/60">[2026-03-16] Add "Related Calculators" section to Workflow page linking to Token Calculator, Context Caching, and Model Comparison.</p>
-                            <p className="text-muted-foreground/60">[2026-03-16] Expand Workflow Estimator page: Add "How Workflow Costs Are Calculated" explainer (n8n, Make, Zapier billing models).</p>
+                            <p className="text-muted-foreground/60">[2026-03-16] Add &quot;Related Calculators&quot; section to Workflow page linking to Token Calculator, Context Caching, and Model Comparison.</p>
+                            <p className="text-muted-foreground/60">[2026-03-16] Expand Workflow Estimator page: Add &quot;How Workflow Costs Are Calculated&quot; explainer (n8n, Make, Zapier billing models).</p>
                             <p className="text-muted-foreground/60">[2026-03-16] Fix build error: Remove duplicate closing div tag from Context Caching page.</p>
                             <p className="text-muted-foreground/60">[2026-03-16] Add Workflow / Agentic FAQ section (4 questions) to main FAQ page covering multi-turn costs, tool calls, system prompts, RAG.</p>
                             <p className="text-muted-foreground/60">[2026-03-16] Add Context Caching FAQ section (4 questions) to Context Caching page.</p>
                             <p className="text-muted-foreground/60">[2026-03-16] Add Image / Multimodal FAQ section (4 questions) to Image Estimator page.</p>
-                            <p className="text-muted-foreground/60">[2026-03-16] Add Pricing & Accuracy FAQ section (4 questions) to homepage covering updates, tax, batch discounts.</p>
+                            <p className="text-muted-foreground/60">[2026-03-16] Add Pricing &amp; Accuracy FAQ section (4 questions) to homepage covering updates, tax, batch discounts.</p>
                             <p className="text-muted-foreground/60">[2026-03-16] Add Token Basics FAQ section (4 questions) to homepage with accordion styling.</p>
                             <p className="text-muted-foreground/60">[2026-03-16] Create TrustBadge component with lock icon and interactive tooltip; replace generic badges across nav.</p>
                             <p className="text-muted-foreground/60">[2026-03-16] Add visual emphasis to Context Caching cost output card with gradient backgrounds and animated counters.</p>
@@ -284,7 +284,7 @@ export default function AboutPage() {
                             <p className="text-muted-foreground/60">[2026-03-06] Implement tiktoken WASM for client-side purely private token counting.</p>
                             <p className="text-muted-foreground/60">[2026-03-06] Implement Zustand for cross-component state management.</p>
                             <p className="text-muted-foreground/60">[2026-03-06] Setup shadcn/ui components (Textarea, Slider, Progress, Badges).</p>
-                            <p className="text-muted-foreground/60">[2026-03-06] Initialize Next.js 15 repository with React 19 & Tailwind CSS v4.</p>
+                            <p className="text-muted-foreground/60">[2026-03-06] Initialize Next.js 15 repository with React 19 &amp; Tailwind CSS v4.</p>
                         </div>
                     </div>
 
@@ -292,6 +292,13 @@ export default function AboutPage() {
 
                     <h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">Contact Us</h2>
                     <BugReportForm />
+                </div>
+            </main>
+
+        </div>
+    );
+}
+              <BugReportForm />
                 </div>
             </main>
 

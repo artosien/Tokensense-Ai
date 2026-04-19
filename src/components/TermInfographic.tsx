@@ -3,25 +3,17 @@
 import React from 'react';
 import { 
   Zap, 
-  Cpu, 
-  Network, 
   Database, 
-  Lock, 
   MessageSquare, 
-  Search, 
   Layers, 
   Repeat, 
   Activity, 
-  GitBranch, 
   Target,
   Brain,
-  Code,
-  LineChart,
   Eye,
   Microscope,
-  Box,
-  Key,
-  List
+  CheckCircle2,
+  ChevronRight
 } from 'lucide-react';
 
 interface TermInfographicProps {
@@ -212,7 +204,7 @@ const TermInfographic: React.FC<TermInfographicProps> = ({ id, term, categories 
                 Context + Examples + Task
               </div>
             </div>
-            <div className="text-[10px] text-[#00e5ff] font-mono uppercase tracking-widest">Optimizing the "Ask"</div>
+            <div className="text-[10px] text-[#00e5ff] font-mono uppercase tracking-widest">Optimizing the &quot;Ask&quot;</div>
           </div>
         );
       default:

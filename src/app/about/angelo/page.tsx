@@ -65,7 +65,7 @@ export default function AngeloBioPage() {
                 <Sparkles className="w-32 h-32 text-indigo-400" />
               </div>
               <p className="text-xl md:text-2xl text-slate-300 font-medium leading-relaxed relative z-10">
-                "I’m a developer who loves exploring the frontier of AI-driven development. While I started in the world of Shopify and WordPress e-commerce, I’ve transitioned into <span className="text-white font-bold underline decoration-indigo-500/50">'vibe coding'</span> web utilities as a side business."
+                &quot;I&apos;m a developer who loves exploring the frontier of AI-driven development. While I started in the world of Shopify and WordPress e-commerce, I&apos;ve transitioned into <span className="text-white font-bold underline decoration-indigo-500/50">&apos;vibe coding&apos;</span> web utilities as a side business.&quot;
               </p>
             </Card>
           </div>
@@ -81,7 +81,7 @@ export default function AngeloBioPage() {
                 My current workflow revolves around <strong>Antigravity</strong>, <strong>Firebase Studio</strong>, and <strong>Gemini-cli</strong>, using the latest models to architect and troubleshoot apps like <strong>AITokenSense</strong> and <strong>FontSniff</strong>. 
               </p>
               <p className="text-slate-400 leading-relaxed font-medium">
-                I’m a big believer in using the best tool for the job—whether that’s designing prototypes in <strong>Stitch</strong> or running deep GEO audits with <strong>Claude</strong>. For me, it’s all about the synergy between human creativity and agentic AI.
+                I&apos;m a big believer in using the best tool for the job—whether that&apos;s designing prototypes in <strong>Stitch</strong> or running deep GEO audits with <strong>Claude</strong>. For me, it&apos;s all about the synergy between human creativity and agentic AI.
               </p>
 
               {/* Current Projects */}
@@ -119,7 +119,7 @@ export default function AngeloBioPage() {
               <div className="space-y-6">
                 <div className="space-y-3">
                   <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                    <Laptop className="w-3 h-3" /> Agentic IDE's
+                    <Laptop className="w-3 h-3" /> Agentic IDE&apos;s
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {["Antigravity", "Cursor", "VS Code", "Firebase Studio"].map(tool => (
