@@ -1,5 +1,5 @@
 ﻿let enc: any = null;
-let isInitializing = false;
+let initPromise: Promise<any> | null = null;
 
 /**
  * Dynamically load tiktoken and get the encoder.
@@ -7,22 +7,23 @@ let isInitializing = false;
  */
 async function getEncoder() {
     if (enc) return enc;
-    if (isInitializing) return null;
+    if (initPromise) return initPromise;
 
-    isInitializing = true;
-    try {
-        // We use a try-catch to handle cases where tiktoken might not load 
-        // correctly in certain browser environments (like those with restricted WASM).
-        const tiktoken = await import("tiktoken");
-        if (tiktoken && typeof tiktoken.encoding_for_model === "function") {
-            enc = tiktoken.encoding_for_model("gpt-4o");
+    initPromise = (async () => {
+        try {
+            // We use a try-catch to handle cases where tiktoken might not load
+            // correctly in certain browser environments (like those with restricted WASM).
+            const tiktoken = await import("tiktoken");
+            if (tiktoken && typeof tiktoken.encoding_for_model === "function") {
+                enc = tiktoken.encoding_for_model("gpt-4o");
+            }
+        } catch (e) {
+            console.warn("Failed to load tiktoken, falling back to rough estimation.", e);
         }
-    } catch (e) {
-        console.warn("Failed to load tiktoken, falling back to rough estimation.", e);
-    } finally {
-        isInitializing = false;
-    }
-    return enc;
+        return enc;
+    })();
+
+    return initPromise;
 }
 
 /**

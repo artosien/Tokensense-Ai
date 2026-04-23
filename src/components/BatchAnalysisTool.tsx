@@ -45,10 +45,8 @@ export default function BatchAnalysisTool() {
 
             if (prompts.length === 0) throw new Error("No prompts found in file.");
 
-            let totalIn = 0;
-            for (const p of prompts) {
-                totalIn += await countTokens(p);
-            }
+            const tokenCounts = await Promise.all(prompts.map(p => countTokens(p)));
+            const totalIn = tokenCounts.reduce((sum, count) => sum + count, 0);
 
             const totalOut = prompts.length * expectedOutputTokens;
             const costResult = calculateCost(totalIn, totalOut, model);
