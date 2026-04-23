@@ -51,6 +51,7 @@ export const models: ModelConfig[] = [
     cachingAvailable: true,
     batchDiscount: 0.5,
     pricingUrl: 'https://openai.com/api/pricing/',
+    latencyMs: 850,
     visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
   {
@@ -66,6 +67,7 @@ export const models: ModelConfig[] = [
     cachingAvailable: true,
     batchDiscount: 0.5,
     pricingUrl: 'https://openai.com/api/pricing/',
+    latencyMs: 450,
     visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
   {
@@ -81,6 +83,7 @@ export const models: ModelConfig[] = [
     cachingAvailable: true,
     batchDiscount: 0.5,
     pricingUrl: 'https://openai.com/api/pricing/',
+    latencyMs: 780,
     visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
   {
@@ -96,6 +99,7 @@ export const models: ModelConfig[] = [
     cachingAvailable: true,
     batchDiscount: 0.5,
     pricingUrl: 'https://openai.com/api/pricing/',
+    latencyMs: 380,
     visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
   {
@@ -111,6 +115,7 @@ export const models: ModelConfig[] = [
     cachingAvailable: true,
     batchDiscount: 0.5,
     pricingUrl: 'https://openai.com/api/pricing/',
+    latencyMs: 1200,
     visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
   {
@@ -126,6 +131,7 @@ export const models: ModelConfig[] = [
     cachingAvailable: true,
     batchDiscount: 0.5,
     pricingUrl: 'https://openai.com/api/pricing/',
+    latencyMs: 420,
     visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
   {
@@ -142,6 +148,7 @@ export const models: ModelConfig[] = [
     batchDiscount: 0.5,
     notes: 'Reasoning model. Internal thinking tokens billed as output — actual cost higher than visible output suggests.',
     pricingUrl: 'https://openai.com/api/pricing/',
+    latencyMs: 5500,
     visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
   {
@@ -158,6 +165,7 @@ export const models: ModelConfig[] = [
     batchDiscount: 0.5,
     notes: 'Reasoning model. Internal thinking tokens billed as output.',
     pricingUrl: 'https://openai.com/api/pricing/',
+    latencyMs: 3500,
     visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
   {
@@ -174,6 +182,7 @@ export const models: ModelConfig[] = [
     batchDiscount: 0.5,
     notes: 'Budget reasoning model. Great for math and coding at lower cost than o1/o3.',
     pricingUrl: 'https://openai.com/api/pricing/',
+    latencyMs: 1800,
     visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
 
@@ -190,6 +199,7 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
+    latencyMs: 1400,
     pricingUrl: 'https://platform.claude.com/docs/en/about-claude/pricing',
     visionPricing: { strategy: 'anthropic-scale' }
   },
@@ -205,6 +215,7 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
+    latencyMs: 850,
     notes: 'Long context surcharge (>200K tokens): $6.00 input / $22.50 output',
     pricingUrl: 'https://platform.claude.com/docs/en/about-claude/pricing',
     visionPricing: { strategy: 'anthropic-scale' }
@@ -221,6 +232,7 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
+    latencyMs: 400,
     pricingUrl: 'https://platform.claude.com/docs/en/about-claude/pricing',
     visionPricing: { strategy: 'anthropic-scale' }
   },
@@ -236,6 +248,7 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
+    latencyMs: 2200,
     pricingUrl: 'https://platform.claude.com/docs/en/about-claude/pricing',
     visionPricing: { strategy: 'anthropic-scale' }
   },
@@ -251,6 +264,7 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
+    latencyMs: 950,
     pricingUrl: 'https://platform.claude.com/docs/en/about-claude/pricing',
     visionPricing: { strategy: 'anthropic-scale' }
   },
@@ -266,6 +280,7 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
+    latencyMs: 500,
     pricingUrl: 'https://platform.claude.com/docs/en/about-claude/pricing',
     visionPricing: { strategy: 'anthropic-scale' }
   },
@@ -298,6 +313,7 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
+    latencyMs: 1100,
     notes: 'Long context surcharge (>200K tokens): 2x input price',
     pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing',
     visionPricing: { strategy: 'gemini-flat', flatTokens: 258 }
@@ -314,6 +330,7 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
+    latencyMs: 350,
     pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing',
     visionPricing: { strategy: 'gemini-flat', flatTokens: 258 }
   },
@@ -329,6 +346,7 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
+    latencyMs: 950,
     notes: 'Long context (>200K tokens): $2.50/$15 per 1M.',
     pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing',
     visionPricing: { strategy: 'gemini-flat', flatTokens: 258 }
@@ -346,6 +364,7 @@ export const models: ModelConfig[] = [
     cachingAvailable: true,
     freeTier: true,
     batchDiscount: 0.5,
+    latencyMs: 400,
     pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing',
     visionPricing: { strategy: 'gemini-flat', flatTokens: 258 }
   },
@@ -362,6 +381,7 @@ export const models: ModelConfig[] = [
     cachingAvailable: true,
     freeTier: true,
     batchDiscount: 0.5,
+    latencyMs: 250,
     pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing',
     visionPricing: { strategy: 'gemini-flat', flatTokens: 258 }
   },
@@ -377,6 +397,7 @@ export const models: ModelConfig[] = [
     supportsVision: true,
     cachingAvailable: true,
     batchDiscount: 0.5,
+    latencyMs: 300,
     pricingUrl: 'https://ai.google.dev/gemini-api/docs/pricing',
     visionPricing: { strategy: 'gemini-flat', flatTokens: 258 }
   },
@@ -439,6 +460,7 @@ export const models: ModelConfig[] = [
     tier: 'flagship',
     supportsVision: true,
     cachingAvailable: false,
+    latencyMs: 1200,
     pricingUrl: 'https://x.ai/api',
     visionPricing: { strategy: 'openai-tiles', baseTokens: 85, tileTokens: 170 }
   },
@@ -495,6 +517,7 @@ export const models: ModelConfig[] = [
     tier: 'flagship',
     supportsVision: false,
     cachingAvailable: true,
+    latencyMs: 1600,
     notes: 'Cache hit: $0.03/M input (90% off). Infrastructure in China — latency varies outside Asia.',
     pricingUrl: 'https://platform.deepseek.com/api-docs/pricing'
   },
@@ -509,6 +532,7 @@ export const models: ModelConfig[] = [
     tier: 'balanced',
     supportsVision: false,
     cachingAvailable: true,
+    latencyMs: 700,
     notes: 'One of the cheapest high-quality models available. Cache hit: $0.028/M input.',
     pricingUrl: 'https://platform.deepseek.com/api-docs/pricing'
   },
@@ -523,6 +547,7 @@ export const models: ModelConfig[] = [
     tier: 'reasoning',
     supportsVision: false,
     cachingAvailable: true,
+    latencyMs: 4500,
     notes: 'Reasoning model. ~96% cheaper than OpenAI o1 for comparable tasks.',
     pricingUrl: 'https://platform.deepseek.com/api-docs/pricing'
   },

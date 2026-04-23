@@ -51,16 +51,21 @@ function getBarColor(ratio: number): string {
 
 // ─── Latency Sparkline ────────────────────────────────────────────────────────
 
-function LatencySparkline({ latency }: { latency?: number }) {
-    // Hooks must be called unconditionally
+function LatencySparkline({ latency, modelId }: { latency?: number; modelId?: string }) {
     const points = useMemo(() => {
         if (!latency) return [];
+
+        // Create a deterministic seed from modelId to ensure unique yet stable patterns
+        const seed = modelId ? modelId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) : 0;
         const base = latency;
-        // Deterministic-ish random based on latency to keep it "stable" for same latency
-        // or just accept it's a mock. To fix the "impure" error, 
-        // we use a simple sine wave for the mock sparkline.
-        return Array.from({ length: 8 }, (_, i) => base + Math.sin(i * 1.5) * (base * 0.1));
-    }, [latency]);
+
+        // We use a sine wave to ensure the sparkline is deterministic (fixing the "impure"
+        // error during hydration) while remaining unique per model.
+        return Array.from({ length: 8 }, (_, i) => {
+            const offset = Math.sin((i + seed) * 1.5) * (base * 0.1);
+            return base + offset;
+        });
+    }, [latency, modelId]);
 
     if (!latency || points.length === 0) return null;
 
@@ -621,7 +626,7 @@ export default function ModelComparisonTable() {
                                                     </td>
                                                     <td className="py-5 px-4 text-right">
                                                         <div className="flex justify-end">
-                                                            <LatencySparkline latency={model.latencyMs} />
+                                                            <LatencySparkline latency={model.latencyMs} modelId={model.id} />
                                                         </div>
                                                     </td>
                                                     <td className="py-5 px-4 text-right">
