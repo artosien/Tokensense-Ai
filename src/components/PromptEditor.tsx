@@ -181,14 +181,22 @@ export default function PromptEditor() {
     };
 
     const handleCompress = async (type: "basic" | "advanced") => {
-        const originalTokens = (await countTokens(systemPrompt)) + (await countTokens(userPrompt));
+        const [systemTokens, userTokens] = await Promise.all([
+            countTokens(systemPrompt),
+            countTokens(userPrompt)
+        ]);
+        const originalTokens = systemTokens + userTokens;
         if (originalTokens === 0) return;
 
         const compressFn = type === "advanced" ? compressAdvanced : compressBasic;
         const newSystem = compressFn(systemPrompt);
         const newUser = compressFn(userPrompt);
 
-        const newTokens = (await countTokens(newSystem)) + (await countTokens(newUser));
+        const [newSystemTokens, newUserTokens] = await Promise.all([
+            countTokens(newSystem),
+            countTokens(newUser)
+        ]);
+        const newTokens = newSystemTokens + newUserTokens;
         const tokensSaved = originalTokens - newTokens;
 
         if (tokensSaved > 0) {
